@@ -1,0 +1,21 @@
+<nav class="fixed bottom-6 left-0 right-0 z-[1000] flex justify-center px-4">
+    <div
+        class="flex items-center gap-2 bg-white/20 backdrop-blur-md border border-white/30 p-2 rounded-full shadow-2xl ring-4 ring-black/5">
+
+        <div *ngFor="let link of navLinks" class="relative">
+            <a [routerLink]="link.path" routerLinkActive="active-link"
+                class="flex flex-col items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full transition-all duration-300 hover:scale-110 group">
+                <div
+                    class="absolute inset-0 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                </div>
+
+                <span class="relative z-10 text-2xl group-hover:drop-shadow-md">{{ link.icon }}</span>
+                <span
+                    class="relative z-10 text-[10px] font-bold text-white uppercase tracking-tighter opacity-0 group-hover:opacity-100 transition-opacity">
+                    {{ link.label }}
+                </span>
+            </a>
+        </div>
+
+    </div>
+</nav>

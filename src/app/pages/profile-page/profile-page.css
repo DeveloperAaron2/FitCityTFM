@@ -1,0 +1,369 @@
+/* ══ Variables ═══════════════════════════════════════════ */
+:root {
+    --pr-bg: #0d0d0d;
+    --pr-surface: rgba(255, 255, 255, 0.05);
+    --pr-border: rgba(255, 255, 255, 0.09);
+    --pr-red: #e53e3e;
+    --pr-red-dim: rgba(229, 62, 62, 0.18);
+    --pr-red-border: rgba(229, 62, 62, 0.30);
+    --pr-text: #f0f0f0;
+    --pr-muted: #8a8a8a;
+    --pr-card: #171717;
+}
+
+/* ══ Page wrapper — fills the full viewport on any screen ══ */
+.pr-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    background: var(--pr-bg);
+    color: var(--pr-text);
+    font-family: system-ui, sans-serif;
+    padding-bottom: 96px;
+}
+
+/* ══ Inner content centred on wide screens, never clipped ══ */
+.pr-inner {
+    width: 100%;
+    max-width: 860px;
+    margin-inline: auto;
+}
+
+/* ══ Hero / Avatar ═══════════════════════════════════════ */
+.pr-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 56px 16px 28px;
+    overflow: hidden;
+}
+
+.pr-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(229, 62, 62, .20) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.pr-avatar-wrap {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.pr-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #991b1b, #e53e3e);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(229, 62, 62, .25), 0 8px 32px rgba(0, 0, 0, .5);
+}
+
+.pr-level-badge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: linear-gradient(135deg, #7f1d1d, #e53e3e);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 20px;
+    border: 2px solid var(--pr-bg);
+}
+
+.pr-username {
+    font-size: 1.5rem;
+    font-weight: 800;
+    margin: 0 0 2px;
+    letter-spacing: -0.5px;
+}
+
+.pr-handle {
+    font-size: 0.8rem;
+    color: var(--pr-muted);
+    margin: 0 0 12px;
+}
+
+.pr-meta-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pr-chip {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--pr-red-dim);
+    border: 1px solid var(--pr-red-border);
+    color: var(--pr-red);
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pr-chip--muted {
+    background: var(--pr-surface);
+    border-color: var(--pr-border);
+    color: var(--pr-muted);
+}
+
+/* ══ XP Card ════════════════════════════════════════════ */
+.pr-xp-card {
+    margin: 0 16px 20px;
+    padding: 16px;
+    background: var(--pr-card);
+    border: 1px solid var(--pr-border);
+    border-radius: 18px;
+}
+
+.pr-xp-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    margin-bottom: 10px;
+}
+
+.pr-xp-nums {
+    color: var(--pr-red);
+    font-weight: 700;
+}
+
+.pr-xp-track {
+    height: 10px;
+    background: rgba(255, 255, 255, .06);
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.pr-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #7f1d1d, #e53e3e);
+    border-radius: 20px;
+    position: relative;
+    transition: width 1s ease;
+}
+
+.pr-xp-glow {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.45;
+    filter: blur(3px);
+}
+
+.pr-xp-hint {
+    font-size: 0.72rem;
+    color: var(--pr-muted);
+    text-align: right;
+}
+
+/* ══ Sections ════════════════════════════════════════════ */
+.pr-section {
+    padding: 0 16px 20px;
+}
+
+.pr-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.pr-section-title {
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--pr-muted);
+    margin: 0 0 12px;
+}
+
+.pr-section-header .pr-section-title {
+    margin: 0;
+}
+
+.pr-total-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--pr-red);
+    background: var(--pr-red-dim);
+    border: 1px solid var(--pr-red-border);
+    padding: 4px 10px;
+    border-radius: 999px;
+}
+
+/* ══ Lifting PRs ════════════════════════════════════════ */
+.pr-pr-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pr-pr-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--pr-card);
+    border: 1px solid var(--pr-border);
+    border-left: 3px solid var(--acc, var(--pr-red));
+    border-radius: 16px;
+    transition: background .2s;
+}
+
+.pr-pr-card:hover {
+    background: rgba(255, 255, 255, .07);
+}
+
+.pr-pr-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+    width: 42px;
+    text-align: center;
+}
+
+.pr-pr-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.pr-pr-name {
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+}
+
+.pr-pr-date {
+    font-size: 0.75rem;
+    color: var(--pr-muted);
+    margin: 0;
+}
+
+.pr-pr-weight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.pr-pr-kg {
+    font-size: 1.6rem;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--acc, var(--pr-red));
+}
+
+.pr-pr-unit {
+    font-size: 0.7rem;
+    color: var(--pr-muted);
+    font-weight: 600;
+}
+
+/* ══ Visited Gyms ════════════════════════════════════════ */
+.pr-gym-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pr-gym-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--pr-card);
+    border: 1px solid var(--pr-border);
+    border-radius: 14px;
+    transition: background .2s;
+}
+
+.pr-gym-row:hover {
+    background: rgba(255, 255, 255, .07);
+}
+
+.pr-gym-pos {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--pr-muted);
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.pr-gym-emoji {
+    font-size: 22px;
+    flex-shrink: 0;
+    width: 32px;
+    text-align: center;
+}
+
+.pr-gym-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pr-gym-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.pr-gym-last {
+    font-size: 0.72rem;
+    color: var(--pr-muted);
+    margin: 0;
+}
+
+.pr-gym-visits {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    flex-shrink: 0;
+}
+
+.pr-gym-visits-num {
+    font-size: 1.15rem;
+    font-weight: 900;
+    color: var(--pr-red);
+    line-height: 1;
+}
+
+.pr-gym-visits-lbl {
+    font-size: 0.65rem;
+    color: var(--pr-muted);
+    font-weight: 600;
+}
+
+/* ══ Responsive ══════════════════════════════════════════ */
+@media (min-width: 600px) {
+    .pr-pr-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .pr-pr-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .pr-pr-weight {
+        align-items: flex-start;
+    }
+}
