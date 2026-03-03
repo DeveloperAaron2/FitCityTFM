@@ -1,0 +1,83 @@
+<div class="login-wrap">
+  <div class="login-card">
+    <header class="head">
+      <div class="logo">
+        <span class="mark"></span>
+        <span class="text">FitCity</span>
+      </div>
+      <h1>Iniciar sesión</h1>
+      <p>Accede al mapa, ranking y tu perfil.</p>
+    </header>
+
+    <form class="form" (ngSubmit)="onSubmit()">
+
+      <!-- EMAIL -->
+      <div class="field">
+        <label>Correo</label>
+
+        <div class="control">
+          <span class="icon">✉️</span>
+
+          <input
+            type="text"
+            name="email"
+            [(ngModel)]="email"
+            placeholder="usuario@gmail.com"
+          />
+        </div>
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="field">
+        <label>Contraseña</label>
+
+        <div class="control">
+          <span class="icon">🔒</span>
+
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            placeholder="Mínimo 5 caracteres y 1 número"
+          />
+
+          <button
+            type="button"
+            class="ghost"
+            (click)="togglePassword()">
+            {{ showPassword ? 'Ocultar' : 'Ver' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- BOTÓN LOGIN -->
+      <button
+        class="primary"
+        type="submit">
+
+        <span *ngIf="!loading">Entrar</span>
+        <span *ngIf="loading">Entrando...</span>
+
+      </button>
+
+      <!-- BOTÓN INVITADO -->
+      <button
+        class="secondary"
+        type="button"
+        (click)="enterAsGuest()">
+
+        Entrar como invitado
+      </button>
+
+    </form>
+  </div>
+</div>
+
+<!-- POPUP ERROR -->
+<div class="popup-overlay" *ngIf="errorMessage">
+  <div class="popup">
+    <h3>Error</h3>
+    <p>{{ errorMessage }}</p>
+    <button (click)="closePopup()">Cerrar</button>
+  </div>
+</div>

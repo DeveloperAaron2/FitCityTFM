@@ -4,6 +4,13 @@
     <div class="pr-hero">
         <div class="pr-hero-bg"></div>
 
+        <button 
+          class="pr-logout-btn-top" 
+          (click)="handleAuthAction()">
+            
+          {{ isGuest ? 'Iniciar sesión' : 'Cerrar sesión' }}
+        </button>
+
         <div class="pr-avatar-wrap">
             <div class="pr-avatar">
                 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
@@ -81,6 +88,21 @@
                 </div>
             </div>
         </section>
+
+        <!-- ══ ACTIONS ══════════════════════════════════════ -->
+        
+        <!-- POPUP CONFIRMACIÓN CERRAR SESIÓN -->
+        <div class="popup-overlay" *ngIf="showLogoutPopup">
+          <div class="popup">
+            <h3>¿Cerrar sesión?</h3>
+            <p>¿Estás seguro de que quieres cerrar la sesión?</p>
+        
+            <div class="popup-actions">
+              <button class="btn-cancel" (click)="closeLogoutPopup()">Cancelar</button>
+              <button class="btn-ok" (click)="confirmLogout()">Aceptar</button>
+            </div>
+          </div>
+        </div>
 
     </div><!-- /pr-inner -->
 

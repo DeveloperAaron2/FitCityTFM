@@ -350,6 +350,125 @@
     font-weight: 600;
 }
 
+/* ═══════════════════════════════════════
+   LOGOUT BUTTON
+═══════════════════════════════════════ */
+
+.pr-logout-btn {
+  margin-top: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: transparent;
+  color: rgba(255,255,255,0.9);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pr-logout-btn:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-1px);
+}
+
+
+/* ═══════════════════════════════════════
+   POPUP OVERLAY
+═══════════════════════════════════════ */
+
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: grid;
+  place-items: center;
+  z-index: 2000;
+}
+
+
+/* ═══════════════════════════════════════
+   POPUP BOX
+═══════════════════════════════════════ */
+
+.popup {
+  width: min(380px, 92vw);
+  background: rgba(20, 25, 40, 0.96);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 20px;
+  padding: 28px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6);
+  animation: popupFade 0.2s ease-out;
+}
+
+.popup h3 {
+  margin: 0 0 10px;
+  font-size: 20px;
+}
+
+.popup p {
+  margin: 0 0 20px;
+  opacity: 0.8;
+}
+
+
+/* ═══════════════════════════════════════
+   POPUP BUTTONS
+═══════════════════════════════════════ */
+
+.popup-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.btn-cancel {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.25);
+  background: transparent;
+  color: rgba(255,255,255,0.9);
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.btn-ok {
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ef4444, #f97316);
+  color: white;
+  transition: transform 0.2s ease;
+}
+
+.btn-ok:hover {
+  transform: scale(1.05);
+}
+
+
+/* ═══════════════════════════════════════
+   POPUP ANIMATION
+═══════════════════════════════════════ */
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* ══ Responsive ══════════════════════════════════════════ */
 @media (min-width: 600px) {
     .pr-pr-grid {
@@ -366,4 +485,33 @@
     .pr-pr-weight {
         align-items: flex-start;
     }
+}
+
+/* Botón logout arriba derecha - versión más pequeña */
+.pr-hero {
+  position: relative;
+}
+
+.pr-logout-btn-top {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+
+  padding: 6px 10px;
+  font-size: 13px;
+  border-radius: 10px;
+
+  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  color: rgba(255,255,255,0.9);
+
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pr-logout-btn-top:hover {
+  background: rgba(255,255,255,0.15);
+  transform: translateY(-1px);
 }
