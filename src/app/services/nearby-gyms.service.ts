@@ -72,11 +72,11 @@ export class NearbyGymsService {
 
     /**
      * Fetch gyms near a known coordinate pair.
-     * Uses a ~3 km bounding box around the point.
+     * Uses a ~1 km bounding box around the point.
      */
     load(lat: number, lon: number): void {
-        // ~0.03° ≈ 3 km, gives a comfortable search radius
-        const delta = 0.03;
+        // ~0.01° ≈ 1 km, reduced to avoid loading too many gyms in dense areas
+        const delta = 0.01;
         const south = lat - delta;
         const north = lat + delta;
         const west = lon - delta;

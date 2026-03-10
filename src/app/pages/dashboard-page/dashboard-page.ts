@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -12,6 +13,24 @@ import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service
 export class DashboardPage implements OnInit {
 
   readonly gymsService = inject(NearbyGymsService);
+  readonly auth = inject(AuthService);
+
+  // Shortcuts for template
+  get user() { return this.auth.user(); }
+  get userName() { return this.user?.username ?? 'Atleta'; }
+  get userLevel() { return this.user?.level ?? 1; }
+  get currentXP() { return this.user?.current_xp ?? 0; }
+  get maxXP() { return this.user?.max_xp ?? 5000; }
+  get xpPercent() { return this.user?.xp_percent ?? 0; }
+
+  get userTitle(): string {
+    const l = this.userLevel;
+    if (l <= 3) return 'Principiante';
+    if (l <= 6) return 'Atleta';
+    if (l <= 9) return 'Campeón';
+    if (l <= 12) return 'FitMaster';
+    return 'Leyenda';
+  }
 
   ngOnInit(): void {
     this.gymsService.loadFromUserLocation();

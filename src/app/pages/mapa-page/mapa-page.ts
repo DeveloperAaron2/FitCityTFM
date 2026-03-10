@@ -1,6 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ViewEncapsulation } from '@angular/core';
-
-declare const L: any;
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation } from '@angular/core';
 
 // Overpass: load fitness/gym nodes within a given bounding box
 function buildOverpassQuery(south: number, west: number, north: number, east: number): string {
@@ -20,7 +18,7 @@ out center;
 }
 
 // Grid cell key at ~5 km precision (0.05° ≈ 5 km)
-function tileKey(lat: number, lon: number, precision = 0.15): string {
+function tileKey(lat: number, lon: number, precision = 0.05): string {
     return `${Math.floor(lat / precision)}_${Math.floor(lon / precision)}`;
 }
 
@@ -32,17 +30,16 @@ function tileKey(lat: number, lon: number, precision = 0.15): string {
     changeDetection: ChangeDetectionStrategy.OnPush,
     encapsulation: ViewEncapsulation.None,
 })
-export class MapaPage implements AfterViewInit {
+export class MapaPage implements AfterViewInit, OnDestroy {
 
-    private leafletMap: any = null;
+    private map: any = null;
+    private maplibregl: any = null;
     private userMarker: any = null;
-    private userCircle: any = null;
     private locating = false;
-    private fitnessIcon: any = null;
 
-    /** Set of tile keys already fetched, to avoid redundant requests */
+    /** Set of tile keys already fetched */
     private loadedTiles = new Set<string>();
-    /** OSM node/way IDs already placed as markers, to avoid duplicates */
+    /** OSM node/way IDs already placed as markers */
     private placedIds = new Set<number>();
     /** Total count of markers on map */
     private totalCount = 0;
@@ -50,50 +47,94 @@ export class MapaPage implements AfterViewInit {
     private fetching = false;
     /** Pending moveend timer (debounce) */
     private moveTimer: any = null;
+    /** All markers on map (for cleanup) */
+    private markers: any[] = [];
 
     ngAfterViewInit(): void {
-        this.loadLeafletAndInitMap();
+        this.loadMapLibreAndInitMap();
+    }
+
+    ngOnDestroy(): void {
+        if (this.map) this.map.remove();
     }
 
     /** Called by the "Mi ubicación" button */
     centerOnUser(): void {
         if (this.locating) return;
         this.setLocatingState(true);
+        this.requestLocation(true);
+    }
+
+    private requestLocation(highAccuracy: boolean, isRetry = false): void {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 this.setLocatingState(false);
                 this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
             },
-            () => {
+            (err) => {
+                // Si falla con alta precisión, reintentar con baja
+                if (highAccuracy && !isRetry) {
+                    console.warn('High accuracy failed, retrying with low accuracy...');
+                    this.requestLocation(false, true);
+                    return;
+                }
                 this.setLocatingState(false);
-                this.showError('No se pudo obtener tu ubicación.');
+                const msgs: Record<number, string> = {
+                    1: 'Permiso de ubicación denegado. Actívalo en tu navegador.',
+                    2: 'Ubicación no disponible. Comprueba los ajustes de ubicación de tu Mac.',
+                    3: 'Tiempo agotado. Inténtalo de nuevo.',
+                };
+                this.showError(msgs[err.code] || 'No se pudo obtener tu ubicación.');
             },
-            { enableHighAccuracy: true, timeout: 10000 }
+            { enableHighAccuracy: highAccuracy, timeout: 15000, maximumAge: 60000 }
         );
     }
 
+    /** Fallback: geolocate by IP when browser geolocation fails */
+    private fallbackIPGeolocation(): void {
+        console.log('[FitCity Map] Trying IP geolocation fallback...');
+        fetch('https://ipapi.co/json/')
+            .then(res => res.json())
+            .then((data: any) => {
+                this.setLocatingState(false);
+                if (data.latitude && data.longitude) {
+                    console.log('[FitCity Map] IP location:', data.city, data.latitude, data.longitude);
+                    this.flyToUser(data.latitude, data.longitude, 5000);
+                } else {
+                    this.loadVisibleArea();
+                }
+            })
+            .catch(() => {
+                this.setLocatingState(false);
+                console.warn('[FitCity Map] IP geolocation also failed');
+                this.loadVisibleArea();
+            });
+    }
+
     // ─────────────────────────────────────────────
-    // Leaflet bootstrap
+    // MapLibre GL bootstrap
     // ─────────────────────────────────────────────
 
-    private loadLeafletAndInitMap(): void {
-        if (!document.getElementById('leaflet-css')) {
+    private loadMapLibreAndInitMap(): void {
+        // CSS
+        if (!document.getElementById('maplibre-css')) {
             const link = document.createElement('link');
-            link.id = 'leaflet-css';
+            link.id = 'maplibre-css';
             link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            link.href = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css';
             document.head.appendChild(link);
         }
 
-        if (typeof (window as any).L !== 'undefined') {
+        // JS
+        if ((window as any).maplibregl) {
             this.initMap();
             return;
         }
 
-        if (!document.getElementById('leaflet-js')) {
+        if (!document.getElementById('maplibre-js')) {
             const script = document.createElement('script');
-            script.id = 'leaflet-js';
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            script.id = 'maplibre-js';
+            script.src = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
             script.onload = () => this.initMap();
             document.head.appendChild(script);
         }
@@ -110,54 +151,114 @@ export class MapaPage implements AfterViewInit {
         const header = document.querySelector('.map-header') as HTMLElement | null;
         mapEl.style.height = (window.innerHeight - (header?.offsetHeight ?? 0)) + 'px';
 
-        const Leaflet = (window as any).L;
-        const madridCenter: [number, number] = [40.4165, -3.7026];
+        const ml = (window as any).maplibregl;
+        this.maplibregl = ml;
 
-        this.leafletMap = Leaflet.map('map', { center: madridCenter, zoom: 13, zoomControl: true });
+        this.map = new ml.Map({
+            container: 'map',
+            style: 'https://tiles.openfreemap.org/styles/bright',
+            center: [-3.7026, 40.4165],   // Madrid
+            zoom: 14,
+            pitch: 55,                     // 3D tilt!
+            bearing: -15,                  // Slight rotation
+            antialias: true,
+        });
 
-        Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 19,
-        }).addTo(this.leafletMap);
+        // Navigation controls (rotate + zoom)
+        this.map.addControl(new ml.NavigationControl({
+            showCompass: true,
+            showZoom: true,
+            visualizePitch: true,
+        }), 'top-right');
+
+        // Disable scroll zoom on touch to avoid conflicts with page scrolling
+        this.map.scrollZoom.setWheelZoomRate(1 / 200);
 
         window.addEventListener('resize', () => {
             const h = document.querySelector('.map-header') as HTMLElement | null;
             mapEl.style.height = (window.innerHeight - (h?.offsetHeight ?? 0)) + 'px';
-            this.leafletMap.invalidateSize();
+            this.map.resize();
         });
 
-        this.fitnessIcon = Leaflet.divIcon({
-            className: '',
-            html: `<div class="fitness-marker"><span>🏋️</span></div>`,
-            iconSize: [36, 36],
-            iconAnchor: [18, 36],
-            popupAnchor: [0, -36],
-        });
+        this.map.on('load', () => {
+            // ── 3D Buildings layer ──────────────────────────────────
+            this.add3DBuildings();
 
-        // ── Lazy load on pan/zoom (debounced 600 ms) ──
-        this.leafletMap.on('moveend', () => {
-            clearTimeout(this.moveTimer);
-            this.moveTimer = setTimeout(() => this.loadVisibleArea(), 600);
-        });
+            // ── Lazy load on pan/zoom (debounced 600 ms) ──
+            this.map.on('moveend', () => {
+                clearTimeout(this.moveTimer);
+                this.moveTimer = setTimeout(() => this.loadVisibleArea(), 600);
+            });
 
-        // ── Try to start at user's location, otherwise load initial view ──
-        if ('geolocation' in navigator) {
-            this.setLocatingState(true);
-            navigator.geolocation.getCurrentPosition(
-                (pos) => {
-                    this.setLocatingState(false);
-                    // flyTo triggers moveend → loadVisibleArea automatically
-                    this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+            // ── Try to start at user's location ──
+            if ('geolocation' in navigator) {
+                this.setLocatingState(true);
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => {
+                        this.setLocatingState(false);
+                        this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                    },
+                    (err) => {
+                        console.warn('Geolocation browser error:', err.message);
+                        // Fallback: intentar geolocalización por IP
+                        this.fallbackIPGeolocation();
+                    },
+                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+                );
+            } else {
+                this.fallbackIPGeolocation();
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    // 3D Buildings
+    // ─────────────────────────────────────────────
+
+    private add3DBuildings(): void {
+        // Check if there's a building source available in the style
+        const layers = this.map.getStyle().layers;
+        if (!layers) return;
+
+        // Find the label layer to insert buildings below it
+        let labelLayerId: string | undefined;
+        for (const layer of layers) {
+            if (layer.type === 'symbol' && (layer as any).layout?.['text-field']) {
+                labelLayerId = layer.id;
+                break;
+            }
+        }
+
+        // Try to add 3D buildings from the existing vector source
+        try {
+            this.map.addLayer({
+                'id': '3d-buildings',
+                'source': 'openmaptiles',
+                'source-layer': 'building',
+                'type': 'fill-extrusion',
+                'minzoom': 14,
+                'paint': {
+                    'fill-extrusion-color': [
+                        'interpolate', ['linear'], ['get', 'render_height'],
+                        0, '#d4d4d8',
+                        50, '#a1a1aa',
+                        100, '#71717a',
+                    ],
+                    'fill-extrusion-height': [
+                        'interpolate', ['linear'], ['zoom'],
+                        14, 0,
+                        15.5, ['get', 'render_height']
+                    ],
+                    'fill-extrusion-base': [
+                        'interpolate', ['linear'], ['zoom'],
+                        14, 0,
+                        15.5, ['get', 'render_min_height']
+                    ],
+                    'fill-extrusion-opacity': 0.7,
                 },
-                () => {
-                    this.setLocatingState(false);
-                    // No location permission → load Madrid center view
-                    this.loadVisibleArea();
-                },
-                { enableHighAccuracy: true, timeout: 8000 }
-            );
-        } else {
-            this.loadVisibleArea();
+            }, labelLayerId);
+        } catch (e) {
+            console.warn('Could not add 3D buildings layer:', e);
         }
     }
 
@@ -166,24 +267,23 @@ export class MapaPage implements AfterViewInit {
     // ─────────────────────────────────────────────
 
     private loadVisibleArea(): void {
-        if (!this.leafletMap || this.fetching) return;
+        if (!this.map || this.fetching) return;
 
-        // Only fetch when zoomed in enough (avoid giant queries on zoom-out)
-        const zoom = this.leafletMap.getZoom();
-        if (zoom < 11) {
+        const zoom = this.map.getZoom();
+        console.log('[FitCity Map] loadVisibleArea — zoom:', zoom);
+        if (zoom < 13) {
             this.showTileHint(true);
             return;
         }
         this.showTileHint(false);
 
-        const bounds = this.leafletMap.getBounds();
+        const bounds = this.map.getBounds();
         const south = bounds.getSouth();
         const west = bounds.getWest();
         const north = bounds.getNorth();
         const east = bounds.getEast();
 
-        // Split the viewport into 0.15° grid cells and fetch only the new ones
-        const precision = 0.15;
+        const precision = 0.05;
         const newTiles: Array<{ s: number; w: number; n: number; e: number }> = [];
 
         for (let lat = Math.floor(south / precision) * precision; lat < north; lat += precision) {
@@ -203,7 +303,6 @@ export class MapaPage implements AfterViewInit {
 
         if (newTiles.length === 0) return;
 
-        // Merge tiles into a single slightly-padded bbox to minimise requests
         const mergedS = Math.min(...newTiles.map(t => t.s));
         const mergedW = Math.min(...newTiles.map(t => t.w));
         const mergedN = Math.max(...newTiles.map(t => t.n));
@@ -218,15 +317,20 @@ export class MapaPage implements AfterViewInit {
 
         const query = buildOverpassQuery(south, west, north, east);
         const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-        const Leaflet = (window as any).L;
+        const ml = this.maplibregl;
+
+        console.log('[FitCity Map] Fetching gyms for bbox:', { south, west, north, east });
 
         fetch(url)
-            .then(res => res.json())
+            .then(res => {
+                console.log('[FitCity Map] Overpass response status:', res.status);
+                return res.json();
+            })
             .then((data: any) => {
                 const elements: any[] = data.elements || [];
+                console.log('[FitCity Map] Received', elements.length, 'elements from Overpass');
 
                 for (const el of elements) {
-                    // Skip duplicates
                     if (this.placedIds.has(el.id)) continue;
                     this.placedIds.add(el.id);
 
@@ -243,7 +347,14 @@ export class MapaPage implements AfterViewInit {
                     const web = el.tags?.website || el.tags?.['contact:website'] || '';
                     const opening = el.tags?.opening_hours || '';
 
-                    const popup = `
+                    // Create marker element — outer div for MapLibre positioning (NO transform!),
+                    // inner div for visual styling and animation
+                    const markerEl = document.createElement('div');
+                    markerEl.className = 'gym-marker-wrap';
+                    markerEl.innerHTML = '<div class="gym-marker"><span class="gym-marker-emoji">🏋️</span></div>';
+
+                    // Popup HTML
+                    const popupHTML = `
                         <div class="fitness-popup">
                             <h3>🏋️ ${name}</h3>
                             ${address ? `<p>📍 ${address}</p>` : ''}
@@ -252,16 +363,28 @@ export class MapaPage implements AfterViewInit {
                             ${web ? `<p>🌐 <a href="${web}" target="_blank" rel="noopener">Sitio web</a></p>` : ''}
                         </div>`;
 
-                    Leaflet.marker([lat, lon], { icon: this.fitnessIcon })
-                        .addTo(this.leafletMap)
-                        .bindPopup(popup);
+                    const popup = new ml.Popup({
+                        offset: [0, -42],
+                        closeButton: true,
+                        maxWidth: '250px',
+                    }).setHTML(popupHTML);
 
+                    const marker = new ml.Marker({ element: markerEl })
+                        .setLngLat([lon, lat])
+                        .setPopup(popup)
+                        .addTo(this.map);
+
+                    this.markers.push(marker);
                     this.totalCount++;
                 }
 
+                console.log('[FitCity Map] Total markers placed:', this.totalCount);
                 this.updateCount(this.totalCount);
             })
-            .catch(() => this.showError('Error al cargar centros. Inténtalo de nuevo.'))
+            .catch((err) => {
+                console.error('[FitCity Map] ERROR fetching gyms:', err);
+                this.showError('Error al cargar centros. Inténtalo de nuevo.');
+            })
             .finally(() => {
                 this.fetching = false;
                 this.showChunkLoader(false);
@@ -273,30 +396,34 @@ export class MapaPage implements AfterViewInit {
     // ─────────────────────────────────────────────
 
     private flyToUser(lat: number, lon: number, accuracy: number): void {
-        if (!this.leafletMap) return;
-        const Leaflet = (window as any).L;
+        if (!this.map) return;
+        const ml = this.maplibregl;
 
-        if (this.userMarker) this.leafletMap.removeLayer(this.userMarker);
-        if (this.userCircle) this.leafletMap.removeLayer(this.userCircle);
+        // Remove old user marker
+        if (this.userMarker) this.userMarker.remove();
 
-        const userIcon = Leaflet.divIcon({
-            className: '',
-            html: `<div class="user-marker"><div class="user-marker-dot"></div><div class="user-marker-pulse"></div></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10],
+        // Create user marker element
+        const el = document.createElement('div');
+        el.className = 'user-marker-3d';
+        el.innerHTML = `
+            <div class="um3-pulse"></div>
+            <div class="um3-dot"></div>
+        `;
+
+        this.userMarker = new ml.Marker({ element: el, anchor: 'center' })
+            .setLngLat([lon, lat])
+            .addTo(this.map);
+
+        // flyTo with 3D angle
+        this.map.flyTo({
+            center: [lon, lat],
+            zoom: 15,
+            pitch: 55,
+            bearing: -15,
+            speed: 1.2,
+            curve: 1.5,
+            essential: true,
         });
-
-        this.userMarker = Leaflet.marker([lat, lon], { icon: userIcon, zIndexOffset: 1000 })
-            .addTo(this.leafletMap)
-            .bindPopup('<div class="fitness-popup"><h3>📍 Tu ubicación</h3></div>');
-
-        this.userCircle = Leaflet.circle([lat, lon], {
-            radius: Math.min(accuracy, 300),
-            color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.12, weight: 1.5,
-        }).addTo(this.leafletMap);
-
-        // flyTo triggers moveend → loadVisibleArea
-        this.leafletMap.flyTo([lat, lon], 14, { duration: 1.2 });
     }
 
     // ─────────────────────────────────────────────

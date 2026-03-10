@@ -44,8 +44,12 @@
         <section class="pr-section">
             <h2 class="pr-section-title">🏆 Marcas personales</h2>
 
+            <div *ngIf="liftingPRs().length === 0" class="pr-empty">
+                Aún no tienes records. ¡Empieza a entrenar!
+            </div>
+
             <div class="pr-pr-grid">
-                <div class="pr-pr-card" *ngFor="let pr of liftingPRs" [style.--acc]="pr.accentColor">
+                <div class="pr-pr-card" *ngFor="let pr of liftingPRs()" [style.--acc]="pr.accentColor">
                     <div class="pr-pr-icon">{{ pr.emoji }}</div>
                     <div class="pr-pr-body">
                         <p class="pr-pr-name">{{ pr.name }}</p>
@@ -63,11 +67,15 @@
         <section class="pr-section">
             <div class="pr-section-header">
                 <h2 class="pr-section-title">📍 Gimnasios visitados</h2>
-                <span class="pr-total-badge">{{ totalVisits }} visitas</span>
+                <span class="pr-total-badge">{{ totalVisits() }} visitas</span>
+            </div>
+
+            <div *ngIf="visitedGyms().length === 0" class="pr-empty">
+                Empieza a visitar gimnasios para ver tu historial aquí.
             </div>
 
             <div class="pr-gym-list">
-                <div class="pr-gym-row" *ngFor="let gym of visitedGyms; let i = index">
+                <div class="pr-gym-row" *ngFor="let gym of visitedGyms(); let i = index">
                     <span class="pr-gym-pos">{{ i + 1 }}</span>
                     <div class="pr-gym-emoji">{{ gym.emoji }}</div>
                     <div class="pr-gym-info">
@@ -82,6 +90,39 @@
             </div>
         </section>
 
+        <!-- ══ LOGOUT ════════════════════════════════════════════ -->
+        <button class="pr-logout-btn" (click)="logout()">
+            🚪 Cerrar sesión
+        </button>
+
     </div><!-- /pr-inner -->
 
 </div>
+
+<style>
+    .pr-empty {
+        color: #64748b;
+        font-size: 13px;
+        padding: 16px 0;
+        text-align: center;
+    }
+
+    .pr-logout-btn {
+        display: block;
+        width: 100%;
+        margin-top: 8px;
+        padding: 14px;
+        background: rgba(239, 68, 68, .08);
+        border: 1px solid rgba(239, 68, 68, .2);
+        border-radius: 14px;
+        color: #f87171;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s;
+    }
+
+    .pr-logout-btn:hover {
+        background: rgba(239, 68, 68, .15);
+    }
+</style>

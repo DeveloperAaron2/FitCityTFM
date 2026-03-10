@@ -9,7 +9,7 @@ app-mapa-page {
     display: flex;
     flex-direction: column;
     width: 100%;
-    background: #0f0f1a;
+    background: #0a0a1a;
     font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
@@ -21,9 +21,9 @@ app-mapa-page {
     gap: 12px;
     padding: 16px 24px 12px;
     flex-shrink: 0;
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(10, 10, 26, 0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(6, 182, 212, 0.15);
 }
 
 .map-header-left {
@@ -49,18 +49,19 @@ app-mapa-page {
 .map-subtitle {
     margin: 0;
     font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(6, 182, 212, 0.6);
 }
 
 .fitness-badge {
     display: inline-block;
     padding: 6px 14px;
-    background: linear-gradient(135deg, #f97316, #ef4444);
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
     color: #fff;
     font-size: 0.78rem;
     font-weight: 600;
     border-radius: 999px;
     white-space: nowrap;
+    box-shadow: 0 2px 12px rgba(6, 182, 212, 0.35);
 }
 
 /* ===== Locate button ===== */
@@ -69,9 +70,9 @@ app-mapa-page {
     align-items: center;
     gap: 6px;
     padding: 7px 14px;
-    background: rgba(59, 130, 246, 0.15);
-    color: #60a5fa;
-    border: 1.5px solid rgba(59, 130, 246, 0.4);
+    background: rgba(6, 182, 212, 0.12);
+    color: #22d3ee;
+    border: 1.5px solid rgba(6, 182, 212, 0.35);
     border-radius: 999px;
     font-size: 0.78rem;
     font-weight: 600;
@@ -82,7 +83,7 @@ app-mapa-page {
 }
 
 .locate-btn:hover:not(:disabled) {
-    background: rgba(59, 130, 246, 0.28);
+    background: rgba(6, 182, 212, 0.25);
     transform: scale(1.03);
 }
 
@@ -92,8 +93,8 @@ app-mapa-page {
 }
 
 .locate-btn.locating .locate-icon {
-    display: inline-block;
     animation: pulse-icon 0.9s ease-in-out infinite alternate;
+    display: inline-block;
 }
 
 @keyframes pulse-icon {
@@ -112,7 +113,6 @@ app-mapa-page {
     line-height: 1;
 }
 
-
 /* ===== Map body ===== */
 .map-body {
     position: relative;
@@ -121,10 +121,10 @@ app-mapa-page {
 
 #map {
     width: 100%;
-    background: #1a1a2e;
+    background: #0a0a1a;
 }
 
-/* ===== Chunk loader (non-blocking, shown in header while fetching a tile) ===== */
+/* ===== Chunk loader ===== */
 .chunk-loader {
     display: flex;
     align-items: center;
@@ -136,8 +136,8 @@ app-mapa-page {
 .chunk-spinner {
     width: 18px;
     height: 18px;
-    border: 2.5px solid rgba(249, 115, 22, 0.25);
-    border-top-color: #f97316;
+    border: 2.5px solid rgba(6, 182, 212, 0.2);
+    border-top-color: #06b6d4;
     border-radius: 50%;
     animation: spin 0.75s linear infinite;
 }
@@ -148,7 +148,7 @@ app-mapa-page {
     }
 }
 
-/* ===== Zoom hint overlay ===== */
+/* ===== Zoom hint ===== */
 .zoom-hint {
     position: absolute;
     bottom: 30px;
@@ -159,13 +159,13 @@ app-mapa-page {
     align-items: center;
     gap: 8px;
     padding: 10px 20px;
-    background: rgba(15, 15, 26, 0.88);
+    background: rgba(10, 10, 26, 0.92);
     backdrop-filter: blur(8px);
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.82rem;
     font-weight: 500;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(6, 182, 212, 0.2);
     white-space: nowrap;
     pointer-events: none;
 }
@@ -186,42 +186,76 @@ app-mapa-page {
     box-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
 }
 
-/* ===== Custom fitness marker ===== */
-.fitness-marker {
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, #f97316, #ef4444);
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
+/* ═══════════════════════════════════════════════════════════════
+   GYM MARKERS
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Outer wrapper: MapLibre controls this element's transform for positioning.
+   NEVER put transform or animation on this element! */
+.gym-marker-wrap {
+    cursor: pointer;
+}
+
+/* Inner visual marker */
+.gym-marker {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(145deg, #06b6d4, #3b82f6, #6366f1);
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.85);
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 10px rgba(249, 115, 22, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow:
+        0 3px 12px rgba(6, 182, 212, 0.5),
+        0 0 20px rgba(6, 182, 212, 0.2);
+    animation: marker-appear 0.4s ease-out forwards;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.fitness-marker span {
-    transform: rotate(45deg);
-    font-size: 16px;
+.gym-marker:hover {
+    transform: scale(1.25);
+    box-shadow:
+        0 5px 20px rgba(6, 182, 212, 0.7),
+        0 0 30px rgba(6, 182, 212, 0.4);
+}
+
+.gym-marker-emoji {
+    font-size: 18px;
     line-height: 1;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
 }
 
-/* ===== Leaflet overrides ===== */
-.leaflet-container {
-    font-family: 'Inter', 'Segoe UI', sans-serif !important;
-    background: #1a2230 !important;
+/* Animation uses opacity only (NO transform — it breaks MapLibre positioning!) */
+@keyframes marker-appear {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
 }
 
-.leaflet-popup-content-wrapper {
-    border-radius: 14px !important;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+/* ===== Popup overrides (MapLibre dark) ===== */
+.maplibregl-popup-content {
+    background: rgba(12, 12, 30, 0.95) !important;
+    backdrop-filter: blur(12px) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(6, 182, 212, 0.12) !important;
     padding: 0 !important;
+    border: 1px solid rgba(6, 182, 212, 0.2) !important;
     overflow: hidden;
 }
 
-.leaflet-popup-content {
-    margin: 0 !important;
-    width: 220px !important;
+.maplibregl-popup-close-button {
+    color: #94a3b8 !important;
+    font-size: 18px !important;
+    padding: 4px 8px !important;
+}
+
+.maplibregl-popup-tip {
+    border-top-color: rgba(12, 12, 30, 0.95) !important;
 }
 
 .fitness-popup {
@@ -233,76 +267,95 @@ app-mapa-page {
     margin: 0 0 8px;
     font-size: 0.95rem;
     font-weight: 700;
-    color: #1a1a2e;
+    color: #e2e8f0;
     line-height: 1.3;
 }
 
 .fitness-popup p {
     margin: 4px 0;
     font-size: 0.8rem;
-    color: #444;
+    color: #94a3b8;
     line-height: 1.4;
 }
 
 .fitness-popup a {
-    color: #f97316;
+    color: #22d3ee;
     text-decoration: none;
     font-weight: 600;
 }
 
-.leaflet-popup-tip-container {
-    display: none !important;
-}
-
-.leaflet-control-zoom a {
-    border-radius: 8px !important;
-    font-size: 16px !important;
-}
-
-.leaflet-control-attribution {
-    font-size: 0.68rem;
-    opacity: 0.6;
-}
-
-/* ===== User location marker ===== */
-.user-marker {
+/* ===== User location marker 3D ===== */
+.user-marker-3d {
     position: relative;
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
 }
 
-.user-marker-dot {
+.um3-dot {
     position: absolute;
     inset: 0;
     margin: auto;
-    width: 14px;
-    height: 14px;
-    background: #3b82f6;
+    width: 18px;
+    height: 18px;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
     border-radius: 50%;
-    border: 2.5px solid #fff;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.6);
+    border: 3px solid #ffffff;
+    box-shadow:
+        0 2px 10px rgba(6, 182, 212, 0.6),
+        0 0 20px rgba(6, 182, 212, 0.3);
     z-index: 2;
 }
 
-.user-marker-pulse {
+.um3-pulse {
     position: absolute;
-    inset: -6px;
-    background: rgba(59, 130, 246, 0.25);
+    inset: -10px;
+    background: rgba(6, 182, 212, 0.18);
     border-radius: 50%;
-    animation: user-pulse 1.8s ease-out infinite;
+    animation: user-pulse-3d 2s ease-out infinite;
     z-index: 1;
 }
 
-@keyframes user-pulse {
+@keyframes user-pulse-3d {
     0% {
-        transform: scale(0.6);
-        opacity: 0.8;
+        transform: scale(0.4);
+        opacity: 0.9;
     }
 
     100% {
-        transform: scale(1.8);
+        transform: scale(2.2);
         opacity: 0;
     }
+}
+
+/* ===== MapLibre control overrides ===== */
+.maplibregl-ctrl-group {
+    background: rgba(12, 12, 30, 0.9) !important;
+    border: 1px solid rgba(6, 182, 212, 0.15) !important;
+    border-radius: 10px !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+}
+
+.maplibregl-ctrl-group button {
+    background: transparent !important;
+    border-color: rgba(6, 182, 212, 0.1) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+    background: rgba(6, 182, 212, 0.1) !important;
+}
+
+.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: invert(1) brightness(0.8);
+}
+
+.maplibregl-ctrl-attrib {
+    background: rgba(0, 0, 0, 0.3) !important;
+    color: #64748b !important;
+    font-size: 0.65rem !important;
+}
+
+.maplibregl-ctrl-attrib a {
+    color: #06b6d4 !important;
 }
 
 /* ===== Responsive ===== */
