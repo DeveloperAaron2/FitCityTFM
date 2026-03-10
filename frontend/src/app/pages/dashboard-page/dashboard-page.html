@@ -12,8 +12,8 @@
                 </svg>
             </div>
             <div>
-                <p class="fc-name">Trainer Aaron</p>
-                <p class="fc-level">Nv. 12 · FitMaster</p>
+                <p class="fc-name">{{ userName }}</p>
+                <p class="fc-level">Nv. {{ userLevel }} · {{ userTitle }}</p>
             </div>
         </div>
 
@@ -34,10 +34,10 @@
     <div class="fc-xp">
         <div class="fc-xp-labels">
             <span>XP</span>
-            <span>0 / 5 000</span>
+            <span>{{ currentXP }} / {{ maxXP }}</span>
         </div>
         <div class="fc-xp-track">
-            <div class="fc-xp-fill" style="width:64.8%"></div>
+            <div class="fc-xp-fill" [style.width.%]="xpPercent"></div>
         </div>
     </div>
 
