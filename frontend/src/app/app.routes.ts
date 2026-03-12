@@ -45,6 +45,11 @@ export const routes: Routes = [
                 path: 'profile',
                 loadComponent: () =>
                     import('./pages/profile-page/profile-page').then(m => m.ProfilePage)
+            },
+            {
+                path: 'validate-pr',
+                loadComponent: () =>
+                    import('./pages/validate-pr-page/validate-pr-page').then(m => m.ValidatePrPage)
             }
         ]
     },

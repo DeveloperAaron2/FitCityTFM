@@ -10,7 +10,6 @@ router = APIRouter(prefix="/users/{user_id}/gym-visits", tags=["gym_visits"])
 # ── Schemas ────────────────────────────────────────────────────────────────────
 
 class GymVisitCreate(BaseModel):
-    osm_id: Optional[str] = None        # OpenStreetMap node/way id
     gym_name: str
     gym_address: Optional[str] = None
     gym_lat: Optional[float] = None
@@ -41,7 +40,6 @@ def create_gym_visit(user_id: str, body: GymVisitCreate):
 
     payload = {
         "user_id": user_id,
-        "osm_id": body.osm_id,
         "gym_name": body.gym_name,
         "gym_address": body.gym_address,
         "gym_lat": body.gym_lat,

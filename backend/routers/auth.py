@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 import traceback
+from utils import level_info, XP_PER_LEVEL
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -20,33 +21,6 @@ class LoginRequest(BaseModel):
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
-
-XP_PER_LEVEL = 5000
-
-TITLES = {
-    3: "Principiante",
-    6: "Atleta",
-    9: "Campeón",
-    12: "FitMaster",
-    999: "Leyenda",
-}
-
-
-def compute_level_info(total_xp: int) -> dict:
-    level = (total_xp // XP_PER_LEVEL) + 1
-    current_xp = total_xp % XP_PER_LEVEL
-    title = "Principiante"
-    for max_lvl, t in TITLES.items():
-        if level <= max_lvl:
-            title = t
-            break
-    return {
-        "level": level,
-        "current_xp": current_xp,
-        "max_xp": XP_PER_LEVEL,
-        "xp_percent": round((current_xp / XP_PER_LEVEL) * 100, 1),
-        "title": title,
-    }
 
 
 def _get_db():
@@ -104,6 +78,16 @@ def register(body: RegisterRequest):
                    "Comprueba las RLS policies en Supabase."
         )
 
+    # Insert initial row in user_levels (level 1, max_xp = XP_PER_LEVEL)
+    try:
+        db.table("user_levels").insert({
+            "user_id": user_id,
+            "level": 1,
+            "max_xp": XP_PER_LEVEL,   # umbral para subir a nivel 2
+        }).execute()
+    except Exception:
+        pass  # Non-fatal: level row will be created on first XP update
+
     return {
         "user_id": user_id,
         "email": body.email,
@@ -147,7 +131,7 @@ def login(body: LoginRequest):
         profile = {}
 
     total_xp = profile.get("total_xp", 0)
-    level_info = compute_level_info(total_xp)
+    lv_info = level_info(total_xp)
 
     return {
         "access_token": auth_res.session.access_token,
@@ -158,7 +142,7 @@ def login(body: LoginRequest):
             "username": profile.get("username", ""),
             "handle": profile.get("handle", ""),
             "total_xp": total_xp,
-            **level_info,
+            **lv_info,
         }
     }
 

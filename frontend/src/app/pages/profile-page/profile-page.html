@@ -42,7 +42,13 @@
 
         <!-- ══ LIFTING PRs ═══════════════════════════════════════ -->
         <section class="pr-section">
-            <h2 class="pr-section-title">🏆 Marcas personales</h2>
+            <div class="pr-section-header">
+                <h2 class="pr-section-title">🏆 Marcas personales</h2>
+                <!-- Video Uploader Link -->
+                <a routerLink="/validate-pr" class="pr-btn-navigate">
+                    📷 Validar PR en vídeo
+                </a>
+            </div>
 
             <div *ngIf="liftingPRs().length === 0" class="pr-empty">
                 Aún no tienes records. ¡Empieza a entrenar!
@@ -124,5 +130,37 @@
 
     .pr-logout-btn:hover {
         background: rgba(239, 68, 68, .15);
+    }
+
+    .pr-logout-btn:hover {
+        background: rgba(239, 68, 68, .15);
+    }
+
+    /* Video Uploader Button */
+    .pr-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+    .pr-btn-navigate {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s, opacity 0.2s;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .pr-btn-navigate:active {
+        transform: scale(0.96);
     }
 </style>
