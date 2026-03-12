@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import Optional
 from database import get_supabase_client
+from utils import compute_level, get_title, level_info, XP_PER_LEVEL
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -18,30 +19,6 @@ class UserXPUpdate(BaseModel):
     xp_to_add: int
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
-
-XP_PER_LEVEL = 5000  # XP needed to level up (same as frontend)
-
-
-def compute_level(total_xp: int) -> tuple[int, int]:
-    """Returns (level, xp_within_current_level) from total accumulated XP."""
-    level = (total_xp // XP_PER_LEVEL) + 1
-    current_xp = total_xp % XP_PER_LEVEL
-    return level, current_xp
-
-
-TITLES = {
-    1: "Principiante", 2: "Aprendiz", 3: "Atleta",
-    4: "Guerrero", 5: "Campeón", 6: "Élite",
-    7: "Maestro", 8: "Gran Maestro", 9: "Leyenda", 10: "FitGod",
-}
-
-
-def get_title(level: int) -> str:
-    bucket = min((level - 1) // 3 + 1, 10)
-    return TITLES.get(bucket, "FitMaster")
-
-
 # ── Endpoints ──────────────────────────────────────────────────────────────────
 
 @router.get("/{user_id}")
@@ -53,15 +30,32 @@ def get_user(user_id: str):
         raise HTTPException(status_code=404, detail="User not found")
 
     user = res.data
-    level, current_xp = compute_level(user["total_xp"])
-    return {
-        **user,
-        "level": level,
-        "current_xp": current_xp,
-        "max_xp": XP_PER_LEVEL,
-        "xp_percent": round((current_xp / XP_PER_LEVEL) * 100, 1),
-        "title": get_title(level),
-    }
+    info = level_info(user["total_xp"])
+    return {**user, **info}
+
+
+@router.get("/{user_id}/level")
+def get_user_level(user_id: str):
+    """Get the stored level info for a user from the user_levels table."""
+    db = get_supabase_client()
+
+    # Try user_levels first (source of truth after any XP update)
+    ul = (
+        db.table("user_levels")
+        .select("level, max_xp")
+        .eq("user_id", user_id)
+        .single()
+        .execute()
+    )
+    if ul.data:
+        return ul.data
+
+    # Fallback: compute from total_xp if user_levels row doesn't exist yet
+    res = db.table("users").select("total_xp").eq("id", user_id).single().execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="User not found")
+    lv = compute_level(res.data["total_xp"])
+    return {"level": lv, "max_xp": XP_PER_LEVEL * lv}
 
 
 @router.post("/")
@@ -81,7 +75,7 @@ def create_user(body: UserCreate):
 
 @router.put("/{user_id}/xp")
 def add_xp(user_id: str, body: UserXPUpdate):
-    """Add XP to a user. Returns updated user with new level info."""
+    """Add XP to a user. Updates user_levels table and returns new level info."""
     db = get_supabase_client()
 
     # Fetch current XP
@@ -91,17 +85,23 @@ def add_xp(user_id: str, body: UserXPUpdate):
 
     new_total_xp = res.data["total_xp"] + body.xp_to_add
 
-    # Update in DB
+    # Update total_xp in users table
     upd = db.table("users").update({"total_xp": new_total_xp}).eq("id", user_id).execute()
     if not upd.data:
         raise HTTPException(status_code=400, detail="Could not update XP")
 
-    level, current_xp = compute_level(new_total_xp)
+    # Compute level and upsert into user_levels table
+    lv = compute_level(new_total_xp)
+    max_xp = XP_PER_LEVEL * lv
+    db.table("user_levels").upsert(
+        {"user_id": user_id, "level": lv, "max_xp": max_xp},
+        on_conflict="user_id",
+    ).execute()
+
     return {
         "user_id": user_id,
         "total_xp": new_total_xp,
-        "level": level,
-        "current_xp": current_xp,
-        "max_xp": XP_PER_LEVEL,
-        "title": get_title(level),
+        "level": lv,
+        "max_xp": max_xp,
+        "title": get_title(lv),
     }

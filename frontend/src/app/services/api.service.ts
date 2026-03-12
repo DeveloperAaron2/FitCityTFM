@@ -49,6 +49,16 @@ export class ApiService {
         return this.http.get(`${API_URL}/users/${userId}/lifting-prs`);
     }
 
+    createLiftingPR(userId: string, body: { gym_name: string, exercise_name: string, exercise_emoji: string, weight_kg: number, reps: number }): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/lifting-prs`, body);
+    }
+
+    validatePRVideo(userId: string, videoFile: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
+    }
+
     // ── Challenges ────────────────────────────────────────────────────────────
 
     getDailyChallenge(): Observable<any> {

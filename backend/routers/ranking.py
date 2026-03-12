@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from database import get_supabase_client
+from utils import level_info, get_title, XP_PER_LEVEL
 
 router = APIRouter(prefix="/ranking", tags=["ranking"])
 
@@ -17,24 +18,14 @@ def get_ranking(limit: int = 20):
     )
     users = res.data or []
 
-    # Add rank, level and title to each user
-    XP_PER_LEVEL = 5000
-    TITLES = {
-        1: "Principiante", 2: "Aprendiz", 3: "Atleta",
-        4: "Guerrero", 5: "Campeón", 6: "Élite",
-        7: "Maestro", 8: "Gran Maestro", 9: "Leyenda", 10: "FitGod",
-    }
-
     ranking = []
     for i, user in enumerate(users):
-        total_xp = user["total_xp"]
-        level = (total_xp // XP_PER_LEVEL) + 1
-        bucket = min((level - 1) // 3 + 1, 10)
+        info = level_info(user["total_xp"])
         ranking.append({
             **user,
             "rank": i + 1,
-            "level": level,
-            "title": TITLES.get(bucket, "FitMaster"),
+            "level": info["level"],
+            "title": info["title"],
         })
 
     return ranking
