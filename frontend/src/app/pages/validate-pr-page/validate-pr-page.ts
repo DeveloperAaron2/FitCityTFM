@@ -1,146 +1,73 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { ApiService } from '../../services/api.service';
-import { AuthService } from '../../services/auth.service';
-import { NearbyGymsService } from '../../services/nearby-gyms.service';
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
-@Component({
-    selector: 'app-validate-pr-page',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    templateUrl: './validate-pr-page.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-})
-export class ValidatePrPage implements OnInit {
-    private api = inject(ApiService);
-    private auth = inject(AuthService);
-    private router = inject(Router);
-    public nearbyGymsSvc = inject(NearbyGymsService);
+export const API_URL = 'http://localhost:8000';
 
-    get user() { return this.auth.user(); }
+@Injectable({ providedIn: 'root' })
+export class ApiService {
 
-    // Form state
-    gymName = signal('');
-    exerciseName = signal('');
-    weightKg = signal<number | null>(null);
-    selectedFile = signal<File | null>(null);
+    constructor(private http: HttpClient) { }
 
-    // Submission state
-    isSubmitting = signal(false);
-    result = signal<{ success: boolean; message: string } | null>(null);
+    // ── Auth ──────────────────────────────────────────────────────────────────
 
-    // Emojis mapping for common exercises
-    private readonly EMOJIS: Record<string, string> = {
-        'Press de banca': '🏋️',
-        'Sentadilla': '🦵',
-        'Peso muerto': '💀',
-    };
-
-    // Location state (Geofencing 50m)
-    nearestGym = computed(() => {
-        const gyms = this.nearbyGymsSvc.nearbyGyms();
-        return gyms.length > 0 ? gyms[0] : null;
-    });
-
-    isGymValid = computed(() => {
-        const gym = this.nearestGym();
-        return gym !== null && gym.distanceM <= 50;
-    });
-
-    constructor() {
-        // Automatically sync detected gym name to the form field if valid
-        effect(() => {
-            const valid = this.isGymValid();
-            const gym = this.nearestGym();
-            if (valid && gym) {
-                this.gymName.set(gym.name);
-            } else {
-                this.gymName.set('');
-            }
-        }, { allowSignalWrites: true });
+    login(email: string, password: string): Observable<any> {
+        return this.http.post(`${API_URL}/auth/login`, { email, password });
     }
 
-    ngOnInit(): void {
-        this.nearbyGymsSvc.loadFromUserLocation();
+    register(email: string, password: string, username: string, handle: string): Observable<any> {
+        return this.http.post(`${API_URL}/auth/register`, { email, password, username, handle });
     }
 
-    onFileSelected(event: Event): void {
-        const input = event.target as HTMLInputElement;
-        if (input.files && input.files.length > 0) {
-            this.selectedFile.set(input.files[0]);
-        }
+    logout(): Observable<any> {
+        return this.http.post(`${API_URL}/auth/logout`, {});
     }
 
-    async onSubmit(): Promise<void> {
-        const userId = this.user?.id;
-        const file = this.selectedFile();
-        const gym = this.gymName().trim();
-        const ex = this.exerciseName().trim();
-        const weight = this.weightKg() || 0;
+    // ── Users ─────────────────────────────────────────────────────────────────
 
-        if (!this.isGymValid()) {
-            this.result.set({ success: false, message: 'Debes estar a 50 metros o menos de un gimnasio para validar un PR.' });
-            return;
-        }
-
-        if (!userId || !file || !gym || !ex || weight <= 0) {
-            this.result.set({ success: false, message: 'Por favor, rellena todos los campos correctamente y selecciona un vídeo.' });
-            return;
-        }
-
-        this.isSubmitting.set(true);
-        this.result.set(null);
-
-        try {
-            // STEP 1: Validate Video
-            await new Promise((resolve, reject) => {
-                this.api.validatePRVideo(userId, file).subscribe({
-                    next: resolve,
-                    error: reject
-                });
-            });
-
-            // STEP 2: Find Emoji
-            const emoji = this.EMOJIS[ex] || this.EMOJIS['default'];
-
-            // STEP 3: Create PR Record in DB
-            const prBody = {
-                gym_name: gym,
-                exercise_name: ex,
-                exercise_emoji: emoji,
-                weight_kg: weight,
-                reps: 1
-            };
-
-            const prRes = await new Promise<any>((resolve, reject) => {
-                this.api.createLiftingPR(userId, prBody).subscribe({
-                    next: resolve,
-                    error: reject
-                });
-            });
-
-            this.result.set({
-                success: true,
-                message: prRes.is_new_record
-                    ? `¡Nuevo record guardado! (+${prRes.xp_awarded} XP) 🚀`
-                    : `Record actualizado. (+${prRes.xp_awarded} XP) 🔥`
-            });
-
-            // Navigate back to profile after 3 seconds on success
-            setTimeout(() => this.goBack(), 3000);
-
-        } catch (err: any) {
-            console.error(err);
-            const detail = err.error?.detail || 'Error en la validación / subida del PR.';
-            this.result.set({ success: false, message: detail });
-        } finally {
-            this.isSubmitting.set(false);
-        }
+    getUser(userId: string): Observable<any> {
+        return this.http.get(`${API_URL}/users/${userId}`);
     }
 
-    goBack(): void {
-        this.router.navigate(['/profile']);
+    addXP(userId: string, xpToAdd: number): Observable<any> {
+        return this.http.put(`${API_URL}/users/${userId}/xp`, { xp_to_add: xpToAdd });
+    }
+
+    // ── Gym Visits ────────────────────────────────────────────────────────────
+
+    getGymVisits(userId: string): Observable<any> {
+        return this.http.get(`${API_URL}/users/${userId}/gym-visits`);
+    }
+
+    getGymStats(userId: string): Observable<any> {
+        return this.http.get(`${API_URL}/users/${userId}/gym-visits/stats`);
+    }
+
+    // ── Lifting PRs ───────────────────────────────────────────────────────────
+
+    getLiftingPRs(userId: string): Observable<any> {
+        return this.http.get(`${API_URL}/users/${userId}/lifting-prs`);
+    }
+
+    createLiftingPR(userId: string, body: { gym_name: string, exercise_name: string, exercise_emoji: string, weight_kg: number, reps: number }): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/lifting-prs`, body);
+    }
+
+    validatePRVideo(userId: string, videoFile: File): Observable<any> {
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
+    }
+
+    // ── Challenges ────────────────────────────────────────────────────────────
+
+    getDailyChallenge(): Observable<any> {
+        return this.http.get(`${API_URL}/challenges/daily`);
+    }
+
+    // ── Ranking ───────────────────────────────────────────────────────────────
+
+    getRanking(): Observable<any> {
+        return this.http.get(`${API_URL}/ranking`);
     }
 }
