@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
-import { Router } from '@angular/router';
 
 export interface LiftingPR {
     name: string;
@@ -24,7 +24,7 @@ const ACCENT_COLORS = ['#3b82f6', '#f97316', '#a855f7', '#22c55e', '#ec4899'];
 @Component({
     selector: 'app-profile-page',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule],
     templateUrl: 'profile-page.html',
     styleUrl: 'profile-page.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
