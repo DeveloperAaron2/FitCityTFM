@@ -54,9 +54,10 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs`, body);
     }
 
-    validatePRVideo(userId: string, videoFile: File): Observable<any> {
+    validatePRVideo(userId: string, videoFile: File, exerciseName: string): Observable<any> {
         const formData = new FormData();
         formData.append('video', videoFile);
+        formData.append('exercise_name', exerciseName);
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
     }
 
@@ -70,5 +71,9 @@ export class ApiService {
 
     getRanking(): Observable<any> {
         return this.http.get(`${API_URL}/ranking`);
+    }
+
+    getGlobalPrsRanking(): Observable<any> {
+        return this.http.get(`${API_URL}/ranking/prs`);
     }
 }

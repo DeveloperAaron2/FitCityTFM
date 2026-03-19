@@ -57,7 +57,7 @@ export class ValidatePrPage implements OnInit {
             if (valid && gym) {
                 this.gymName.set(gym.name);
             } else {
-                this.gymName.set('');
+                this.gymName.set('Grzly gym');
             }
         }, { allowSignalWrites: true });
     }
@@ -80,10 +80,11 @@ export class ValidatePrPage implements OnInit {
         const ex = this.exerciseName().trim();
         const weight = this.weightKg() || 0;
 
-        if (!this.isGymValid()) {
+        // Descomentar cuando se implemente la protección por cercanía a los gimansios
+        /* if (!this.isGymValid()) {
             this.result.set({ success: false, message: 'Debes estar a 50 metros o menos de un gimnasio para validar un PR.' });
             return;
-        }
+        } */
 
         if (!userId || !file || !gym || !ex || weight <= 0) {
             this.result.set({ success: false, message: 'Por favor, rellena todos los campos correctamente y selecciona un vídeo.' });
@@ -96,7 +97,7 @@ export class ValidatePrPage implements OnInit {
         try {
             // STEP 1: Validate Video
             await new Promise((resolve, reject) => {
-                this.api.validatePRVideo(userId, file).subscribe({
+                this.api.validatePRVideo(userId, file, ex).subscribe({
                     next: resolve,
                     error: reject
                 });

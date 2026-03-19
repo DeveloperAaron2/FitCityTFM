@@ -3,7 +3,8 @@
     <!-- Navbar/Header -->
     <header class="vpr-header">
         <button class="vpr-btn-back" (click)="goBack()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
             </svg>
         </button>
@@ -12,7 +13,7 @@
 
     <div class="vpr-content">
         <div class="vpr-card">
-            
+
             <!-- Geo-fencing Status Banner -->
             <div class="vpr-geo-banner" [ngClass]="{
                 'is-loading': nearbyGymsSvc.loading(),
@@ -26,7 +27,7 @@
                 </div>
                 <div class="vpr-geo-text">
                     <ng-container *ngIf="nearbyGymsSvc.loading()">Obteniendo ubicación del gimnasio...</ng-container>
-                    
+
                     <ng-container *ngIf="!nearbyGymsSvc.loading() && nearbyGymsSvc.error()">
                         {{ nearbyGymsSvc.error() }}
                     </ng-container>
@@ -35,11 +36,14 @@
                         Estás en <strong>{{ nearestGym()?.name }}</strong> (A {{ nearestGym()?.distanceM }} metros).
                     </ng-container>
 
-                    <ng-container *ngIf="!nearbyGymsSvc.loading() && !nearbyGymsSvc.error() && !isGymValid() && nearestGym()">
-                        Estás muy lejos ({{ nearestGym()?.distanceM }}m) del gimnasio más cercano ({{ nearestGym()?.name }}). Acércate a 50m.
+                    <ng-container
+                        *ngIf="!nearbyGymsSvc.loading() && !nearbyGymsSvc.error() && !isGymValid() && nearestGym()">
+                        Estás muy lejos ({{ nearestGym()?.distanceM }}m) del gimnasio más cercano ({{ nearestGym()?.name
+                        }}). Acércate a 50m.
                     </ng-container>
 
-                    <ng-container *ngIf="!nearbyGymsSvc.loading() && !nearbyGymsSvc.error() && !isGymValid() && !nearestGym()">
+                    <ng-container
+                        *ngIf="!nearbyGymsSvc.loading() && !nearbyGymsSvc.error() && !isGymValid() && !nearestGym()">
                         No se han encontrado gimnasios a tu alrededor.
                     </ng-container>
                 </div>
@@ -52,7 +56,7 @@
                 <!-- 1. Video Upload -->
                 <div class="vpr-field vpr-field--file">
                     <label class="vpr-label">1. Vídeo del Levantamiento</label>
-                    
+
                     <label for="videoFile" class="vpr-file-drop">
                         <ng-container *ngIf="!selectedFile()">
                             <span class="vpr-file-icon">📹</span>
@@ -64,44 +68,47 @@
                             <span class="vpr-file-sub">Vídeo seleccionado listo para validar</span>
                         </ng-container>
                     </label>
-                    <input type="file" id="videoFile" accept="video/*" class="vpr-file-input" (change)="onFileSelected($event)">
+                    <input type="file" id="videoFile" accept="video/*" class="vpr-file-input"
+                        (change)="onFileSelected($event)">
                 </div>
 
                 <!-- 2. Gym (Read Only) -->
                 <div class="vpr-field">
                     <label class="vpr-label">2. Gimnasio asociado (Automático)</label>
-                    <input type="text" class="vpr-input vpr-input--readonly" placeholder="Buscando gimnasio cercano..." [ngModel]="gymName()" name="gym" readonly>
+                    <input type="text" class="vpr-input vpr-input--readonly" placeholder="Buscando gimnasio cercano..."
+                        [ngModel]="gymName()" name="gym" readonly>
                 </div>
 
                 <!-- 3. Exercise & Weight Row -->
                 <div class="vpr-row">
                     <div class="vpr-field vpr-col-grow">
                         <label class="vpr-label">3. Ejercicio</label>
-                        <select class="vpr-input vpr-select" [ngModel]="exerciseName()" (ngModelChange)="exerciseName.set($event)" name="exercise">
+                        <select class="vpr-input vpr-select" [ngModel]="exerciseName()"
+                            (ngModelChange)="exerciseName.set($event)" name="exercise">
                             <option value="">Selecciona ejercicio...</option>
                             <option value="Press de banca">Press de banca</option>
                             <option value="Sentadilla">Sentadilla</option>
                             <option value="Peso muerto">Peso muerto</option>
-                            <option value="Press militar">Press militar</option>
-                            <option value="Dominadas">Dominadas lastradas</option>
-                            <option value="Otro">Otro (Especificar)</option>
                         </select>
                     </div>
 
                     <div class="vpr-field vpr-col-small">
                         <label class="vpr-label">4. Peso (kg)</label>
-                        <input type="number" class="vpr-input vpr-center" placeholder="0" [ngModel]="weightKg()" (ngModelChange)="weightKg.set($event)" name="weight" min="1" step="0.5">
+                        <input type="number" class="vpr-input vpr-center" placeholder="0" [ngModel]="weightKg()"
+                            (ngModelChange)="weightKg.set($event)" name="weight" min="1" step="0.5">
                     </div>
                 </div>
 
                 <!-- Result Alert -->
-                <div *ngIf="result() as res" class="vpr-alert" [class.is-success]="res.success" [class.is-error]="!res.success">
+                <div *ngIf="result() as res" class="vpr-alert" [class.is-success]="res.success"
+                    [class.is-error]="!res.success">
                     <span class="vpr-alert-icon">{{ res.success ? '🎉' : '⚠️' }}</span>
                     <span>{{ res.message }}</span>
                 </div>
 
                 <!-- Action button -->
-                <button type="submit" class="vpr-btn-submit" [disabled]="isSubmitting() || !selectedFile() || !weightKg() || !exerciseName() || !isGymValid()">
+                <button type="submit" class="vpr-btn-submit"
+                    [disabled]="isSubmitting() || !selectedFile() || !weightKg() || !exerciseName() ">
                     <span *ngIf="!isSubmitting()">Subir y Validar PR</span>
                     <span *ngIf="isSubmitting()" class="vpr-loading">Validando...</span>
                 </button>
@@ -113,209 +120,357 @@
 </div>
 
 <style>
-/* Reset base for standalone view */
-.vpr-page {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-color: #f1f5f9;
-    z-index: 1000;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
+    /* Reset base for standalone view */
+    .vpr-page {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #f1f5f9;
+        z-index: 1000;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
 
-@keyframes slideUp {
-    from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+            opacity: 0;
+        }
 
-.vpr-header {
-    background: white;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid #e2e8f0;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-}
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 
-.vpr-btn-back {
-    background: none; border: none; padding: 8px; margin: -8px;
-    color: #475569; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-}
-.vpr-btn-back:active { background: #f1f5f9; }
+    .vpr-header {
+        background: white;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border-bottom: 1px solid #e2e8f0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
 
-.vpr-title {
-    margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;
-}
+    .vpr-btn-back {
+        background: none;
+        border: none;
+        padding: 8px;
+        margin: -8px;
+        color: #475569;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
 
-.vpr-content {
-    padding: 24px;
-    flex: 1;
-    max-width: 600px;
-    margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
-}
+    .vpr-btn-back:active {
+        background: #f1f5f9;
+    }
 
-.vpr-card {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-}
+    .vpr-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+    }
 
-.vpr-desc {
-    color: #64748b;
-    font-size: 14px;
-    margin-top: 0;
-    margin-bottom: 24px;
-    line-height: 1.5;
-}
+    .vpr-content {
+        padding: 24px;
+        flex: 1;
+        max-width: 600px;
+        margin: 0 auto;
+        width: 100%;
+        box-sizing: border-box;
+    }
 
-.vpr-form { display: flex; flex-direction: column; gap: 20px; }
+    .vpr-card {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    }
 
-.vpr-field { display: flex; flex-direction: column; gap: 8px; }
-.vpr-row { display: flex; gap: 16px; align-items: flex-start; }
-.vpr-col-grow { flex: 1; }
-.vpr-col-small { width: 100px; }
+    .vpr-desc {
+        color: #64748b;
+        font-size: 14px;
+        margin-top: 0;
+        margin-bottom: 24px;
+        line-height: 1.5;
+    }
 
-.vpr-label { font-size: 13px; font-weight: 600; color: #334155; }
+    .vpr-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
 
-.vpr-input {
-    appearance: none;
-    border: 1px solid #cbd5e1;
-    background: #f8fafc;
-    border-radius: 12px;
-    padding: 14px 16px;
-    font-size: 15px;
-    color: #0f172a;
-    transition: all 0.2s;
-    outline: none;
-    width: 100%;
-    box-sizing: border-box;
-    font-family: inherit;
-}
-.vpr-input:focus {
-    border-color: #3b82f6;
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-}
-.vpr-input--readonly { background: #e2e8f0; color: #475569; pointer-events: none; }
-.vpr-select { cursor: pointer; }
-.vpr-center { text-align: center; font-weight: 600; font-size: 18px; padding-left: 0; padding-right: 0; }
+    .vpr-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-.vpr-file-input { display: none; }
-.vpr-file-drop {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 32px 24px;
-    border: 2px dashed #cbd5e1;
-    border-radius: 12px;
-    background: #f8fafc;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    text-align: center;
-}
-.vpr-file-drop:active {
-    background: #f1f5f9;
-    border-color: #94a3b8;
-}
-.vpr-file-icon { font-size: 32px; margin-bottom: 12px; }
-.vpr-file-text { font-size: 14px; font-weight: 500; color: #475569; }
-.vpr-file-name { font-size: 15px; font-weight: 600; color: #3b82f6; margin-bottom: 4px; word-break: break-all; }
-.vpr-file-sub { font-size: 12px; color: #64748b; }
+    .vpr-row {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
 
-.vpr-btn-submit {
-    margin-top: 12px;
-    border: none;
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-    padding: 16px;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 14px;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    transition: transform 0.2s, opacity 0.2s;
-    display: flex; justify-content: center; align-items: center;
-}
-.vpr-btn-submit:active { transform: scale(0.98); }
-.vpr-btn-submit:disabled {
-    background: #cbd5e1; box-shadow: none; cursor: not-allowed; opacity: 1; transform: none; color: #64748b;
-}
+    .vpr-col-grow {
+        flex: 1;
+    }
 
-.vpr-loading {
-    display: inline-block;
-    position: relative;
-    padding-left: 24px;
-}
-.vpr-loading::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 50%; transform: translateY(-50%);
-    width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: #fff;
-    border-radius: 50%;
-    animation: vprspin 0.8s linear infinite;
-}
-@keyframes vprspin { to { transform: translateY(-50%) rotate(360deg); } }
+    .vpr-col-small {
+        width: 100px;
+    }
 
-.vpr-spinner-small {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(0,0,0,0.2);
-    border-top-color: currentColor;
-    border-radius: 50%;
-    animation: vprospin-center 0.8s linear infinite;
-}
-@keyframes vprospin-center { to { transform: rotate(360deg); } }
+    .vpr-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+    }
 
-/* Geo Banner */
-.vpr-geo-banner {
-    display: flex; gap: 12px; align-items: flex-start;
-    padding: 14px 16px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-    border: 1px solid #e2e8f0;
-    background: #f8fafc;
-}
-.vpr-geo-icon { font-size: 18px; line-height: 1; display:flex; align-items:center; }
-.vpr-geo-text { color: #334155; }
-.vpr-geo-banner.is-loading { color: #475569; }
-.vpr-geo-banner.is-error { background: #fef2f2; border-color: #fecaca; }
-.vpr-geo-banner.is-error .vpr-geo-text { color: #991b1b; }
-.vpr-geo-banner.is-success { background: #f0fdf4; border-color: #bbf7d0; }
-.vpr-geo-banner.is-success .vpr-geo-text { color: #166534; }
+    .vpr-input {
+        appearance: none;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 15px;
+        color: #0f172a;
+        transition: all 0.2s;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
 
-.vpr-alert {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    padding: 16px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 500;
-    margin-top: 8px;
-    line-height: 1.4;
-}
-.vpr-alert-icon { font-size: 20px; line-height: 1; }
-.vpr-alert.is-error {
-    background: #fef2f2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
-}
-.vpr-alert.is-success {
-    background: #f0fdf4;
-    color: #166534;
-    border: 1px solid #bbf7d0;
-}
+    .vpr-input:focus {
+        border-color: #3b82f6;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .vpr-input--readonly {
+        background: #e2e8f0;
+        color: #475569;
+        pointer-events: none;
+    }
+
+    .vpr-select {
+        cursor: pointer;
+    }
+
+    .vpr-center {
+        text-align: center;
+        font-weight: 600;
+        font-size: 18px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    .vpr-file-input {
+        display: none;
+    }
+
+    .vpr-file-drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 32px 24px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background: #f8fafc;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+        text-align: center;
+    }
+
+    .vpr-file-drop:active {
+        background: #f1f5f9;
+        border-color: #94a3b8;
+    }
+
+    .vpr-file-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    .vpr-file-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #475569;
+    }
+
+    .vpr-file-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #3b82f6;
+        margin-bottom: 4px;
+        word-break: break-all;
+    }
+
+    .vpr-file-sub {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .vpr-btn-submit {
+        margin-top: 12px;
+        border: none;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        padding: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        transition: transform 0.2s, opacity 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .vpr-btn-submit:active {
+        transform: scale(0.98);
+    }
+
+    .vpr-btn-submit:disabled {
+        background: #cbd5e1;
+        box-shadow: none;
+        cursor: not-allowed;
+        opacity: 1;
+        transform: none;
+        color: #64748b;
+    }
+
+    .vpr-loading {
+        display: inline-block;
+        position: relative;
+        padding-left: 24px;
+    }
+
+    .vpr-loading::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: vprspin 0.8s linear infinite;
+    }
+
+    @keyframes vprspin {
+        to {
+            transform: translateY(-50%) rotate(360deg);
+        }
+    }
+
+    .vpr-spinner-small {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top-color: currentColor;
+        border-radius: 50%;
+        animation: vprospin-center 0.8s linear infinite;
+    }
+
+    @keyframes vprospin-center {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* Geo Banner */
+    .vpr-geo-banner {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px 16px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 1.4;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .vpr-geo-icon {
+        font-size: 18px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+    }
+
+    .vpr-geo-text {
+        color: #334155;
+    }
+
+    .vpr-geo-banner.is-loading {
+        color: #475569;
+    }
+
+    .vpr-geo-banner.is-error {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .vpr-geo-banner.is-error .vpr-geo-text {
+        color: #991b1b;
+    }
+
+    .vpr-geo-banner.is-success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .vpr-geo-banner.is-success .vpr-geo-text {
+        color: #166534;
+    }
+
+    .vpr-alert {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 8px;
+        line-height: 1.4;
+    }
+
+    .vpr-alert-icon {
+        font-size: 20px;
+        line-height: 1;
+    }
+
+    .vpr-alert.is-error {
+        background: #fef2f2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .vpr-alert.is-success {
+        background: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
 </style>
