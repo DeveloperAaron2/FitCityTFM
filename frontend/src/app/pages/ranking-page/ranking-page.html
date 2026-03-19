@@ -1,0 +1,86 @@
+<div class="ranking-container">
+  <header class="ranking-header">
+    <div class="header-icon">🏆</div>
+    <h1 class="header-title">Ranking</h1>
+    <p class="header-subtitle">Descubre a los más fuertes de la comunidad</p>
+  </header>
+
+  <!-- Segmented Control -->
+  <div class="segmented-control">
+    <button class="segment-btn" [class.active]="activeTab() === 'global'" (click)="setTab('global')">
+      🌍 Global
+    </button>
+    <button class="segment-btn" [class.active]="activeTab() === 'me'" (click)="setTab('me')">
+      👤 Mis PRs
+    </button>
+  </div>
+
+  <!-- Global PRs View -->
+  <div class="ranking-list" *ngIf="activeTab() === 'global'">
+    <div *ngIf="loadingGlobal()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando campeones...</p>
+    </div>
+
+    <div *ngIf="!loadingGlobal() && globalPrs().length === 0" class="empty-state">
+      <p>Aún no hay récords registrados.</p>
+    </div>
+
+    <ng-container *ngIf="!loadingGlobal()">
+      <div *ngFor="let pr of globalPrs(); let i = index" class="ranking-card" [class.top-1]="i === 0"
+        [class.top-2]="i === 1" [class.top-3]="i === 2">
+        <div class="rank-number">#{{ i + 1 }}</div>
+
+        <img #avatarImg [src]="pr.users?.avatar_url || 'assets/default-avatar.png'" alt="Avatar" class="user-avatar"
+          (error)="avatarImg.src='assets/default-avatar.png'" />
+
+        <div class="card-content">
+          <div class="user-info">
+            <span class="username">{{ pr.users?.username || 'Usuario' }}</span>
+            <span class="handle">{{ '@' + (pr.users?.handle || 'anon') }}</span>
+          </div>
+          <div class="pr-details">
+            <span class="exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+            <span class="gym-badge">📍 {{ pr.gym_name || 'Sin gimnasio' }}</span>
+          </div>
+        </div>
+
+        <div class="weight-display">
+          <span class="weight">{{ pr.weight_kg }}</span>
+          <span class="unit">kg</span>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- My PRs View -->
+  <div class="ranking-list" *ngIf="activeTab() === 'me'">
+    <div *ngIf="loadingMe()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando tus marcas...</p>
+    </div>
+
+    <div *ngIf="!loadingMe() && myPrs().length === 0" class="empty-state">
+      <p>Aún no tienes récords (PRs). ¡Registra el primero!</p>
+    </div>
+
+    <ng-container *ngIf="!loadingMe()">
+      <div *ngFor="let pr of myPrs()" class="ranking-card my-pr-card">
+        <div class="exercise-icon">{{ pr.exercise_emoji }}</div>
+
+        <div class="card-content">
+          <div class="pr-title">{{ pr.exercise_name }}</div>
+          <div class="pr-details">
+            <span class="gym-badge">📍 {{ pr.gym_name || 'Sin gimnasio' }}</span>
+            <span class="date">{{ pr.pr_date | date:'dd MMM yyyy' }}</span>
+          </div>
+        </div>
+
+        <div class="weight-display">
+          <span class="weight">{{ pr.weight_kg }}</span>
+          <span class="unit">kg</span>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
