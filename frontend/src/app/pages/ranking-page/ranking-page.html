@@ -10,6 +10,9 @@
     <button class="segment-btn" [class.active]="activeTab() === 'global'" (click)="setTab('global')">
       🌍 Global
     </button>
+    <button class="segment-btn" [class.active]="activeTab() === 'gyms'" (click)="setTab('gyms')">
+      🏟️ Gimnasios
+    </button>
     <button class="segment-btn" [class.active]="activeTab() === 'me'" (click)="setTab('me')">
       👤 Mis PRs
     </button>
@@ -53,6 +56,58 @@
     </ng-container>
   </div>
 
+  <!-- Gyms Ranking View -->
+  <div class="ranking-list" *ngIf="activeTab() === 'gyms'">
+    <div *ngIf="loadingGyms()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando gimnasios...</p>
+    </div>
+
+    <div *ngIf="!loadingGyms() && gymRanking().length === 0" class="empty-state">
+      <div class="empty-icon">🏟️</div>
+      <p>Aún no hay récords registrados en ningún gimnasio.</p>
+    </div>
+
+    <ng-container *ngIf="!loadingGyms()">
+      <div *ngFor="let gym of gymRanking(); let gi = index" class="gym-group">
+
+        <!-- Gym Header -->
+        <div class="gym-group-header">
+          <div class="gym-icon">🏟️</div>
+          <div class="gym-header-info">
+            <span class="gym-name">{{ gym.gym_name }}</span>
+            <span class="gym-stat-badge">{{ gym.total_prs }} {{ gym.total_prs === 1 ? 'récord' : 'récords' }}</span>
+          </div>
+          <div class="gym-rank">#{{ gi + 1 }}</div>
+        </div>
+
+        <!-- Top PRs inside this gym -->
+        <div class="gym-prs-list">
+          <div *ngFor="let pr of gym.top_prs; let pi = index" class="gym-pr-row">
+            <div class="gym-pr-position">{{ pi + 1 }}</div>
+
+            <img #gymAvatarImg
+              [src]="pr.users?.avatar_url || 'assets/default-avatar.png'"
+              alt="Avatar"
+              class="gym-pr-avatar"
+              (error)="gymAvatarImg.src='assets/default-avatar.png'" />
+
+            <div class="gym-pr-info">
+              <span class="gym-pr-username">{{ pr.users?.username || 'Usuario' }}</span>
+              <span class="gym-pr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+            </div>
+
+            <div class="gym-pr-weight">
+              <span class="weight">{{ pr.weight_kg }}</span>
+              <span class="unit">kg</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </ng-container>
+  </div>
+
   <!-- My PRs View -->
   <div class="ranking-list" *ngIf="activeTab() === 'me'">
     <div *ngIf="loadingMe()" class="loading-state">
@@ -83,4 +138,5 @@
       </div>
     </ng-container>
   </div>
+
 </div>

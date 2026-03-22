@@ -1,8 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from database import get_supabase_client
 from utils import compute_level, get_title, level_info, XP_PER_LEVEL
+from config import get_settings
+
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -105,3 +107,54 @@ def add_xp(user_id: str, body: UserXPUpdate):
         "max_xp": max_xp,
         "title": get_title(lv),
     }
+
+
+@router.put("/{user_id}/avatar")
+async def upload_avatar(user_id: str, file: UploadFile = File(...)):
+    """Upload or replace a user's profile avatar.
+    Stores the image in the Supabase 'avatars' bucket and updates users.avatar_url.
+    """
+    import os
+
+    # Validate MIME type
+    content_type = file.content_type or ""
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tipo de archivo no permitido: '{content_type}'. Se esperan: {', '.join(allowed_types)}"
+        )
+
+    # Read file bytes (max 5 MB)
+    MAX_BYTES = 5 * 1024 * 1024
+    image_bytes = await file.read()
+    if len(image_bytes) > MAX_BYTES:
+        raise HTTPException(status_code=413, detail="La imagen supera el límite de 5 MB.")
+
+    # Determine extension
+    ext_map = {"image/jpeg": "jpg", "image/png": "png", "image/webp": "webp", "image/gif": "gif"}
+    ext = ext_map.get(content_type, "jpg")
+    storage_path = f"{user_id}.{ext}"
+
+    db = get_supabase_client()
+
+    # Upload to Supabase Storage (upsert = overwrite if exists)
+    try:
+        db.storage.from_("avatars").upload(
+            path=storage_path,
+            file=image_bytes,
+            file_options={"content-type": content_type, "upsert": "true"},
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error subiendo imagen: {str(e)}")
+
+    # Build public URL
+    settings = get_settings()
+    public_url = f"{settings.supabase_url}/storage/v1/object/public/avatars/{storage_path}"
+
+    # Update users.avatar_url
+    upd = db.table("users").update({"avatar_url": public_url}).eq("id", user_id).execute()
+    if not upd.data:
+        raise HTTPException(status_code=400, detail="No se pudo actualizar la URL del avatar.")
+
+    return {"avatar_url": public_url}

@@ -5,6 +5,7 @@ export interface FitCityUser {
     email: string;
     username: string;
     handle: string;
+    avatar_url?: string;
     total_xp: number;
     level: number;
     current_xp: number;

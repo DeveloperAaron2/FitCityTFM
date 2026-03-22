@@ -51,16 +51,92 @@
     margin-bottom: 12px;
 }
 
-.pr-avatar {
+/* ── Avatar button (clickable circle) ────────────────── */
+.pr-avatar-btn {
+    position: relative;
     width: 88px;
     height: 88px;
     border-radius: 50%;
     background: linear-gradient(135deg, #991b1b, #e53e3e);
+    border: none;
+    cursor: pointer;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     box-shadow: 0 0 0 4px rgba(229, 62, 62, .25), 0 8px 32px rgba(0, 0, 0, .5);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+
+.pr-avatar-btn:hover .pr-avatar-overlay {
+    opacity: 1;
+}
+
+.pr-avatar-btn:disabled {
+    cursor: default;
+}
+
+/* Real avatar image */
+.pr-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+/* SVG fallback placeholder */
+.pr-avatar-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Camera overlay on hover */
+.pr-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.pr-camera-icon {
+    font-size: 1.4rem;
+}
+
+/* Upload spinner inside the avatar */
+.pr-avatar-spinner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pr-upload-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: pr-spin 0.8s linear infinite;
+}
+
+@keyframes pr-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Upload error */
+.pr-upload-error {
+    font-size: 0.78rem;
+    color: #f87171;
+    margin: 4px 0 8px;
+    text-align: center;
+    padding: 0 16px;
 }
 
 .pr-level-badge {

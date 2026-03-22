@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -34,6 +34,8 @@ export class ProfilePage implements OnInit {
     private api = inject(ApiService);
     private router = inject(Router);
 
+    @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
+
     // ── User data from AuthService (reactive) ─────────────────────────────────
     get user() { return this.auth.user(); }
     get userName() { return this.user?.username ?? ''; }
@@ -43,6 +45,7 @@ export class ProfilePage implements OnInit {
     get maxXP() { return this.user?.max_xp ?? 5000; }
     get xpPercent() { return this.user?.xp_percent ?? 0; }
     get memberSince() { return 'Marzo 2026'; }
+    get avatarUrl() { return this.user?.avatar_url ?? null; }
 
     get title(): string {
         const l = this.level;
@@ -57,6 +60,8 @@ export class ProfilePage implements OnInit {
     liftingPRs = signal<LiftingPR[]>([]);
     visitedGyms = signal<VisitedGym[]>([]);
     totalVisits = signal(0);
+    uploading = signal(false);
+    uploadError = signal<string | null>(null);
 
     ngOnInit(): void {
         const userId = this.user?.id;
@@ -87,6 +92,31 @@ export class ProfilePage implements OnInit {
                         emoji: ['🏋️', '⚡', '🥊', '🧘', '🏃'][i % 5],
                     }))
                 );
+            },
+        });
+    }
+
+    triggerFileInput(): void {
+        this.fileInput.nativeElement.click();
+    }
+
+    onAvatarChange(event: Event): void {
+        const input = event.target as HTMLInputElement;
+        const file = input.files?.[0];
+        if (!file || !this.user?.id) return;
+
+        this.uploadError.set(null);
+        this.uploading.set(true);
+
+        this.api.uploadAvatar(this.user.id, file).subscribe({
+            next: (res) => {
+                this.auth.updateUser({ avatar_url: res.avatar_url });
+                this.uploading.set(false);
+                input.value = '';
+            },
+            error: (err) => {
+                this.uploadError.set(err.error?.detail || 'Error al subir la foto.');
+                this.uploading.set(false);
             },
         });
     }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
@@ -15,20 +15,23 @@ export class RankingPage implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
 
-  activeTab = signal<'global' | 'me'>('global');
+  activeTab = signal<'global' | 'me' | 'gyms'>('global');
 
   globalPrs = signal<any[]>([]);
   myPrs = signal<any[]>([]);
+  gymRanking = signal<any[]>([]);
 
   loadingGlobal = signal(false);
   loadingMe = signal(false);
+  loadingGyms = signal(false);
 
   ngOnInit() {
     this.loadGlobalPrs();
     this.loadMyPrs();
+    this.loadGymRanking();
   }
 
-  setTab(tab: 'global' | 'me') {
+  setTab(tab: 'global' | 'me' | 'gyms') {
     this.activeTab.set(tab);
   }
 
@@ -52,6 +55,16 @@ export class RankingPage implements OnInit {
       .subscribe({
         next: (res) => this.myPrs.set(res),
         error: (err) => console.error('Error fetching my PRs', err)
+      });
+  }
+
+  loadGymRanking() {
+    this.loadingGyms.set(true);
+    this.api.getGymPrsRanking()
+      .pipe(finalize(() => this.loadingGyms.set(false)))
+      .subscribe({
+        next: (res) => this.gymRanking.set(res),
+        error: (err) => console.error('Error fetching gym ranking', err)
       });
   }
 }
