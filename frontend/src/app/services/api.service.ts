@@ -34,6 +34,12 @@ export class ApiService {
         return this.http.put(`${API_URL}/users/${userId}/xp`, { xp_to_add: xpToAdd });
     }
 
+    uploadAvatar(userId: string, file: File): Observable<{ avatar_url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        return this.http.put<{ avatar_url: string }>(`${API_URL}/users/${userId}/avatar`, formData);
+    }
+
     // ── Gym Visits ────────────────────────────────────────────────────────────
 
     getGymVisits(userId: string): Observable<any> {
@@ -75,5 +81,9 @@ export class ApiService {
 
     getGlobalPrsRanking(): Observable<any> {
         return this.http.get(`${API_URL}/ranking/prs`);
+    }
+
+    getGymPrsRanking(): Observable<any> {
+        return this.http.get(`${API_URL}/ranking/prs/by-gym`);
     }
 }

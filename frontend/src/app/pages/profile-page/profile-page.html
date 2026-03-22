@@ -5,17 +5,54 @@
         <div class="pr-hero-bg"></div>
 
         <div class="pr-avatar-wrap">
-            <div class="pr-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2z" />
-                    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z" />
-                </svg>
-            </div>
+            <!-- Hidden file input for avatar selection -->
+            <input
+              #fileInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              style="display:none"
+              (change)="onAvatarChange($event)"
+            />
+
+            <!-- Avatar button: click opens file picker -->
+            <button class="pr-avatar-btn" (click)="triggerFileInput()" [disabled]="uploading()" aria-label="Cambiar foto de perfil">
+                <!-- Real avatar image -->
+                <img
+                  *ngIf="avatarUrl && !uploading()"
+                  [src]="avatarUrl"
+                  #avatarImg
+                  alt="Avatar"
+                  class="pr-avatar-img"
+                  (error)="avatarImg.src=''; avatarImg.style.display='none'"
+                />
+
+                <!-- SVG fallback when no avatar set -->
+                <div class="pr-avatar-placeholder" *ngIf="!avatarUrl && !uploading()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2z" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z" />
+                    </svg>
+                </div>
+
+                <!-- Upload spinner -->
+                <div class="pr-avatar-spinner" *ngIf="uploading()">
+                    <div class="pr-upload-spinner"></div>
+                </div>
+
+                <!-- Camera overlay (shows on hover when not uploading) -->
+                <div class="pr-avatar-overlay" *ngIf="!uploading()">
+                    <span class="pr-camera-icon">📷</span>
+                </div>
+            </button>
+
             <div class="pr-level-badge">Nv.{{ level }}</div>
         </div>
 
         <h1 class="pr-username">{{ userName }}</h1>
         <p class="pr-handle">{{ userHandle }}</p>
+
+        <!-- Upload error message -->
+        <p class="pr-upload-error" *ngIf="uploadError()">{{ uploadError() }}</p>
 
         <div class="pr-meta-row">
             <span class="pr-chip">{{ title }}</span>

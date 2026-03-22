@@ -141,6 +141,7 @@ def login(body: LoginRequest):
             "email": auth_res.user.email,
             "username": profile.get("username", ""),
             "handle": profile.get("handle", ""),
+            "avatar_url": profile.get("avatar_url", None),
             "total_xp": total_xp,
             **lv_info,
         }

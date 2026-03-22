@@ -18,6 +18,37 @@ def get_global_prs(limit: int = 50):
     )
     return res.data or []
 
+
+@router.get("/prs/by-gym")
+def get_prs_by_gym(top_per_gym: int = 5):
+    """Return top PRs grouped by gym, sorted by weight descending within each gym."""
+    db = get_supabase_client()
+    res = (
+        db.table("lifting_prs")
+        .select("*, users!inner(username, handle, avatar_url)")
+        .order("weight_kg", desc=True)
+        .execute()
+    )
+    records = res.data or []
+
+    # Group by gym_name
+    grouped: dict[str, list] = {}
+    for pr in records:
+        gym = pr.get("gym_name") or "Sin gimnasio"
+        grouped.setdefault(gym, []).append(pr)
+
+    # Build response: sorted alphabetically by gym name, top N PRs each
+    result = []
+    for gym_name in sorted(grouped.keys()):
+        prs = grouped[gym_name]  # already sorted by weight_kg desc from the query
+        result.append({
+            "gym_name": gym_name,
+            "total_prs": len(prs),
+            "top_prs": prs[:top_per_gym],
+        })
+
+    return result
+
 @router.get("/")
 def get_ranking(limit: int = 20):
     """Return top users sorted by total XP descending."""
