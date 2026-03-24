@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, ElementRef, inject, OnInit, signal, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, inject, OnInit, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { ApiService } from '../../services/api.service';
+import { ThemeService, AppTheme } from '../../services/theme.service';
 
 export interface LiftingPR {
     name: string;
@@ -33,6 +34,9 @@ export class ProfilePage implements OnInit {
     private auth = inject(AuthService);
     private api = inject(ApiService);
     private router = inject(Router);
+    themeService = inject(ThemeService);
+
+    get theme() { return this.themeService.theme; }
 
     @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -62,6 +66,24 @@ export class ProfilePage implements OnInit {
     totalVisits = signal(0);
     uploading = signal(false);
     uploadError = signal<string | null>(null);
+    showThemeMenu = signal(false);
+
+    toggleTheme() {
+        this.showThemeMenu.set(!this.showThemeMenu());
+    }
+
+    selectTheme(t: AppTheme) {
+        this.themeService.setTheme(t);
+        this.showThemeMenu.set(false);
+    }
+
+    @HostListener('document:click', ['$event'])
+    onDocumentClick(e: MouseEvent) {
+        const target = e.target as HTMLElement;
+        if (!target.closest('.pr-theme-toggle') && !target.closest('.pr-theme-menu')) {
+            this.showThemeMenu.set(false);
+        }
+    }
 
     ngOnInit(): void {
         const userId = this.user?.id;

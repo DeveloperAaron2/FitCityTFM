@@ -1,8 +1,45 @@
-<div class="pr-page">
+<div class="pr-page" [class.theme-moon]="theme() === 'moon'" [class.theme-sun]="theme() === 'sun'">
 
     <!-- ══ HERO / AVATAR ═══════════════════════════════════ -->
     <div class="pr-hero">
         <div class="pr-hero-bg"></div>
+
+        <!-- Selector de Tema — esquina superior izquierda -->
+        <div class="pr-theme-wrap">
+            <button
+                type="button"
+                class="pr-theme-toggle"
+                [class.is-sun]="theme() === 'sun'"
+                [class.is-default]="theme() === 'default'"
+                (click)="toggleTheme(); $event.stopPropagation()"
+                title="Cambiar tema">
+                <span class="pr-theme-icon">
+                    {{ theme() === 'moon' ? '🌙' : theme() === 'sun' ? '☀️' : '🤖' }}
+                </span>
+            </button>
+
+            <!-- Dropdown menu -->
+            <div class="pr-theme-menu" *ngIf="showThemeMenu()" (click)="$event.stopPropagation()">
+                <button class="pr-theme-option" [class.selected]="theme() === 'default'" (click)="selectTheme('default')">
+                    <span class="pr-option-emoji">🤖</span>
+                    <span class="pr-option-label">Tema por Defecto</span>
+                    <span class="pr-option-check" *ngIf="theme() === 'default'">✓</span>
+                </button>
+                <button class="pr-theme-option" [class.selected]="theme() === 'moon'" (click)="selectTheme('moon')">
+                    <span class="pr-option-emoji">🌙</span>
+                    <span class="pr-option-label">Tema oscuro</span>
+                    <span class="pr-option-check" *ngIf="theme() === 'moon'">✓</span>
+                </button>
+                <button class="pr-theme-option" [class.selected]="theme() === 'sun'" (click)="selectTheme('sun')">
+                    <span class="pr-option-emoji">☀️</span>
+                    <span class="pr-option-label">Tema claro</span>
+                    <span class="pr-option-check" *ngIf="theme() === 'sun'">✓</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Botón cerrar sesión: esquina superior derecha -->
+        <button class="pr-logout-btn" (click)="logout()">Cerrar Sesión</button>
 
         <div class="pr-avatar-wrap">
             <!-- Hidden file input for avatar selection -->
@@ -81,10 +118,6 @@
         <section class="pr-section">
             <div class="pr-section-header">
                 <h2 class="pr-section-title">🏆 Marcas personales</h2>
-                <!-- Video Uploader Link -->
-                <a routerLink="/validate-pr" class="pr-btn-navigate">
-                    📷 Validar PR en vídeo
-                </a>
             </div>
 
             <div *ngIf="liftingPRs().length === 0" class="pr-empty">
@@ -133,10 +166,7 @@
             </div>
         </section>
 
-        <!-- ══ LOGOUT ════════════════════════════════════════════ -->
-        <button class="pr-logout-btn" (click)="logout()">
-            🚪 Cerrar sesión
-        </button>
+
 
     </div><!-- /pr-inner -->
 
@@ -151,26 +181,34 @@
     }
 
     .pr-logout-btn {
-        display: block;
-        width: 100%;
-        margin-top: 8px;
-        padding: 14px;
-        background: rgba(239, 68, 68, .08);
-        border: 1px solid rgba(239, 68, 68, .2);
-        border-radius: 14px;
-        color: #f87171;
-        font-size: 14px;
-        font-weight: 700;
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        padding: 5px 12px;
+        background: #d1d5db;
+        border: none;
+        border-radius: 6px;
+        color: #991b1b;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
         cursor: pointer;
-        transition: background .2s;
+        z-index: 10;
+        animation: pr-pulse-red 3s infinite ease-in-out;
+        transition: background .2s, transform .15s;
+    }
+
+    @keyframes pr-pulse-red {
+        0%, 100% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
+        50% { box-shadow: 0 0 8px rgba(220, 38, 38, 0.4); }
     }
 
     .pr-logout-btn:hover {
-        background: rgba(239, 68, 68, .15);
-    }
-
-    .pr-logout-btn:hover {
-        background: rgba(239, 68, 68, .15);
+        background: #e5e7eb;
+        transform: translateY(-1px);
+        animation-play-state: paused;
+        box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
     }
 
     /* Video Uploader Button */

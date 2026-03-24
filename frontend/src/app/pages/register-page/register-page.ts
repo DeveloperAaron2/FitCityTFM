@@ -22,6 +22,7 @@ export class RegisterPage {
     handle = '';
     email = '';
     password = '';
+    showPassword = signal(false);
     loading = signal(false);
     error = signal<string | null>(null);
 

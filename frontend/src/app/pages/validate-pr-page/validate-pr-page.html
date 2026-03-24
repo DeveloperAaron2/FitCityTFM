@@ -127,7 +127,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: #f1f5f9;
+        background-color: #000000;
         z-index: 1000;
         overflow-y: auto;
         display: flex;
@@ -148,12 +148,12 @@
     }
 
     .vpr-header {
-        background: white;
+        background: #000000;
         padding: 16px 20px;
         display: flex;
         align-items: center;
         gap: 16px;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         position: sticky;
         top: 0;
         z-index: 10;
@@ -164,7 +164,7 @@
         border: none;
         padding: 8px;
         margin: -8px;
-        color: #475569;
+        color: #f0f0f0;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -180,7 +180,7 @@
         margin: 0;
         font-size: 18px;
         font-weight: 700;
-        color: #0f172a;
+        color: #ffffff;
     }
 
     .vpr-content {
@@ -193,14 +193,15 @@
     }
 
     .vpr-card {
-        background: white;
+        background: #1c1c1c;
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
     }
 
     .vpr-desc {
-        color: #64748b;
+        color: #94a3b8;
         font-size: 14px;
         margin-top: 0;
         margin-bottom: 24px;
@@ -236,17 +237,17 @@
     .vpr-label {
         font-size: 13px;
         font-weight: 600;
-        color: #334155;
+        color: #e2e8f0;
     }
 
     .vpr-input {
         appearance: none;
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
         border-radius: 12px;
         padding: 14px 16px;
         font-size: 15px;
-        color: #0f172a;
+        color: #ffffff;
         transition: all 0.2s;
         outline: none;
         width: 100%;
@@ -255,14 +256,15 @@
     }
 
     .vpr-input:focus {
-        border-color: #3b82f6;
-        background: #fff;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        border-color: #22d3ee;
+        background: rgba(34, 211, 238, 0.05);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
     }
 
     .vpr-input--readonly {
-        background: #e2e8f0;
-        color: #475569;
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        border-color: rgba(255, 255, 255, 0.08);
         pointer-events: none;
     }
 
@@ -288,9 +290,9 @@
         align-items: center;
         justify-content: center;
         padding: 32px 24px;
-        border: 2px dashed #cbd5e1;
+        border: 2px dashed rgba(255, 255, 255, 0.1);
         border-radius: 12px;
-        background: #f8fafc;
+        background: rgba(255, 255, 255, 0.03);
         cursor: pointer;
         transition: border-color .2s, background .2s;
         text-align: center;
@@ -315,7 +317,7 @@
     .vpr-file-name {
         font-size: 15px;
         font-weight: 600;
-        color: #3b82f6;
+        color: #22d3ee;
         margin-bottom: 4px;
         word-break: break-all;
     }
@@ -328,14 +330,14 @@
     .vpr-btn-submit {
         margin-top: 12px;
         border: none;
-        background: linear-gradient(135deg, #10b981, #059669);
+        background: linear-gradient(135deg, #22d3ee, #0ea5e9);
         color: white;
         padding: 16px;
         font-size: 16px;
         font-weight: 700;
         border-radius: 14px;
         cursor: pointer;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
         transition: transform 0.2s, opacity 0.2s;
         display: flex;
         justify-content: center;
@@ -408,8 +410,8 @@
         font-size: 14px;
         font-weight: 500;
         line-height: 1.4;
-        border: 1px solid #e2e8f0;
-        background: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .vpr-geo-icon {
@@ -420,29 +422,30 @@
     }
 
     .vpr-geo-text {
-        color: #334155;
+        color: #e2e8f0;
     }
 
     .vpr-geo-banner.is-loading {
-        color: #475569;
+        color: #94a3b8;
+        background: rgba(255, 255, 255, 0.05);
     }
 
     .vpr-geo-banner.is-error {
-        background: #fef2f2;
-        border-color: #fecaca;
+        background: rgba(239, 68, 68, 0.1);
+        border-color: rgba(239, 68, 68, 0.3);
     }
 
     .vpr-geo-banner.is-error .vpr-geo-text {
-        color: #991b1b;
+        color: #f87171;
     }
 
     .vpr-geo-banner.is-success {
-        background: #f0fdf4;
-        border-color: #bbf7d0;
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.3);
     }
 
     .vpr-geo-banner.is-success .vpr-geo-text {
-        color: #166534;
+        color: #22d3ee;
     }
 
     .vpr-alert {
@@ -463,14 +466,14 @@
     }
 
     .vpr-alert.is-error {
-        background: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fecaca;
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.2);
     }
 
     .vpr-alert.is-success {
-        background: #f0fdf4;
-        color: #166534;
-        border: 1px solid #bbf7d0;
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+        border: 1px solid rgba(34, 211, 238, 0.2);
     }
 </style>
