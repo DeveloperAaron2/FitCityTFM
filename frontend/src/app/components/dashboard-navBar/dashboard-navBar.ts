@@ -13,7 +13,8 @@ export class DashboardNavBar {
   navLinks = [
     { label: 'Inicio', path: '/dashboard', icon: '🏠' },
     { label: 'Ranking', path: '/ranking', icon: '📖' },
-    { label: 'Mapa', path: '/mapa', icon: '📍' }, // Este es el que creamos antes
+    { label: 'Misiones', path: '/missions', icon: '⚔️' },
+    { label: 'Mapa', path: '/mapa', icon: '📍' },
     { label: 'Perfil', path: '/profile', icon: '👤' }
   ];
 }

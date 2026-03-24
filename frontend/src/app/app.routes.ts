@@ -50,6 +50,11 @@ export const routes: Routes = [
                 path: 'validate-pr',
                 loadComponent: () =>
                     import('./pages/validate-pr-page/validate-pr-page').then(m => m.ValidatePrPage)
+            },
+            {
+                path: 'missions',
+                loadComponent: () =>
+                    import('./pages/missions-page/missions-page').then(m => m.MissionsPage)
             }
         ]
     },

@@ -1,0 +1,531 @@
+/* ── Variables ───────────────────────────────────────────────────────────── */
+:host {
+    --gold: #f59e0b;
+    --gold-light: #fcd34d;
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #1e2530;
+    --border: rgba(255, 255, 255, 0.06);
+    --text: #e6edf3;
+    --muted: #7d8590;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+}
+
+/* ── Page wrapper ────────────────────────────────────────────────────────── */
+.ms-page {
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    padding-bottom: 120px;
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ══ LEVEL-UP OVERLAY ════════════════════════════════════════════════════════ */
+.ms-levelup-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.ms-levelup-card {
+    background: linear-gradient(135deg, #1e2a3a 0%, #0d1117 100%);
+    border: 1px solid rgba(245, 158, 11, 0.4);
+    border-radius: 28px;
+    padding: 48px 40px;
+    text-align: center;
+    max-width: 340px;
+    width: 90%;
+    box-shadow: 0 0 60px rgba(245, 158, 11, 0.2), 0 24px 48px rgba(0,0,0,0.6);
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ms-levelup-stars {
+    font-size: 28px;
+    margin-bottom: 12px;
+    animation: pulse 1.5s ease infinite;
+}
+
+.ms-levelup-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.8));
+    animation: float 2s ease-in-out infinite;
+}
+
+.ms-levelup-title {
+    font-size: 26px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.ms-levelup-level {
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 12px;
+    text-shadow: 0 0 30px rgba(245,158,11,0.5);
+}
+
+.ms-levelup-sub {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 28px;
+}
+
+.ms-levelup-btn {
+    background: linear-gradient(135deg, var(--gold), #d97706);
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 14px 36px;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 8px 24px rgba(245, 158, 11, 0.35);
+}
+
+.ms-levelup-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.5);
+}
+
+/* ══ HERO ════════════════════════════════════════════════════════════════════ */
+.ms-hero {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 20px 28px;
+}
+
+.ms-hero-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, #1a2340 0%, #0d1117 60%);
+    z-index: 0;
+}
+
+.ms-hero-bg::after {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(245, 158, 11, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.ms-hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    max-width: 480px;
+    margin: 0 auto;
+}
+
+/* Level orb */
+.ms-level-orb {
+    flex-shrink: 0;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #d97706, var(--gold));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+        0 0 0 4px rgba(245,158,11,0.2),
+        0 0 24px rgba(245,158,11,0.4),
+        0 8px 24px rgba(0,0,0,0.5);
+    animation: float 3s ease-in-out infinite;
+}
+
+.ms-level-num {
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+    line-height: 1;
+}
+
+.ms-level-lbl {
+    font-size: 8px;
+    font-weight: 800;
+    color: rgba(0,0,0,0.7);
+    letter-spacing: 1px;
+}
+
+.ms-hero-info {
+    flex: 1;
+}
+
+.ms-hero-title {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 2px;
+}
+
+.ms-hero-user {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 12px;
+}
+
+/* XP bar in hero */
+.ms-xp-bar-wrap {
+    width: 100%;
+}
+
+.ms-xp-bar-track {
+    height: 8px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.ms-xp-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #d97706, var(--gold), var(--gold-light));
+    border-radius: 99px;
+    position: relative;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ms-xp-bar-glow {
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 16px;
+    height: 12px;
+    background: rgba(253, 211, 77, 0.8);
+    border-radius: 50%;
+    filter: blur(4px);
+}
+
+.ms-xp-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+/* progress chip */
+.ms-progress-chip {
+    position: relative;
+    z-index: 1;
+    margin: 20px auto 0;
+    max-width: 480px;
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 99px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gold-light);
+    text-align: center;
+    width: fit-content;
+}
+
+/* ══ ROADMAP ═════════════════════════════════════════════════════════════════ */
+.ms-roadmap-wrap {
+    padding: 24px 16px 8px;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.ms-roadmap {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    gap: 0;
+}
+
+.ms-roadmap::-webkit-scrollbar {
+    display: none;
+}
+
+.ms-roadmap-node {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    transition: transform 0.2s;
+}
+
+.ms-roadmap-node--done {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    box-shadow: 0 0 12px rgba(34,197,94,0.4);
+}
+
+.ms-roadmap-node--current {
+    background: linear-gradient(135deg, #d97706, var(--gold));
+    color: #000;
+    box-shadow: 0 0 16px rgba(245,158,11,0.6), 0 0 0 3px rgba(245,158,11,0.2);
+    transform: scale(1.2);
+    animation: pulse 2s ease infinite;
+}
+
+.ms-roadmap-node--locked {
+    background: var(--surface2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
+.ms-roadmap-line {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.08);
+    min-width: 16px;
+    border-radius: 99px;
+    transition: background 0.3s;
+}
+
+.ms-roadmap-line--done {
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+}
+
+.ms-roadmap-hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+}
+
+/* ══ MISSION CARDS ═══════════════════════════════════════════════════════════ */
+.ms-inner {
+    padding: 16px;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.ms-section-title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 16px;
+}
+
+.ms-missions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.ms-mission-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 16px;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.ms-mission-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    border-color: rgba(255,255,255,0.12);
+}
+
+.ms-mission-card--done {
+    border-color: rgba(34, 197, 94, 0.3);
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.05), var(--surface));
+}
+
+.ms-mission-emoji {
+    font-size: 32px;
+    flex-shrink: 0;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-radius: 14px;
+}
+
+.ms-mission-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.ms-mission-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 2px;
+}
+
+.ms-mission-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ms-mission-xp {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 99px;
+    padding: 2px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ms-mission-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 10px;
+}
+
+/* mission progress bar */
+.ms-mission-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ms-mission-bar-track {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.ms-mission-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blue), #60a5fa);
+    border-radius: 99px;
+    transition: width 0.6s ease;
+}
+
+.ms-mission-bar-fill--done {
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+}
+
+.ms-mission-bar-label {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* action area */
+.ms-mission-action {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+}
+
+.ms-mission-badge {
+    font-size: 24px;
+}
+
+.ms-mission-lock {
+    font-size: 20px;
+    opacity: 0.5;
+}
+
+.ms-claim-btn {
+    background: linear-gradient(135deg, var(--gold), #d97706);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 7px 10px;
+    font-size: 11px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.15s;
+    white-space: nowrap;
+}
+
+.ms-claim-btn:hover {
+    transform: scale(1.05);
+}
+
+/* ── Loading ─────────────────────────────────────────────────────────────── */
+.ms-loading {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--muted);
+}
+
+.ms-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+}
+
+.ms-empty {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.7); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.7; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

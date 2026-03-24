@@ -73,6 +73,14 @@ export class ApiService {
         return this.http.get(`${API_URL}/challenges/daily`);
     }
 
+    getUserChallengesAll(userId: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/all`);
+    }
+
+    updateChallengeProgress(userId: string, challengeId: string, progress: number): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/${challengeId}/progress`, { progress });
+    }
+
     // ── Ranking ───────────────────────────────────────────────────────────────
 
     getRanking(): Observable<any> {
