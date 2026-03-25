@@ -8,9 +8,10 @@
     --nav-hover-from: #38bdf8; 
     --nav-hover-to: #2563eb; 
     --nav-hover-shadow: rgba(56, 189, 248, 0.4);
+    --nav-shadow: rgba(0, 0, 0, 0.6);
 }
 
-:host-context(body.theme-sun) {
+:host-context(.theme-sun) {
     /* Variables para Modo Claro */
     --nav-bg: #f0f4f8; 
     --nav-border: #22d3ee; /* core cyan (azul claro/cyan) */
@@ -20,11 +21,13 @@
     --nav-hover-from: #7dd3fc;
     --nav-hover-to: #38bdf8;
     --nav-hover-shadow: rgba(14, 165, 233, 0.2);
+    --nav-shadow: rgba(0, 0, 0, 0.08); /* Sombra mucho más suave para modo claro */
 }
 
 .nav-container {
     background-color: var(--nav-bg);
     border-top: 2px solid var(--nav-border);
+    box-shadow: 0 -4px 24px var(--nav-shadow);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -49,10 +52,10 @@
 }
 
 /* Mantener iconos blancos sobre el fondo de brillo activo para mejor contraste en ambos modos si es necesario */
-:host-context(body.theme-moon) ::ng-deep .active-link .nav-icon-wrap {
+:host-context(.theme-moon) ::ng-deep .active-link .nav-icon-wrap {
     color: #ffffff;
 }
 
-:host-context(body.theme-sun) ::ng-deep .active-link .nav-icon-wrap {
+:host-context(.theme-sun) ::ng-deep .active-link .nav-icon-wrap {
     color: #0284c7;
 }
