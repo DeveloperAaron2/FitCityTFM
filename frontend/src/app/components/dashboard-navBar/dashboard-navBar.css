@@ -1,25 +1,25 @@
 :host {
     /* Variables para Modo Oscuro (Predeterminado) */
     --nav-bg: #030712; /* gray-950 */
-    --nav-border: #22d3ee; /* cyan-400 */
+    --nav-border: #22d3ee; /* core cyan (azul claro/cyan) */
     --nav-icon: #ffffff;
-    --nav-active-glow: rgba(14, 165, 233, 0.6); /* sky-500/60 */
-    --nav-active-shadow: rgba(14, 165, 233, 0.5);
-    --nav-hover-from: #06b6d4; /* cyan-500 */
-    --nav-hover-to: #2563eb; /* blue-600 */
-    --nav-hover-shadow: rgba(56, 189, 248, 0.6);
+    --nav-active-glow: rgba(56, 189, 248, 0.4); 
+    --nav-active-shadow: rgba(56, 189, 248, 0.3);
+    --nav-hover-from: #38bdf8; 
+    --nav-hover-to: #2563eb; 
+    --nav-hover-shadow: rgba(56, 189, 248, 0.4);
 }
 
 :host-context(body.theme-sun) {
     /* Variables para Modo Claro */
     --nav-bg: #f0f4f8; 
-    --nav-border: #0284c7; /* sky-700 */
-    --nav-icon: #1e293b; /* slate-800 */
-    --nav-active-glow: rgba(2, 132, 199, 0.25);
-    --nav-active-shadow: rgba(2, 132, 199, 0.15);
-    --nav-hover-from: #38bdf8;
-    --nav-hover-to: #0ea5e9;
-    --nav-hover-shadow: rgba(14, 165, 233, 0.25);
+    --nav-border: #22d3ee; /* core cyan (azul claro/cyan) */
+    --nav-icon: #1e293b; 
+    --nav-active-glow: rgba(14, 165, 233, 0.2);
+    --nav-active-shadow: rgba(14, 165, 233, 0.1);
+    --nav-hover-from: #7dd3fc;
+    --nav-hover-to: #38bdf8;
+    --nav-hover-shadow: rgba(14, 165, 233, 0.2);
 }
 
 .nav-container {

@@ -12,9 +12,9 @@ body:not(.theme-sun) nav.fixed.bottom-0 {
 }
 
 body.theme-sun nav.fixed.bottom-0 {
-    background-color: #f0f4f8 !important;
-    border-top-color: #0284c7 !important;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.08) !important;
+    background-color: #f8fafc !important; /* Slate 50 */
+    border-top-color: #e2e8f0 !important; /* Slate 200 */
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.04) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -22,19 +22,19 @@ body.theme-sun nav.fixed.bottom-0 {
    Se activan cuando ThemeService añade .theme-sun al body
 ═══════════════════════════════════════════════════════════ */
 body.theme-sun {
-    background-color: #f0f4f8;
+    background-color: #e2e8f0; /* Slate 200 */
 }
 
 /* ── Dashboard ────────────────────────────────────────── */
 body.theme-sun .fc-dashboard {
-    background: #f0f4f8;
+    background: #e2e8f0;
     color: #1e293b;
 }
 
 body.theme-sun .fc-topbar {
-    background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    background: transparent;
+    border-bottom: none;
+    box-shadow: none;
 }
 
 body.theme-sun .fc-name { color: #1e293b; }
@@ -43,14 +43,14 @@ body.theme-sun .fc-logo { color: #1e293b; }
 body.theme-sun .fc-logo span { color: #0284c7; }
 
 body.theme-sun .fc-xp {
-    background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    background: transparent;
+    border-bottom: none;
 }
 
 body.theme-sun .fc-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     color: #1e293b;
 }
 
@@ -58,59 +58,59 @@ body.theme-sun .fc-card-title { color: #1e293b; }
 body.theme-sun .fc-card-value { color: #0284c7; }
 body.theme-sun .fc-card-sub { color: #64748b; }
 
-body.theme-sun .fc-section-title { color: #1e293b; }
-body.theme-sun .fc-activity-item { background: #ffffff; border-color: rgba(0,0,0,0.08); }
+body.theme-sun .fc-section-title { color: #334155; }
+body.theme-sun .fc-activity-item { background: #f8fafc; border-color: #cbd5e1; }
 body.theme-sun .fc-activity-label { color: #1e293b; }
 body.theme-sun .fc-activity-sub { color: #64748b; }
 body.theme-sun .fc-activity-val { color: #0284c7; }
 
 body.theme-sun .fc-gym-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
+    background: #f8fafc;
+    border-color: #cbd5e1;
 }
 
 body.theme-sun .fc-gym-name { color: #1e293b; }
 body.theme-sun .fc-gym-sub { color: #64748b; }
 
 body.theme-sun .fc-avatar {
-    background: rgba(2, 132, 199, 0.1);
-    border-color: rgba(2, 132, 199, 0.3);
-    color: #0284c7;
+    background: #e0f2fe; /* Sky 100 */
+    border-color: #7dd3fc; /* Sky 300 */
+    color: #0369a1; /* Sky 700 */
 }
 
 /* ── Ranking ─────────────────────────────────────────── */
 body.theme-sun .ranking-container {
-    background: #f0f4f8;
+    background: #e2e8f0;
     color: #1e293b;
     min-height: 100dvh;
 }
 
 body.theme-sun .ranking-header {
-    background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    background: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
 
 body.theme-sun .header-title { color: #1e293b; }
 body.theme-sun .header-subtitle { color: #64748b; }
 
 body.theme-sun .segmented-control {
-    background: rgba(0,0,0,0.05);
-    border-color: rgba(0,0,0,0.1);
+    background: #cbd5e1; /* Slate 300 */
+    border-color: #94a3b8;
 }
 
 body.theme-sun .segment-btn { color: #64748b; }
 
 body.theme-sun .segment-btn.active {
-    background: #0284c7;
-    color: #ffffff;
-    box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+    background: #f8fafc;
+    color: #0369a1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 body.theme-sun .ranking-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
     color: #1e293b;
 }
 
@@ -118,13 +118,13 @@ body.theme-sun .username { color: #1e293b; }
 body.theme-sun .handle { color: #64748b; }
 body.theme-sun .weight { color: #0284c7; }
 body.theme-sun .unit { color: #64748b; }
-body.theme-sun .exercise { color: #475569; }
+body.theme-sun .exercise { color: #334155; }
 body.theme-sun .pr-title { color: #1e293b; }
 body.theme-sun .date { color: #64748b; }
 
 body.theme-sun .gym-group-header {
-    background: rgba(0,0,0,0.03);
-    border-color: rgba(0,0,0,0.08);
+    background: #cbd5e1;
+    border-color: #94a3b8;
 }
 
 body.theme-sun .gym-name { color: #1e293b; }
@@ -142,22 +142,22 @@ body.theme-sun .rank-number { color: #94a3b8; }
 
 /* ── Mapa ─────────────────────────────────────────────── */
 body.theme-sun .map-wrapper {
-    background: #f0f4f8;
+    background: #e2e8f0;
 }
 
 body.theme-sun .map-header {
-    background: rgba(255, 255, 255, 0.92);
-    border-bottom-color: rgba(2, 132, 199, 0.15);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    background: rgba(248, 250, 252, 0.95);
+    border-bottom-color: #cbd5e1;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
 body.theme-sun .map-title { color: #1e293b; }
 body.theme-sun .map-subtitle { color: rgba(2, 132, 199, 0.7); }
 
 body.theme-sun .locate-btn {
-    background: rgba(2, 132, 199, 0.08);
+    background: #f8fafc;
     color: #0284c7;
-    border-color: rgba(2, 132, 199, 0.3);
+    border-color: #cbd5e1;
 }
 
 body.theme-sun .zoom-hint {
@@ -176,9 +176,9 @@ body.theme-sun .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
 }
 
 body.theme-sun .maplibregl-popup-content {
-    background: rgba(255, 255, 255, 0.97) !important;
-    border-color: rgba(2, 132, 199, 0.15) !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12) !important;
+    background: rgba(248, 250, 252, 0.98) !important;
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
 }
 
 body.theme-sun .fitness-popup h3 { color: #1e293b; }
@@ -186,16 +186,16 @@ body.theme-sun .fitness-popup p { color: #64748b; }
 
 /* ── Misiones ─────────────────────────────────────────── */
 body.theme-sun .ms-page {
-    background: #f0f4f8;
+    background: #e2e8f0;
     color: #1e293b;
 }
 
 body.theme-sun .ms-hero-bg {
-    background: linear-gradient(160deg, #dbeafe 0%, #f0f4f8 60%);
+    background: linear-gradient(160deg, #cbd5e1 0%, #e2e8f0 60%);
 }
 
 body.theme-sun .ms-hero-bg::after {
-    background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.05) 0%, transparent 70%);
 }
 
 body.theme-sun .ms-hero-title { -webkit-text-fill-color: #0284c7; }
@@ -227,9 +227,9 @@ body.theme-sun .ms-roadmap-hint { color: #64748b; }
 body.theme-sun .ms-section-title { color: #1e293b; }
 
 body.theme-sun .ms-mission-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
 }
 
 body.theme-sun .ms-mission-title { color: #1e293b; }
@@ -247,22 +247,22 @@ body.theme-sun .ms-levelup-card {
 
 /* ── Validar PR ─────────────────────────────────────── */
 body.theme-sun .vpr-page {
-    background: #f0f4f8;
+    background: #e2e8f0;
     color: #1e293b;
 }
 
 body.theme-sun .vpr-header {
-    background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    background: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
 }
 
 body.theme-sun .vpr-title { color: #1e293b; }
 body.theme-sun .vpr-btn-back { color: #0284c7; background: rgba(2,132,199,0.08); }
 
 body.theme-sun .vpr-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
 body.theme-sun .vpr-desc { color: #475569; }
@@ -295,12 +295,12 @@ body.theme-sun .vpr-geo-banner.is-error {
 body.theme-sun .vpr-geo-banner.is-error .vpr-geo-text { color: #dc2626; }
 
 /* ── Login / Registro ──────────────────────────────── */
-body.theme-sun .auth-screen { background: #f0f4f8; }
+body.theme-sun .auth-screen { background: #e2e8f0; }
 
 body.theme-sun .auth-card {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.05);
 }
 
 body.theme-sun .auth-logo { color: #1e293b; }
