@@ -1,0 +1,762 @@
+<div class="fc-dashboard">
+
+    <!-- ── TOP BAR ────────────────────────────────── -->
+    <header class="fc-topbar flex justify-center align-items-center">
+        <div class="fc-trainer flex justify-center align-items-center" routerLink="/profile">
+            <div class="fc-avatar">
+                <img *ngIf="user?.avatar_url" [src]="user?.avatar_url" alt="Avatar" class="fc-avatar-img">
+                <svg *ngIf="!user?.avatar_url" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M4 7a1 1 0 0 1 1 1v8a1 1 0 0 1 -2 0v-3h-1a1 1 0 0 1 0 -2h1v-3a1 1 0 0 1 1 -1" />
+                    <path d="M20 7a1 1 0 0 1 1 1v3h1a1 1 0 0 1 0 2h-1v3a1 1 0 0 1 -2 0v-8a1 1 0 0 1 1 -1" />
+                    <path
+                        d="M16 5a2 2 0 0 1 2 2v10a2 2 0 1 1 -4 0v-4h-4v4a2 2 0 1 1 -4 0v-10a2 2 0 1 1 4 0v4h4v-4a2 2 0 0 1 2 -2" />
+                </svg>
+            </div>
+            <div>
+                <p class="fc-name">{{ userName }}</p>
+                <p class="fc-level">Nv. {{ userLevel }} · {{ userTitle }}</p>
+            </div>
+        </div>
+
+        <span class="fc-logo">FIT<span>CITY</span></span>
+    </header>
+
+    <!-- ── XP BAR ─────────────────────────────────── -->
+    <div class="fc-xp">
+        <div class="fc-xp-labels fc-camera-zone">
+            <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Actualizar PR en vídeo">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Actualizar PR</span>
+            </a>
+            <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Validar PR en vídeo">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Validar PR</span>
+            </a>
+        </div>
+    </div>
+
+
+
+    <!-- ── RETO DIARIO ─────────────────────────────── -->
+    <div class="fc-quest">
+        <span class="fc-quest-icon">⚔️</span>
+        <div class="fc-quest-body">
+            <p class="fc-quest-title">Reto del día</p>
+            <p class="fc-quest-desc">Visita 2 gimnasios</p>
+            <div class="fc-quest-bar">
+                <div style="width:45%"></div>
+            </div>
+        </div>
+        <span class="fc-quest-xp">+250 XP</span>
+    </div>
+
+    <!-- ── GIMNASIOS CERCANOS ─────────────────────── -->
+    <section class="fc-gyms">
+        <div class="fc-section-header">
+            <h2>📍 Gimnasios cercanos</h2>
+            <span class="fc-gyms-count" *ngIf="!gymsService.loading() && gymsService.nearbyGyms().length > 0">
+                {{ gymsService.nearbyGyms().length }} encontrados
+            </span>
+        </div>
+
+        <div class="fc-gyms-list">
+
+            <!-- Loading skeletons -->
+            <ng-container *ngIf="gymsService.loading()">
+                <div class="fc-gym-card fc-gym-skeleton" *ngFor="let i of [1, 2, 3]">
+                    <div class="skeleton-icon"></div>
+                    <div class="skeleton-body">
+                        <div class="skeleton-line skeleton-name"></div>
+                        <div class="skeleton-line skeleton-meta"></div>
+                    </div>
+                </div>
+            </ng-container>
+
+            <!-- Error state -->
+            <div class="fc-gyms-error" *ngIf="gymsService.error() && !gymsService.loading()">
+                <span>⚠️</span>
+                <p>{{ gymsService.error() }}</p>
+            </div>
+
+            <!-- Empty state -->
+            <div class="fc-gyms-empty"
+                *ngIf="!gymsService.loading() && !gymsService.error() && gymsService.nearbyGyms().length === 0">
+                <span>🏙️</span>
+                <p>No se encontraron centros en un radio de 3 km</p>
+            </div>
+
+            <!-- Real gym cards -->
+            <ng-container *ngIf="!gymsService.loading()">
+                <div class="fc-gym-card" *ngFor="let gym of gymsService.nearbyGyms(); let i = index; trackBy: trackById"
+                    [style.--accent]="accentColor(i)">
+                    <span class="fc-gym-emoji">{{ gymEmoji(i) }}</span>
+                    <div class="fc-gym-info">
+                        <p class="fc-gym-name">{{ gym.name }}</p>
+                        <p class="fc-gym-meta">
+                            {{ formatDistance(gym.distanceM) }}
+                            <span *ngIf="gym.address"> · {{ gym.address }}</span>
+                        </p>
+                        <p class="fc-gym-hours" *ngIf="gym.opening_hours">🕐 {{ gym.opening_hours }}</p>
+                    </div>
+                    <div class="fc-gym-actions">
+                        <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn">📞</a>
+                        <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener"
+                            class="fc-gym-action-btn">🌐</a>
+                        <button class="fc-gym-action-btn" 
+                                *ngIf="gym.distanceM <= 150 && !isVisited(gym.name)"
+                                (click)="visitGym(gym)" 
+                                [disabled]="isVisiting(gym.id)"
+                                title="Marcar como visitado">
+                            📍
+                        </button>
+                        <span class="fc-gym-dist-badge" *ngIf="isVisited(gym.name)" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">✓ Visitado</span>
+                        <span class="fc-gym-dist-badge" *ngIf="!isVisited(gym.name)">{{ formatDistance(gym.distanceM) }}</span>
+                    </div>
+                </div>
+            </ng-container>
+
+        </div>
+    </section>
+
+
+
+</div>
+
+<style>
+    /* ── Variables ────────────────────────────────────────── */
+    :host {
+        --bg: #000000;
+        --surface: rgba(255, 255, 255, 0.05);
+        --border: rgba(255, 255, 255, 0.1);
+        --cyan: #22d3ee;
+        --text: #ffffff;
+        --muted: #94a3b8;
+    }
+
+    /* ── Base ─────────────────────────────────────────────── */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    .fc-dashboard {
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+        background: var(--bg);
+        color: var(--text);
+        font-family: system-ui, sans-serif;
+        padding-bottom: 96px;
+        /* espacio navbar */
+    }
+
+    /* ── TOP BAR ──────────────────────────────────────────── */
+    .fc-topbar {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: center;
+        padding: 48px 16px 12px;
+        gap: 8px;
+    }
+
+    .fc-trainer {
+        justify-self: start;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.12); /* Más grisáceo */
+        border: 1px solid var(--border);
+        border-radius: 40px;
+        padding: 6px 14px 6px 6px;
+        flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .fc-trainer:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-1px);
+    }
+
+    .fc-trainer:active {
+        transform: scale(0.98);
+    }
+
+    .fc-avatar {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4ade80, #06b6d4);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        overflow: hidden; /* Para que la imagen respete el redondeo */
+    }
+
+    .fc-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .fc-name {
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .fc-level {
+        font-size: 10px;
+        color: var(--cyan);
+    }
+
+    .fc-logo {
+        justify-self: center;
+        transform: translateX(10px); /* Ajustado a 10px según feedback */
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: 1px;
+        white-space: nowrap;
+    }
+
+    .fc-logo span {
+        color: var(--cyan);
+    }
+
+    /* ── BELL / CAMERA ────────────────────────────────────── */
+
+    /* ── XP ───────────────────────────────────────────────── */
+    .fc-xp {
+        padding: 0 16px 8px;
+    }
+
+    .fc-camera-zone {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .fc-camera-action {
+        width: 42%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(34, 211, 238, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        border-radius: 18px;
+        padding: 10px 8px;
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.05);
+    }
+
+    .fc-camera-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .fc-camera-action:hover {
+        transform: translateY(-3px) scale(1.02);
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.6);
+        box-shadow: 
+            inset 0 0 15px rgba(34, 211, 238, 0.1),
+            0 8px 25px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-camera-action:hover::before {
+        opacity: 1;
+    }
+
+    .fc-cam-label {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-btn-emoji {
+        display: block;
+        font-size: 28px;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5));
+    }
+
+    .fc-cam-icon {
+        font-size: 16px;
+    }
+
+    /* ── STATS ────────────────────────────────────────────── */
+    .fc-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 0 16px 12px;
+    }
+
+    .fc-stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 10px 4px;
+        gap: 2px;
+    }
+
+    .fc-stat-icon {
+        font-size: 20px;
+    }
+
+    .fc-stat-val {
+        font-size: 13px;
+        font-weight: 800;
+    }
+
+    .fc-stat-lbl {
+        font-size: 9px;
+        color: var(--muted);
+        text-transform: uppercase;
+    }
+
+    /* ── MAPA ─────────────────────────────────────────────── */
+    .fc-map {
+        position: relative;
+        margin: 0 16px 12px;
+        height: clamp(160px, 30vw, 260px);
+        background: radial-gradient(ellipse at center, #0f2c1a 0%, #071623 100%);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    /* Grid */
+    .fc-map::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(rgba(34, 197, 94, .07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(34, 197, 94, .07) 1px, transparent 1px);
+        background-size: 40px 40px;
+    }
+
+    .fc-map-label {
+        position: absolute;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 10px;
+        color: rgba(255, 255, 255, .3);
+        white-space: nowrap;
+    }
+
+    /* PIN */
+    .fc-pin {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .fc-pin-avatar {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, #3b82f6, #06b6d4);
+        border-radius: 50%;
+        border: 2px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        z-index: 2;
+        position: relative;
+        box-shadow: 0 0 16px rgba(59, 130, 246, .6);
+    }
+
+    .fc-camera-btn {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: white;
+        border-radius: 50%;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .fc-camera-btn:hover {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        transform: translateY(-1px);
+    }
+
+    .fc-camera-btn:active {
+        transform: scale(0.94);
+    }
+
+    .fc-pin-pulse {
+        position: absolute;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        border: 2px solid rgba(59, 130, 246, .4);
+        animation: pulse 2s ease-out infinite;
+    }
+
+    @keyframes pulse {
+        0% {
+            opacity: 1;
+            transform: scale(.7);
+        }
+
+        100% {
+            opacity: 0;
+            transform: scale(1.6);
+        }
+    }
+
+    /* Markers */
+    .fc-marker {
+        position: absolute;
+        width: 36px;
+        height: 36px;
+        background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .2);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        backdrop-filter: blur(4px);
+    }
+
+    .fc-marker--active {
+        background: rgba(234, 179, 8, .2);
+        border-color: rgba(234, 179, 8, .5);
+        box-shadow: 0 0 12px rgba(234, 179, 8, .4);
+    }
+
+    /* ── QUEST ────────────────────────────────────────────── */
+    .fc-quest {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 16px 12px;
+        background: linear-gradient(135deg, rgba(234, 179, 8, .1), rgba(239, 68, 68, .07));
+        border: 1px solid rgba(234, 179, 8, .25);
+        border-radius: 16px;
+        padding: 12px;
+    }
+
+    .fc-quest-icon {
+        font-size: 26px;
+        flex-shrink: 0;
+    }
+
+    .fc-quest-body {
+        flex: 1;
+    }
+
+    .fc-quest-title {
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .8px;
+        color: #eab308;
+        margin-bottom: 2px;
+    }
+
+    .fc-quest-desc {
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+
+    .fc-quest-bar {
+        height: 4px;
+        background: rgba(255, 255, 255, .1);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+
+    .fc-quest-bar div {
+        height: 100%;
+        background: linear-gradient(90deg, #eab308, #f97316);
+        border-radius: 20px;
+    }
+
+    .fc-quest-xp {
+        font-size: 12px;
+        font-weight: 900;
+        color: #eab308;
+        background: rgba(234, 179, 8, .1);
+        border: 1px solid rgba(234, 179, 8, .25);
+        border-radius: 10px;
+        padding: 6px 8px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* ── GYMS ─────────────────────────────────────────────── */
+    .fc-gyms {
+        padding: 0 16px;
+    }
+
+    .fc-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+
+    .fc-section-header h2 {
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .fc-section-header button {
+        font-size: 11px;
+        color: var(--cyan);
+        background: none;
+        border: none;
+        cursor: pointer;
+    }
+
+    .fc-gyms-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .fc-gym-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 255, 255, 0.08); /* Un pelín más claro que el surface base */
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 14px;
+        padding: 12px;
+        transition: transform 0.2s;
+    }
+
+    .fc-gym-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
+    }
+
+    .fc-gym-emoji {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+
+    .fc-gym-name {
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .fc-gym-meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .fc-gym-lvl {
+        margin-left: auto;
+        flex-shrink: 0;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+        background: rgba(255, 255, 255, .06);
+        border-radius: 8px;
+        padding: 4px 8px;
+    }
+
+    .fc-open {
+        color: #4ade80;
+    }
+
+    .fc-closed {
+        color: #f87171;
+    }
+
+    /* ── New gym card layout ─────────────────────── */
+    .fc-gym-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .fc-gym-hours {
+        font-size: 10px;
+        color: var(--muted);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 180px;
+    }
+
+    .fc-gym-actions {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+
+    .fc-gym-action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        background: rgba(255, 255, 255, .06);
+        border: 1px solid rgba(255, 255, 255, .1);
+        border-radius: 8px;
+        font-size: 14px;
+        text-decoration: none;
+        transition: background .2s;
+    }
+
+    .fc-gym-action-btn:hover {
+        background: rgba(255, 255, 255, .12);
+    }
+
+    .fc-gym-dist-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--accent, var(--cyan));
+        background: rgba(255, 255, 255, .05);
+        border: 1px solid rgba(255, 255, 255, .1);
+        border-radius: 8px;
+        padding: 4px 8px;
+        white-space: nowrap;
+    }
+
+    .fc-gyms-count {
+        font-size: 11px;
+        color: var(--cyan);
+    }
+
+    /* ── Skeleton loaders ─────────────────────────── */
+    @keyframes shimmer {
+        0% {
+            background-position: -200% 0;
+        }
+
+        100% {
+            background-position: 200% 0;
+        }
+    }
+
+    .skeleton-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: linear-gradient(90deg, rgba(255, 255, 255, .06) 25%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .06) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .skeleton-line {
+        border-radius: 6px;
+        background: linear-gradient(90deg, rgba(255, 255, 255, .06) 25%, rgba(255, 255, 255, .12) 50%, rgba(255, 255, 255, .06) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+    }
+
+    .skeleton-name {
+        height: 12px;
+        width: 60%;
+    }
+
+    .skeleton-meta {
+        height: 10px;
+        width: 40%;
+    }
+
+    /* ── Error / empty states ─────────────────────── */
+    .fc-gyms-error,
+    .fc-gyms-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        padding: 24px 16px;
+        color: var(--muted);
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .fc-gyms-error span,
+    .fc-gyms-empty span {
+        font-size: 28px;
+    }
+
+    .fc-gyms-error {
+        color: #f87171;
+    }
+
+    /* ── Responsive: tablet / desktop ────────────────────── */
+    @media (min-width: 600px) {
+        .fc-topbar {
+            padding-top: 24px;
+        }
+
+        .fc-map {
+            height: 300px;
+        }
+
+        .fc-gyms-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (min-width: 900px) {
+        .fc-dashboard {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .fc-map {
+            height: 360px;
+        }
+
+        .fc-gyms-list {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>

@@ -1,0 +1,405 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #000000;
+  color: #fff;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  --fc-primary: #22d3ee;
+  --fc-primary-glow: rgba(34, 211, 238, 0.4);
+}
+
+.ranking-container {
+  padding: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+  padding-bottom: 5rem; /* Space for bottom nav */
+}
+
+/* Header */
+.ranking-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: fadeInDown 0.6s ease-out;
+}
+
+.header-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+}
+
+.header-title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(135deg, #fff, #a0a0a0);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.header-subtitle {
+  color: #888;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+/* Segmented Control */
+.segmented-control {
+  display: flex;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.segment-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.segment-btn.active {
+  background: var(--fc-primary);
+  color: #fff;
+  font-weight: 600;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.5), 0 0 10px rgba(34, 211, 238, 0.3);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Lists */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Card General */
+.ranking-card {
+  display: flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 1rem;
+  gap: 1rem;
+  transition: transform 0.2s, background 0.2s;
+  animation: fadeInUp 0.5s ease backwards;
+}
+
+.ranking-card:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Stagger animations */
+.ranking-card:nth-child(1) { animation-delay: 0.1s; }
+.ranking-card:nth-child(2) { animation-delay: 0.15s; }
+.ranking-card:nth-child(3) { animation-delay: 0.2s; }
+.ranking-card:nth-child(4) { animation-delay: 0.25s; }
+.ranking-card:nth-child(5) { animation-delay: 0.3s; }
+
+/* Podium Details */
+.rank-number {
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: #555;
+  width: 40px;
+  text-align: center;
+}
+
+.top-1 .rank-number { color: #FFD700; text-shadow: 0 0 10px rgba(255, 215, 0, 0.5); font-size: 1.5rem; }
+.top-2 .rank-number { color: #C0C0C0; text-shadow: 0 0 10px rgba(192, 192, 192, 0.5); font-size: 1.4rem; }
+.top-3 .rank-number { color: #CD7F32; text-shadow: 0 0 10px rgba(205, 127, 50, 0.5); font-size: 1.3rem; }
+
+.top-1 { border-color: rgba(255, 215, 0, 0.3); background: rgba(255, 215, 0, 0.05); }
+.top-2 { border-color: rgba(192, 192, 192, 0.3); background: rgba(192, 192, 192, 0.05); }
+.top-3 { border-color: rgba(205, 127, 50, 0.3); background: rgba(205, 127, 50, 0.05); }
+
+/* User Info */
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.top-1 .user-avatar { border-color: #FFD700; }
+.top-2 .user-avatar { border-color: #C0C0C0; }
+.top-3 .user-avatar { border-color: #CD7F32; }
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.username {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.handle {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.pr-details {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.exercise {
+  font-size: 0.9rem;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.gym-badge {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: #aaa;
+}
+
+.date {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Weight Display */
+.weight-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.1rem;
+  padding-left: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.weight {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--fc-primary);
+}
+
+.unit {
+  font-size: 0.9rem;
+  color: var(--fc-primary);
+  opacity: 0.8;
+  font-weight: 600;
+}
+
+/* My PRs Specific */
+.my-pr-card {
+  border-left: 4px solid var(--fc-primary);
+}
+
+.exercise-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  background: rgba(34, 211, 238, 0.15);
+  border-radius: 12px;
+}
+
+.pr-title {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+/* States */
+.loading-state, .empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #888;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(34, 211, 238, 0.2);
+  border-top-color: var(--fc-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+/* Animations */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Gym Ranking ─────────────────────────────────────────────────────────── */
+
+.gym-group {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  overflow: hidden;
+  animation: fadeInUp 0.5s ease backwards;
+}
+
+.gym-group:nth-child(1) { animation-delay: 0.1s; }
+.gym-group:nth-child(2) { animation-delay: 0.15s; }
+.gym-group:nth-child(3) { animation-delay: 0.2s; }
+.gym-group:nth-child(4) { animation-delay: 0.25s; }
+.gym-group:nth-child(5) { animation-delay: 0.3s; }
+
+/* Gym header row */
+.gym-group-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(34, 211, 238, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gym-icon {
+  font-size: 1.6rem;
+  flex-shrink: 0;
+}
+
+.gym-header-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gym-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #fff;
+}
+
+.gym-stat-badge {
+  font-size: 0.75rem;
+  background: rgba(34, 211, 238, 0.2);
+  color: var(--fc-primary);
+  padding: 2px 8px;
+  border-radius: 20px;
+  width: fit-content;
+  font-weight: 600;
+}
+
+.gym-rank {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: rgba(34, 211, 238, 0.6);
+}
+
+/* PRs list inside each gym */
+.gym-prs-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.gym-pr-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s;
+}
+
+.gym-pr-row:last-child {
+  border-bottom: none;
+}
+
+.gym-pr-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.gym-pr-position {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #555;
+  width: 20px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.gym-pr-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.gym-pr-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.gym-pr-username {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gym-pr-exercise {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.gym-pr-weight {
+  display: flex;
+  align-items: baseline;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
