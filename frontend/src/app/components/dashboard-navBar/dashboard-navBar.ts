@@ -6,20 +6,16 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   selector: 'app-dashboard-nav-bar',
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: `./dashboard-navBar.html`,
+  styleUrl: `./dashboard-navBar.css`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    :host ::ng-deep .active-link .active-circle {
-      opacity: 1 !important;
-    }
-  `]
 })
 export class DashboardNavBar {
   // Lista de enlaces para mantener el HTML limpio
   navLinks = [
-    { label: 'Inicio', path: '/dashboard', icon: '🏠' },
-    { label: 'Ranking', path: '/ranking', icon: '📖' },
-    { label: 'Mapa', path: '/mapa', icon: '📍' },
-    { label: 'Misiones', path: '/missions', icon: '⚔️' },
-    { label: 'Perfil', path: '/profile', icon: '👤' }
+    { label: 'Inicio', path: '/dashboard', icon: 'home' },
+    { label: 'Ranking', path: '/ranking', icon: 'ranking' },
+    { label: 'Mapa', path: '/mapa', icon: 'map' },
+    { label: 'Misiones', path: '/missions', icon: 'missions' },
+    { label: 'Perfil', path: '/profile', icon: 'profile' }
   ];
 }

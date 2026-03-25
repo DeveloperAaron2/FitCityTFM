@@ -47,6 +47,11 @@ export class HomePage {
             if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 40) {
                 const currentUrl = this.router.url;
                 
+                // Disable swipe navigation on the Map page
+                if (currentUrl.includes('/mapa')) {
+                    return;
+                }
+                
                 // Find current page index in the array
                 const currentIndex = this.pageOrder.findIndex(path => currentUrl.includes(path));
 

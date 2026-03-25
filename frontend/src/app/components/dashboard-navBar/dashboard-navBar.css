@@ -1,0 +1,58 @@
+:host {
+    /* Variables para Modo Oscuro (Predeterminado) */
+    --nav-bg: #030712; /* gray-950 */
+    --nav-border: #22d3ee; /* cyan-400 */
+    --nav-icon: #ffffff;
+    --nav-active-glow: rgba(14, 165, 233, 0.6); /* sky-500/60 */
+    --nav-active-shadow: rgba(14, 165, 233, 0.5);
+    --nav-hover-from: #06b6d4; /* cyan-500 */
+    --nav-hover-to: #2563eb; /* blue-600 */
+    --nav-hover-shadow: rgba(56, 189, 248, 0.6);
+}
+
+:host-context(body.theme-sun) {
+    /* Variables para Modo Claro */
+    --nav-bg: #f0f4f8; 
+    --nav-border: #0284c7; /* sky-700 */
+    --nav-icon: #1e293b; /* slate-800 */
+    --nav-active-glow: rgba(2, 132, 199, 0.25);
+    --nav-active-shadow: rgba(2, 132, 199, 0.15);
+    --nav-hover-from: #38bdf8;
+    --nav-hover-to: #0ea5e9;
+    --nav-hover-shadow: rgba(14, 165, 233, 0.25);
+}
+
+.nav-container {
+    background-color: var(--nav-bg);
+    border-top: 2px solid var(--nav-border);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-icon-wrap {
+    color: var(--nav-icon);
+    transition: color 0.4s ease;
+}
+
+.active-circle {
+    background-color: var(--nav-active-glow);
+    box-shadow: 0 0 10px var(--nav-active-shadow);
+}
+
+.hover-circle {
+    background: linear-gradient(to bottom right, var(--nav-hover-from), var(--nav-hover-to));
+    box-shadow: 0 0 12px var(--nav-hover-shadow);
+}
+
+/* Forzar opacidad en el círculo activo cuando la ruta coincide */
+:host ::ng-deep .active-link .active-circle {
+    opacity: 1 !important;
+}
+
+/* Mantener iconos blancos sobre el fondo de brillo activo para mejor contraste en ambos modos si es necesario */
+:host-context(body.theme-moon) ::ng-deep .active-link .nav-icon-wrap {
+    color: #ffffff;
+}
+
+:host-context(body.theme-sun) ::ng-deep .active-link .nav-icon-wrap {
+    color: #0284c7;
+}
