@@ -157,3 +157,89 @@ def logout():
     except Exception:
         pass
     return {"message": "Sesión cerrada correctamente"}
+
+
+# ── Google OAuth Callback ──────────────────────────────────────────────────────
+
+class GoogleCallbackRequest(BaseModel):
+    access_token: str
+    refresh_token: str
+
+
+@router.post("/google/callback")
+def google_callback(body: GoogleCallbackRequest):
+    """
+    Called by the frontend after Supabase OAuth redirect.
+    Verifies the token, creates a profile row in public.users if it's a new user,
+    and returns the same session format as /auth/login.
+    """
+    db = _get_db()
+
+    # 1. Restore the session from the tokens provided by the frontend
+    try:
+        session_res = db.auth.set_session(body.access_token, body.refresh_token)
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=401, detail=f"Token de Google inválido: {str(e)}")
+
+    if not session_res.user or not session_res.session:
+        raise HTTPException(status_code=401, detail="No se pudo verificar el token de Google")
+
+    user = session_res.user
+    user_id = user.id
+    email = user.email or ""
+
+    # 2. Try to fetch existing profile
+    try:
+        profile_res = db.table("users").select("*").eq("id", user_id).maybe_single().execute()
+        profile = profile_res.data
+    except Exception:
+        profile = None
+
+    # 3. First time with Google — auto-create the profile
+    if not profile:
+        # Derive a username from the Google display name or email
+        raw_name = (user.user_metadata or {}).get("full_name") or email.split("@")[0]
+        base_handle = raw_name.lower().replace(" ", "_")[:20]
+
+        try:
+            insert_res = db.table("users").insert({
+                "id": user_id,
+                "username": raw_name,
+                "handle": f"@{base_handle}",
+                "total_xp": 0,
+            }).execute()
+            profile = insert_res.data[0] if insert_res.data else {}
+        except Exception as e:
+            traceback.print_exc()
+            raise HTTPException(
+                status_code=500,
+                detail=f"Error al crear perfil de usuario Google: {str(e)}"
+            )
+
+        # Insert initial level row (non-fatal)
+        try:
+            db.table("user_levels").insert({
+                "user_id": user_id,
+                "level": 1,
+                "max_xp": XP_PER_LEVEL,
+            }).execute()
+        except Exception:
+            pass
+
+    total_xp = profile.get("total_xp", 0)
+    lv_info = level_info(total_xp)
+
+    return {
+        "access_token": session_res.session.access_token,
+        "refresh_token": session_res.session.refresh_token,
+        "user": {
+            "id": user_id,
+            "email": email,
+            "username": profile.get("username", ""),
+            "handle": profile.get("handle", ""),
+            "avatar_url": profile.get("avatar_url", None),
+            "total_xp": total_xp,
+            **lv_info,
+        }
+    }
