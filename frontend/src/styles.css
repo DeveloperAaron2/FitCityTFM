@@ -337,3 +337,33 @@ body.theme-sun .pr-xp-track {
 body.theme-sun .pr-xp-fill {
     background: linear-gradient(90deg, #0284c7, #22d3ee);
 }
+
+body.theme-sun .header-title {
+    background: none;
+    -webkit-background-clip: unset;
+    background-clip: unset;
+    -webkit-text-fill-color: #64748b;
+    color: #64748b;
+}
+
+body.theme-sun .fc-gym-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+    border-left: 3px solid var(--accent);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+body.theme-sun .fc-gym-card:hover {
+    background: #f8fafc;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+body.theme-sun .fc-gym-name { color: #1e293b; }
+body.theme-sun .fc-gym-meta { color: #64748b; }
+body.theme-sun .fc-gym-hours { color: #94a3b8; }
+
+body.theme-sun .fc-gym-dist-badge {
+    background: rgba(0,0,0,0.04);
+    border-color: #e2e8f0;
+    color: var(--accent, #0284c7);
+}
