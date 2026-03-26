@@ -215,7 +215,7 @@ body.theme-sun .ms-progress-chip {
 }
 
 body.theme-sun .ms-roadmap-node--locked {
-    background: #e2e8f0;
+    background: #ffffff;
     color: #94a3b8;
     border-color: rgba(0,0,0,0.1);
 }
@@ -316,3 +316,16 @@ body.theme-sun .auth-field input {
 body.theme-sun .auth-link { color: #475569; }
 body.theme-sun .auth-link a { color: #0284c7; }
 body.theme-sun .password-toggle { color: #64748b; }
+
+body.theme-sun .google-btn {
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    color: #1e293b;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+body.theme-sun .google-btn:hover:not(:disabled) {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+    transform: translateY(-1px);
+}

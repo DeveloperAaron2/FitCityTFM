@@ -6,39 +6,84 @@
 
         <!-- Selector de Tema — esquina superior izquierda -->
         <div class="pr-theme-wrap">
-            <button
-                type="button"
-                class="pr-theme-toggle"
-                [class.is-sun]="theme() === 'sun'"
-                [class.is-default]="theme() === 'default'"
-                (click)="toggleTheme(); $event.stopPropagation()"
+            <button type="button" class="pr-theme-toggle" [class.is-sun]="theme() === 'sun'"
+                [class.is-default]="theme() === 'default'" (click)="toggleTheme(); $event.stopPropagation()"
                 title="Cambiar tema">
                 <span class="pr-theme-icon" [ngSwitch]="theme()">
-                    <svg *ngSwitchCase="'moon'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-cyan-400"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-                    <svg *ngSwitchCase="'sun'" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-orange-400"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-                    <svg *ngSwitchDefault xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-cyan-400"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+                    <svg *ngSwitchCase="'moon'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-5 h-5 text-cyan-400">
+                        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                    </svg>
+                    <svg *ngSwitchCase="'sun'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-5 h-5 text-orange-400">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2" />
+                        <path d="M12 20v2" />
+                        <path d="m4.93 4.93 1.41 1.41" />
+                        <path d="m17.66 17.66 1.41 1.41" />
+                        <path d="M2 12h2" />
+                        <path d="M20 12h2" />
+                        <path d="m6.34 17.66-1.41 1.41" />
+                        <path d="m19.07 4.93-1.41 1.41" />
+                    </svg>
+                    <svg *ngSwitchDefault xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-5 h-5 text-cyan-400">
+                        <rect width="18" height="10" x="3" y="11" rx="2" />
+                        <circle cx="12" cy="5" r="2" />
+                        <path d="M12 7v4" />
+                        <line x1="8" y1="16" x2="8" y2="16" />
+                        <line x1="16" y1="16" x2="16" y2="16" />
+                    </svg>
                 </span>
             </button>
 
             <!-- Dropdown menu -->
             <div class="pr-theme-menu" *ngIf="showThemeMenu()" (click)="$event.stopPropagation()">
-                <button class="pr-theme-option" [class.selected]="theme() === 'default'" (click)="selectTheme('default')">
+                <button class="pr-theme-option" [class.selected]="theme() === 'default'"
+                    (click)="selectTheme('default')">
                     <span class="pr-option-emoji">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><rect width="18" height="10" x="3" y="11" rx="2"/><circle cx="12" cy="5" r="2"/><path d="M12 7v4"/><line x1="8" y1="16" x2="8" y2="16"/><line x1="16" y1="16" x2="16" y2="16"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-4 h-4">
+                            <rect width="18" height="10" x="3" y="11" rx="2" />
+                            <circle cx="12" cy="5" r="2" />
+                            <path d="M12 7v4" />
+                            <line x1="8" y1="16" x2="8" y2="16" />
+                            <line x1="16" y1="16" x2="16" y2="16" />
+                        </svg>
                     </span>
                     <span class="pr-option-label">Tema por Defecto</span>
                     <span class="pr-option-check" *ngIf="theme() === 'default'">✓</span>
                 </button>
                 <button class="pr-theme-option" [class.selected]="theme() === 'moon'" (click)="selectTheme('moon')">
                     <span class="pr-option-emoji">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-4 h-4">
+                            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+                        </svg>
                     </span>
                     <span class="pr-option-label">Tema oscuro</span>
                     <span class="pr-option-check" *ngIf="theme() === 'moon'">✓</span>
                 </button>
                 <button class="pr-theme-option" [class.selected]="theme() === 'sun'" (click)="selectTheme('sun')">
                     <span class="pr-option-emoji">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="w-4 h-4">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2" />
+                            <path d="M12 20v2" />
+                            <path d="m4.93 4.93 1.41 1.41" />
+                            <path d="m17.66 17.66 1.41 1.41" />
+                            <path d="M2 12h2" />
+                            <path d="M20 12h2" />
+                            <path d="m6.34 17.66-1.41 1.41" />
+                            <path d="m19.07 4.93-1.41 1.41" />
+                        </svg>
                     </span>
                     <span class="pr-option-label">Tema claro</span>
                     <span class="pr-option-check" *ngIf="theme() === 'sun'">✓</span>
@@ -51,29 +96,20 @@
 
         <div class="pr-avatar-wrap">
             <!-- Hidden file input for avatar selection -->
-            <input
-              #fileInput
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              style="display:none"
-              (change)="onAvatarChange($event)"
-            />
+            <input #fileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none"
+                (change)="onAvatarChange($event)" />
 
             <!-- Avatar button: click opens file picker -->
-            <button class="pr-avatar-btn" (click)="triggerFileInput()" [disabled]="uploading()" aria-label="Cambiar foto de perfil">
+            <button class="pr-avatar-btn" (click)="triggerFileInput()" [disabled]="uploading()"
+                aria-label="Cambiar foto de perfil">
                 <!-- Real avatar image -->
-                <img
-                  *ngIf="avatarUrl && !uploading()"
-                  [src]="avatarUrl"
-                  #avatarImg
-                  alt="Avatar"
-                  class="pr-avatar-img"
-                  (error)="avatarImg.src=''; avatarImg.style.display='none'"
-                />
+                <img *ngIf="avatarUrl && !uploading()" [src]="avatarUrl" #avatarImg alt="Avatar" class="pr-avatar-img"
+                    (error)="avatarImg.src=''; avatarImg.style.display='none'" />
 
                 <!-- SVG fallback when no avatar set -->
                 <div class="pr-avatar-placeholder" *ngIf="!avatarUrl && !uploading()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                        fill="currentColor">
                         <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2z" />
                         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z" />
                     </svg>
@@ -208,8 +244,15 @@
     }
 
     @keyframes pr-pulse-red {
-        0%, 100% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        50% { box-shadow: 0 0 8px rgba(220, 38, 38, 0.4); }
+
+        0%,
+        100% {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        50% {
+            box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+        }
     }
 
     .pr-logout-btn:hover {

@@ -3,7 +3,8 @@
     --pr-bg: #111111;
     --pr-surface: rgba(255, 255, 255, 0.08);
     --pr-border: rgba(255, 255, 255, 0.15);
-    --pr-accent: #22d3ee; /* cyan-400 */
+    --pr-accent: #22d3ee;
+    /* cyan-400 */
     --pr-accent-dim: rgba(34, 211, 238, 0.15);
     --pr-accent-border: rgba(34, 211, 238, 0.30);
     --pr-text: #ffffff;
@@ -163,7 +164,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -213,7 +214,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     animation: pr-menu-in 0.2s ease-out;
     display: flex;
     flex-direction: column;
@@ -221,8 +222,15 @@
 }
 
 @keyframes pr-menu-in {
-    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .pr-theme-option {
@@ -327,7 +335,9 @@
 }
 
 @keyframes pr-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Upload error */

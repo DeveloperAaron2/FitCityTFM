@@ -1,0 +1,10 @@
+﻿a1218007 Merge Miguel-changes into Dani-changes, resolving conflicts
+4fbac8ad Fix auth.py red lines and update roadmap light theme background
+89a6c73e feat(auth): add Google OAuth login via Supabase
+5f3da3e6 style(ui): refine dashboard and ranking page styles for theme compatibility
+c2da8cd3 chore: Apply Miguel's full project updates
+457f8144 25/03
+a2a20c73 Refine navigation UI: theme-responsive SVG icons and navigation gesture fixes
+afc88971 style: adjust logo translation to 10px in dashboard
+d0e90386 feat: implement horizontal swipe navigation for mobile pages
+75eb6028 Redise├▒o Premium FitCity: Tema Oscuro/Cian, Nuevo Dashboard y Sistema de Temas Din├ímico
