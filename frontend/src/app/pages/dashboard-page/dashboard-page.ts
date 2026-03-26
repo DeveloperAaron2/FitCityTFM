@@ -2,11 +2,13 @@ import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service';
 import { AuthService } from '../../services/auth.service';
+import { ApiService } from '../../services/api.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -14,6 +16,10 @@ export class DashboardPage implements OnInit {
 
   readonly gymsService = inject(NearbyGymsService);
   readonly auth = inject(AuthService);
+  readonly api = inject(ApiService);
+  
+  private visitedTodayGyms = new Set<string>();
+  visitingGyms = new Set<number>();
 
   // Shortcuts for template
   get user() { return this.auth.user(); }
@@ -34,6 +40,20 @@ export class DashboardPage implements OnInit {
 
   ngOnInit(): void {
     this.gymsService.loadFromUserLocation();
+    
+    const user = this.auth.user();
+    if (user && user.id) {
+        this.api.getGymVisits(user.id).subscribe({
+            next: (visits: any[]) => {
+                const today = new Date().toISOString().split('T')[0];
+                for (const v of visits) {
+                    if (v.visited_at === today && v.gym_name) {
+                        this.visitedTodayGyms.add(v.gym_name);
+                    }
+                }
+            }
+        });
+    }
   }
 
   /** Format distance: "350 m" or "1.2 km" */
@@ -57,5 +77,42 @@ export class DashboardPage implements OnInit {
 
   trackById(_: number, gym: NearbyGym): number {
     return gym.id;
+  }
+
+  isVisited(gymName: string): boolean {
+      return this.visitedTodayGyms.has(gymName);
+  }
+
+  isVisiting(id: number): boolean {
+      return this.visitingGyms.has(id);
+  }
+
+  visitGym(gym: NearbyGym) {
+      const user = this.auth.user();
+      if (!user || !user.id || this.visitingGyms.has(gym.id)) return;
+
+      this.visitingGyms.add(gym.id);
+      this.api.createGymVisit(user.id, {
+          gym_name: gym.name,
+          gym_address: gym.address
+      }).subscribe({
+          next: (res) => {
+              this.visitedTodayGyms.add(gym.name);
+              this.visitingGyms.delete(gym.id);
+              if (res.xp_awarded) {
+                  const currentXp = user.current_xp || 0;
+                  this.auth.updateUser({ current_xp: currentXp + res.xp_awarded });
+              }
+          },
+          error: (err) => {
+              this.visitingGyms.delete(gym.id);
+              if (err.status === 400) {
+                  // If the backend says it's already visited, just sync the UI silently
+                  this.visitedTodayGyms.add(gym.name);
+              } else {
+                  console.error('Error al registrar la visita:', err);
+              }
+          }
+      });
   }
 }

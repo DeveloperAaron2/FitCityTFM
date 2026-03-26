@@ -60,7 +60,7 @@ def get_user_level(user_id: str):
     return {"level": lv, "max_xp": XP_PER_LEVEL * lv}
 
 
-@router.post("/")
+@router.post("")
 def create_user(body: UserCreate):
     """Create a new user."""
     db = get_supabase_client()

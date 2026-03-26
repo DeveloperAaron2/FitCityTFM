@@ -142,6 +142,6 @@ export class ValidatePrPage implements OnInit {
     }
 
     goBack(): void {
-        this.router.navigate(['/profile']);
+        this.router.navigate(['/dashboard']);
     }
 }

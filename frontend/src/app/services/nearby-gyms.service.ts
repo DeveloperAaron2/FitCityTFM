@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { API_URL } from './api.service';
 
 export interface NearbyGym {
     id: number;
@@ -10,6 +11,7 @@ export interface NearbyGym {
     opening_hours: string;
 }
 
+// ── Haversine distance in metres ──────────────────────────────────
 function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): number {
     const R = 6371000;
     const toRad = (v: number) => (v * Math.PI) / 180;
@@ -21,21 +23,19 @@ function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): num
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function buildOverpassQuery(south: number, west: number, north: number, east: number): string {
-    const bbox = `${south},${west},${north},${east}`;
-    return `
-[out:json][timeout:20];
-(
-  node["leisure"="fitness_centre"](${bbox});
-  node["amenity"="gym"](${bbox});
-  node["sport"="fitness"](${bbox});
-  way["leisure"="fitness_centre"](${bbox});
-  way["amenity"="gym"](${bbox});
-  way["leisure"="sports_centre"]["sport"="fitness"](${bbox});
-);
-out center;
-`.trim();
+/** 
+ * Fetch gyms from the Python Backend Proxy.
+ * The backend manages Overpass requests and caching to prevent 504 Gateway Timeouts.
+ */
+async function fetchGymsProxy(south: number, west: number, north: number, east: number): Promise<any> {
+    const url = `${API_URL}/gyms/nearby?south=${south}&west=${west}&north=${north}&east=${east}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
 }
+
+/** Max displacement (metres) before we refetch gyms */
+const CACHE_THRESHOLD_M = 500;
 
 @Injectable({ providedIn: 'root' })
 export class NearbyGymsService {
@@ -45,9 +45,19 @@ export class NearbyGymsService {
     readonly loading = signal<boolean>(false);
     readonly error = signal<string | null>(null);
 
+    /** Cached location from the last successful fetch */
+    private cachedLat: number | null = null;
+    private cachedLon: number | null = null;
+
+    /** Whether we already have valid cached results */
+    get hasCachedData(): boolean {
+        return this.cachedLat !== null && this.nearbyGyms().length > 0;
+    }
+
     /**
      * Request the browser's geolocation and then load nearby gyms.
-     * Safe to call multiple times; ignores concurrent calls if already loading.
+     * If the user has barely moved (<500 m) and we already have results,
+     * skips the expensive Overpass fetch.
      */
     loadFromUserLocation(): void {
         if (this.loading()) return;
@@ -57,6 +67,33 @@ export class NearbyGymsService {
             return;
         }
 
+        // If we have cached data, silently check location first (no loader flash)
+        if (this.hasCachedData) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const dist = haversineM(
+                        this.cachedLat!, this.cachedLon!,
+                        pos.coords.latitude, pos.coords.longitude
+                    );
+                    if (dist < CACHE_THRESHOLD_M) {
+                        // Close enough — reuse cached results, no fetch needed
+                        console.log('[NearbyGyms] Using cached results (moved', Math.round(dist), 'm)');
+                    } else {
+                        // Moved significantly — refetch
+                        console.log('[NearbyGyms] Location changed', Math.round(dist), 'm — refreshing');
+                        this.load(pos.coords.latitude, pos.coords.longitude);
+                    }
+                },
+                () => {
+                    // Geolocation failed but we have cached data — keep showing it
+                    console.warn('[NearbyGyms] Could not refresh location, using cached data');
+                },
+                { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 }
+            );
+            return;
+        }
+
+        // No cached data yet — show loader and fetch for the first time
         this.loading.set(true);
         this.error.set(null);
 
@@ -66,7 +103,7 @@ export class NearbyGymsService {
                 this.loading.set(false);
                 this.error.set('No se pudo obtener tu ubicación. Activa el permiso de localización.');
             },
-            { enableHighAccuracy: true, timeout: 10000 }
+            { enableHighAccuracy: false, timeout: 6000, maximumAge: 60000 }
         );
     }
 
@@ -75,24 +112,16 @@ export class NearbyGymsService {
      * Uses a ~1 km bounding box around the point.
      */
     load(lat: number, lon: number): void {
-        // ~0.01° ≈ 1 km, reduced to avoid loading too many gyms in dense areas
         const delta = 0.01;
         const south = lat - delta;
         const north = lat + delta;
         const west = lon - delta;
         const east = lon + delta;
 
-        const query = buildOverpassQuery(south, west, north, east);
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-
         this.loading.set(true);
         this.error.set(null);
 
-        fetch(url)
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                return res.json();
-            })
+        fetchGymsProxy(south, west, north, east)
             .then((data: any) => {
                 const elements: any[] = data.elements || [];
                 const gyms: NearbyGym[] = [];
@@ -117,13 +146,21 @@ export class NearbyGymsService {
                     });
                 }
 
-                // Sort by distance and keep the 5 nearest
                 gyms.sort((a, b) => a.distanceM - b.distanceM);
                 this.nearbyGyms.set(gyms.slice(0, 5));
+
+                // Cache the successful location
+                this.cachedLat = lat;
+                this.cachedLon = lon;
             })
             .catch((err) => {
                 console.error('[NearbyGymsService]', err);
-                this.error.set('No se pudieron cargar los gimnasios cercanos.');
+                // If we have stale cached data, keep showing it instead of an error
+                if (this.hasCachedData) {
+                    console.warn('[NearbyGyms] Overpass failed — keeping cached results');
+                } else {
+                    this.error.set('No se pudieron cargar los gimnasios cercanos.');
+                }
             })
             .finally(() => this.loading.set(false));
     }

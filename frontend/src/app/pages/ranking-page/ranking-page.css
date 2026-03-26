@@ -1,9 +1,14 @@
 :host {
   display: block;
   min-height: 100vh;
-  background-color: var(--fc-bg-main, #0d0d0d);
+  background-color: #000000;
   color: #fff;
   font-family: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  --fc-primary: #22d3ee;
+  --fc-primary-glow: rgba(34, 211, 238, 0.4);
 }
 
 .ranking-container {
@@ -32,6 +37,7 @@
   margin: 0 0 0.5rem 0;
   background: linear-gradient(135deg, #fff, #a0a0a0);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -66,9 +72,12 @@
 }
 
 .segment-btn.active {
-  background: var(--fc-primary, #b0ff00);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(176, 255, 0, 0.3);
+  background: var(--fc-primary);
+  color: #fff;
+  font-weight: 600;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.5), 0 0 10px rgba(34, 211, 238, 0.3);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 /* Lists */
@@ -82,8 +91,8 @@
 .ranking-card {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1rem;
   gap: 1rem;
@@ -195,19 +204,19 @@
 .weight {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--fc-primary, #b0ff00);
+  color: var(--fc-primary);
 }
 
 .unit {
   font-size: 0.9rem;
-  color: var(--fc-primary, #b0ff00);
+  color: var(--fc-primary);
   opacity: 0.8;
   font-weight: 600;
 }
 
 /* My PRs Specific */
 .my-pr-card {
-  border-left: 4px solid var(--fc-primary, #b0ff00);
+  border-left: 4px solid var(--fc-primary);
 }
 
 .exercise-icon {
@@ -217,7 +226,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  background: rgba(176, 255, 0, 0.1);
+  background: rgba(34, 211, 238, 0.15);
   border-radius: 12px;
 }
 
@@ -237,8 +246,8 @@
 .spinner {
   width: 30px;
   height: 30px;
-  border: 3px solid rgba(176, 255, 0, 0.2);
-  border-top-color: var(--fc-primary, #b0ff00);
+  border: 3px solid rgba(34, 211, 238, 0.2);
+  border-top-color: var(--fc-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -282,7 +291,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  background: rgba(176, 255, 0, 0.06);
+  background: rgba(34, 211, 238, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -306,8 +315,8 @@
 
 .gym-stat-badge {
   font-size: 0.75rem;
-  background: rgba(176, 255, 0, 0.15);
-  color: var(--fc-primary, #b0ff00);
+  background: rgba(34, 211, 238, 0.2);
+  color: var(--fc-primary);
   padding: 2px 8px;
   border-radius: 20px;
   width: fit-content;
@@ -317,7 +326,7 @@
 .gym-rank {
   font-size: 1.4rem;
   font-weight: 800;
-  color: rgba(176, 255, 0, 0.5);
+  color: rgba(34, 211, 238, 0.6);
 }
 
 /* PRs list inside each gym */

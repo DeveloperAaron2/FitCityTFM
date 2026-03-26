@@ -46,6 +46,10 @@ export class ApiService {
         return this.http.get(`${API_URL}/users/${userId}/gym-visits`);
     }
 
+    createGymVisit(userId: string, body: { gym_name: string, gym_address?: string, gym_lat?: number, gym_lon?: number }): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/gym-visits`, body);
+    }
+
     getGymStats(userId: string): Observable<any> {
         return this.http.get(`${API_URL}/users/${userId}/gym-visits/stats`);
     }
@@ -71,6 +75,14 @@ export class ApiService {
 
     getDailyChallenge(): Observable<any> {
         return this.http.get(`${API_URL}/challenges/daily`);
+    }
+
+    getUserChallengesAll(userId: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/all`);
+    }
+
+    updateChallengeProgress(userId: string, challengeId: string, progress: number): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/${challengeId}/progress`, { progress });
     }
 
     // ── Ranking ───────────────────────────────────────────────────────────────

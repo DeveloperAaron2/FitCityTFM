@@ -93,7 +93,7 @@ async def validate_pr_video(
         "message": f"Vídeo validado correctamente por la IA ({size_mb} MB). Puedes registrar tu PR.",
     }
 
-@router.get("/")
+@router.get("")
 def get_lifting_prs(
     user_id: str,
     gym_name: Optional[str] = Query(default=None, description="Filter PRs by gym name"),
@@ -136,7 +136,7 @@ def get_prs_by_gym(user_id: str):
     return [{"gym_name": gym, "prs": prs} for gym, prs in grouped.items()]
 
 
-@router.post("/")
+@router.post("")
 def upsert_lifting_pr(user_id: str, body: LiftingPRCreate):
     """Create or update a PR for a specific gym+exercise combo.
     Updates only if the new weight is heavier than the existing PR at that gym.

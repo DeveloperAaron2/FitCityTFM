@@ -49,7 +49,7 @@ def get_prs_by_gym(top_per_gym: int = 5):
 
     return result
 
-@router.get("/")
+@router.get("")
 def get_ranking(limit: int = 20):
     """Return top users sorted by total XP descending."""
     db = get_supabase_client()

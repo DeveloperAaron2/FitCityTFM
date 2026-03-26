@@ -2,9 +2,10 @@
 
     <!-- ── TOP BAR ────────────────────────────────── -->
     <header class="fc-topbar flex justify-center align-items-center">
-        <div class="fc-trainer flex justify-center align-items-center">
+        <div class="fc-trainer flex justify-center align-items-center" routerLink="/profile">
             <div class="fc-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <img *ngIf="user?.avatar_url" [src]="user?.avatar_url" alt="Avatar" class="fc-avatar-img">
+                <svg *ngIf="!user?.avatar_url" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M4 7a1 1 0 0 1 1 1v8a1 1 0 0 1 -2 0v-3h-1a1 1 0 0 1 0 -2h1v-3a1 1 0 0 1 1 -1" />
                     <path d="M20 7a1 1 0 0 1 1 1v3h1a1 1 0 0 1 0 2h-1v3a1 1 0 0 1 -2 0v-8a1 1 0 0 1 1 -1" />
                     <path
@@ -18,26 +19,17 @@
         </div>
 
         <span class="fc-logo">FIT<span>CITY</span></span>
-
-        <button class="" aria-label="Notificaciones">
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 6h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />
-                <path d="M17 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-            </svg>
-            <!-- <span class="fc-dot"></span> -->
-        </button>
     </header>
 
     <!-- ── XP BAR ─────────────────────────────────── -->
     <div class="fc-xp">
-        <div class="fc-xp-labels">
-            <span>XP</span>
-            <span>{{ currentXP }} / {{ maxXP }}</span>
-        </div>
-        <div class="fc-xp-track">
-            <div class="fc-xp-fill" [style.width.%]="xpPercent"></div>
+        <div class="fc-xp-labels fc-camera-zone">
+            <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Actualizar PR en vídeo">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Actualizar PR</span>
+            </a>
+            <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Validar PR en vídeo">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Validar PR</span>
+            </a>
         </div>
     </div>
 
@@ -108,7 +100,15 @@
                         <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn">📞</a>
                         <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener"
                             class="fc-gym-action-btn">🌐</a>
-                        <span class="fc-gym-dist-badge">{{ formatDistance(gym.distanceM) }}</span>
+                        <button class="fc-gym-action-btn" 
+                                *ngIf="gym.distanceM <= 150 && !isVisited(gym.name)"
+                                (click)="visitGym(gym)" 
+                                [disabled]="isVisiting(gym.id)"
+                                title="Marcar como visitado">
+                            📍
+                        </button>
+                        <span class="fc-gym-dist-badge" *ngIf="isVisited(gym.name)" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">✓ Visitado</span>
+                        <span class="fc-gym-dist-badge" *ngIf="!isVisited(gym.name)">{{ formatDistance(gym.distanceM) }}</span>
                     </div>
                 </div>
             </ng-container>
@@ -122,12 +122,12 @@
 
 <style>
     /* ── Variables ────────────────────────────────────────── */
-    :root {
-        --bg: #0b0f1c;
-        --surface: rgba(255, 255, 255, 0.06);
+    :host {
+        --bg: #000000;
+        --surface: rgba(255, 255, 255, 0.05);
         --border: rgba(255, 255, 255, 0.1);
-        --cyan: #06b6d4;
-        --text: #e2e8f0;
+        --cyan: #22d3ee;
+        --text: #ffffff;
         --muted: #94a3b8;
     }
 
@@ -153,22 +153,34 @@
 
     /* ── TOP BAR ──────────────────────────────────────────── */
     .fc-topbar {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
-        justify-content: space-between;
         padding: 48px 16px 12px;
         gap: 8px;
     }
 
     .fc-trainer {
+        justify-self: start;
         display: flex;
         align-items: center;
         gap: 10px;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.12); /* Más grisáceo */
         border: 1px solid var(--border);
         border-radius: 40px;
         padding: 6px 14px 6px 6px;
         flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .fc-trainer:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-1px);
+    }
+
+    .fc-trainer:active {
+        transform: scale(0.98);
     }
 
     .fc-avatar {
@@ -180,6 +192,13 @@
         align-items: center;
         justify-content: center;
         font-size: 18px;
+        overflow: hidden; /* Para que la imagen respete el redondeo */
+    }
+
+    .fc-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .fc-name {
@@ -193,6 +212,8 @@
     }
 
     .fc-logo {
+        justify-self: center;
+        transform: translateX(10px); /* Ajustado a 10px según feedback */
         font-size: 18px;
         font-weight: 900;
         letter-spacing: 1px;
@@ -203,59 +224,82 @@
         color: var(--cyan);
     }
 
-    .fc-bell {
-        position: relative;
-        width: 38px;
-        height: 38px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        font-size: 16px;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-
-    .fc-dot {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        width: 7px;
-        height: 7px;
-        background: #ef4444;
-        border-radius: 50%;
-        border: 1.5px solid var(--bg);
-    }
+    /* ── BELL / CAMERA ────────────────────────────────────── */
 
     /* ── XP ───────────────────────────────────────────────── */
     .fc-xp {
         padding: 0 16px 8px;
     }
 
-    .fc-xp-labels {
+    .fc-camera-zone {
         display: flex;
         justify-content: space-between;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin-bottom: 4px;
+        align-items: center;
+        margin-bottom: 8px;
     }
 
-    .fc-xp-labels span:last-child {
-        color: var(--cyan);
-    }
-
-    .fc-xp-track {
-        height: 5px;
-        background: rgba(255, 255, 255, .1);
-        border-radius: 20px;
+    .fc-camera-action {
+        width: 42%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(34, 211, 238, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        border-radius: 18px;
+        padding: 10px 8px;
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
         overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.05);
     }
 
-    .fc-xp-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--cyan), #3b82f6);
-        border-radius: 20px;
+    .fc-camera-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .fc-camera-action:hover {
+        transform: translateY(-3px) scale(1.02);
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.6);
+        box-shadow: 
+            inset 0 0 15px rgba(34, 211, 238, 0.1),
+            0 8px 25px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-camera-action:hover::before {
+        opacity: 1;
+    }
+
+    .fc-cam-label {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-btn-emoji {
+        display: block;
+        font-size: 28px;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5));
+    }
+
+    .fc-cam-icon {
+        font-size: 16px;
     }
 
     /* ── STATS ────────────────────────────────────────────── */
@@ -348,6 +392,31 @@
         z-index: 2;
         position: relative;
         box-shadow: 0 0 16px rgba(59, 130, 246, .6);
+    }
+
+    .fc-camera-btn {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: white;
+        border-radius: 50%;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .fc-camera-btn:hover {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        transform: translateY(-1px);
+    }
+
+    .fc-camera-btn:active {
+        transform: scale(0.94);
     }
 
     .fc-pin-pulse {
@@ -487,11 +556,17 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.08); /* Un pelín más claro que el surface base */
         border: 1px solid var(--border);
         border-left: 3px solid var(--accent);
         border-radius: 14px;
         padding: 12px;
+        transition: transform 0.2s;
+    }
+
+    .fc-gym-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .fc-gym-emoji {
