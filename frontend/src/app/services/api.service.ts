@@ -16,6 +16,10 @@ export class ApiService {
         return this.http.post(`${API_URL}/auth/login`, { email, password });
     }
 
+    googleCallback(accessToken: string, refreshToken: string): Observable<any> {
+        return this.http.post(`${API_URL}/auth/google/callback`, { access_token: accessToken, refresh_token: refreshToken });
+    }
+
     register(email: string, password: string, username: string, handle: string): Observable<any> {
         return this.http.post(`${API_URL}/auth/register`, { email, password, username, handle });
     }

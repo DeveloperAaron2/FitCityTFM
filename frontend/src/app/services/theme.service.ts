@@ -6,17 +6,10 @@ export type AppTheme = 'moon' | 'sun' | 'default';
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
     private platformId = inject(PLATFORM_ID);
-
-    theme = signal<AppTheme>('moon');
+    theme = signal<AppTheme>(this.getInitialTheme());
 
     constructor() {
-        // Load initial theme from localStorage if available
-        if (isPlatformBrowser(this.platformId)) {
-            const saved = localStorage.getItem('fitcity-theme') as AppTheme;
-            if (saved) {
-                this.theme.set(saved);
-            }
-        }
+        this.applyTheme();
 
         effect(() => {
             if (isPlatformBrowser(this.platformId)) {
@@ -29,7 +22,7 @@ export class ThemeService {
         // Listen for system theme changes (Windows, Mac, Android, iOS)
         if (isPlatformBrowser(this.platformId)) {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            
+
             // Modern browsers
             if (mediaQuery.addEventListener) {
                 mediaQuery.addEventListener('change', () => this.handleSystemChange());
@@ -38,6 +31,13 @@ export class ThemeService {
                 (mediaQuery as any).addListener(() => this.handleSystemChange());
             }
         }
+    }
+
+    private getInitialTheme(): AppTheme {
+        if (isPlatformBrowser(this.platformId)) {
+            return (localStorage.getItem('fitcity-theme') as AppTheme) || 'default';
+        }
+        return 'default';
     }
 
     private handleSystemChange() {

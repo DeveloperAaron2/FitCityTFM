@@ -1,16 +1,57 @@
-<nav class="fixed bottom-0 left-0 right-0 w-full z-[1000] border-t-2 border-cyan-400 bg-gray-950 shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
+<nav
+    class="fixed bottom-0 left-0 right-0 w-full z-[1000] border-t-2 border-cyan-400 bg-gray-950 shadow-[0_-4px_24px_rgba(0,0,0,0.6)]">
     <div class="flex items-center justify-around px-4 h-16">
-
         <div *ngFor="let link of navLinks" class="relative flex items-center justify-center">
             <a [routerLink]="link.path" routerLinkActive="active-link"
                 class="flex flex-col items-center justify-center w-12 h-12 rounded-full transition-all duration-300 hover:scale-110 group">
                 <!-- Círculo para ruta activa (azul cielo claro) -->
-                <div class="active-circle absolute inset-0 bg-sky-500/60 rounded-full opacity-0 transition-all duration-300 shadow-[0_0_10px_rgba(14,165,233,0.5)]"></div>
+                <div
+                    class="active-circle absolute inset-0 bg-sky-500/60 rounded-full opacity-0 transition-all duration-300 shadow-[0_0_10px_rgba(14,165,233,0.5)]">
+                </div>
                 <!-- Círculo para hover -->
-                <div class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_12px_rgba(56,189,248,0.6)]"></div>
-                <span class="relative z-10 text-xl transition-all duration-300 group-hover:text-2xl group-hover:drop-shadow-md">{{ link.icon }}</span>
+                <div
+                    class="absolute inset-0 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-[0_0_12px_rgba(56,189,248,0.6)]">
+                </div>
+
+                <span
+                    class="relative z-10 transition-all duration-300 group-hover:drop-shadow-md flex items-center justify-center nav-icon-wrap"
+                    [ngSwitch]="link.icon">
+                    <svg *ngSwitchCase="'home'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6">
+                        <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                        <polyline points="9 22 9 12 15 12 15 22" />
+                    </svg>
+                    <svg *ngSwitchCase="'ranking'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                        width="24" height="24" class="w-6 h-6">
+                        <path
+                            d="M12 14V17M12 14C9.58104 14 7.56329 12.2822 7.10002 10M12 14C14.419 14 16.4367 12.2822 16.9 10M17 5H19.75C19.9823 5 20.0985 5 20.1951 5.01921C20.5918 5.09812 20.9019 5.40822 20.9808 5.80491C21 5.90151 21 6.01767 21 6.25C21 6.94698 21 7.29547 20.9424 7.58527C20.7056 8.77534 19.7753 9.70564 18.5853 9.94236C18.2955 10 17.947 10 17.25 10H17H16.9M7 5H4.25C4.01767 5 3.90151 5 3.80491 5.01921C3.40822 5.09812 3.09812 5.40822 3.01921 5.80491C3 5.90151 3 6.01767 3 6.25C3 6.94698 3 7.29547 3.05764 7.58527C3.29436 8.77534 4.22466 9.70564 5.41473 9.94236C5.70453 10 6.05302 10 6.75 10H7H7.10002M12 17C12.93 17 13.395 17 13.7765 17.1022C14.8117 17.3796 15.6204 18.1883 15.8978 19.2235C16 19.605 16 20.07 16 21H8C8 20.07 8 19.605 8.10222 19.2235C8.37962 18.1883 9.18827 17.3796 10.2235 17.1022C10.605 17 11.07 17 12 17ZM7.10002 10C7.03443 9.67689 7 9.34247 7 9V4.57143C7 4.03831 7 3.77176 7.09903 3.56612C7.19732 3.36201 7.36201 3.19732 7.56612 3.09903C7.77176 3 8.03831 3 8.57143 3H15.4286C15.9617 3 16.2282 3 16.4339 3.09903C16.638 3.19732 16.8027 3.36201 16.901 3.56612C17 3.77176 17 4.03831 17 4.57143V9C17 9.34247 16.9656 9.67689 16.9 10"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        </path>
+                    </svg>
+                    <svg *ngSwitchCase="'map'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6">
+                        <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    <svg *ngSwitchCase="'missions'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6">
+                        <path d="M6 15H4a2 2 0 0 1-2-2V11a2 2 0 0 1 2-2h2" />
+                        <path d="M18 9h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2" />
+                        <line x1="6" y1="12" x2="18" y2="12" />
+                        <path d="M6 5v14" />
+                        <path d="M18 5v14" />
+                    </svg>
+                    <svg *ngSwitchCase="'profile'" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="w-6 h-6">
+                        <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                        <circle cx="12" cy="7" r="4" />
+                    </svg>
+                </span>
             </a>
         </div>
-
     </div>
 </nav>

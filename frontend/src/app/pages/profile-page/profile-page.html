@@ -1,241 +1,257 @@
 <div class="pr-page" [class.theme-moon]="theme() === 'moon'" [class.theme-sun]="theme() === 'sun'">
+    <div class="pr-page" [class.theme-moon]="theme() === 'moon'" [class.theme-sun]="theme() === 'sun'">
 
-    <!-- ══ HERO / AVATAR ═══════════════════════════════════ -->
-    <div class="pr-hero">
-        <div class="pr-hero-bg"></div>
+        <!-- ══ HERO / AVATAR ═══════════════════════════════════ -->
+        <div class="pr-hero">
+            <div class="pr-hero-bg"></div>
 
-        <!-- Selector de Tema — esquina superior izquierda -->
-        <div class="pr-theme-wrap">
-            <button
-                type="button"
-                class="pr-theme-toggle"
-                [class.is-sun]="theme() === 'sun'"
-                [class.is-default]="theme() === 'default'"
-                (click)="toggleTheme(); $event.stopPropagation()"
-                title="Cambiar tema">
-                <span class="pr-theme-icon">
-                    {{ theme() === 'moon' ? '🌙' : theme() === 'sun' ? '☀️' : '🤖' }}
-                </span>
-            </button>
+            <!-- Selector de Tema — esquina superior izquierda -->
+            <div class="pr-theme-wrap">
+                <button type="button" class="pr-theme-toggle" [class.is-sun]="theme() === 'sun'"
+                    [class.is-default]="theme() === 'default'" (click)="toggleTheme(); $event.stopPropagation()"
+                    title="Cambiar tema">
+                    <span class="pr-theme-icon">
+                        {{ theme() === 'moon' ? '🌙' : theme() === 'sun' ? '☀️' : '🤖' }}
+                    </span>
+                </button>
 
-            <!-- Dropdown menu -->
-            <div class="pr-theme-menu" *ngIf="showThemeMenu()" (click)="$event.stopPropagation()">
-                <button class="pr-theme-option" [class.selected]="theme() === 'default'" (click)="selectTheme('default')">
-                    <span class="pr-option-emoji">🤖</span>
-                    <span class="pr-option-label">Tema por Defecto</span>
-                    <span class="pr-option-check" *ngIf="theme() === 'default'">✓</span>
+                <!-- Dropdown menu -->
+                <div class="pr-theme-menu" *ngIf="showThemeMenu()" (click)="$event.stopPropagation()">
+                    <button class="pr-theme-option" [class.selected]="theme() === 'default'"
+                        (click)="selectTheme('default')">
+                        <span class="pr-option-emoji">🤖</span>
+                        <span class="pr-option-label">Tema por Defecto</span>
+                        <span class="pr-option-check" *ngIf="theme() === 'default'">✓</span>
+                    </button>
+                    <button class="pr-theme-option" [class.selected]="theme() === 'moon'" (click)="selectTheme('moon')">
+                        <span class="pr-option-emoji">🌙</span>
+                        <span class="pr-option-label">Tema oscuro</span>
+                        <span class="pr-option-check" *ngIf="theme() === 'moon'">✓</span>
+                    </button>
+                    <button class="pr-theme-option" [class.selected]="theme() === 'sun'" (click)="selectTheme('sun')">
+                        <span class="pr-option-emoji">☀️</span>
+                        <span class="pr-option-label">Tema claro</span>
+                        <span class="pr-option-check" *ngIf="theme() === 'sun'">✓</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botón cerrar sesión: esquina superior derecha -->
+            <button class="pr-logout-btn" (click)="logout()">Cerrar Sesión</button>
+
+            <div class="pr-avatar-wrap">
+                <!-- Hidden file input for avatar selection -->
+                <input #fileInput type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:none"
+                    (change)="onAvatarChange($event)" />
+
+                <!-- Avatar button: click opens file picker -->
+                <button class="pr-avatar-btn" (click)="triggerFileInput()" [disabled]="uploading()"
+                    aria-label="Cambiar foto de perfil">
+                    <!-- Real avatar image -->
+                    <img *ngIf="avatarUrl && !uploading()" [src]="avatarUrl" #avatarImg alt="Avatar"
+                        class="pr-avatar-img" (error)="avatarImg.src=''; avatarImg.style.display='none'" />
+
+                    <!-- SVG fallback when no avatar set -->
+                    <div class="pr-avatar-placeholder" *ngIf="!avatarUrl && !uploading()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2z" />
+                            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z" />
+                        </svg>
+                    </div>
+
+                    <!-- Upload spinner -->
+                    <div class="pr-avatar-spinner" *ngIf="uploading()">
+                        <div class="pr-upload-spinner"></div>
+                    </div>
+
+                    <!-- Camera overlay (shows on hover when not uploading) -->
+                    <div class="pr-avatar-overlay" *ngIf="!uploading()">
+                        <span class="pr-camera-icon">📷</span>
+                    </div>
                 </button>
-                <button class="pr-theme-option" [class.selected]="theme() === 'moon'" (click)="selectTheme('moon')">
-                    <span class="pr-option-emoji">🌙</span>
-                    <span class="pr-option-label">Tema oscuro</span>
-                    <span class="pr-option-check" *ngIf="theme() === 'moon'">✓</span>
-                </button>
-                <button class="pr-theme-option" [class.selected]="theme() === 'sun'" (click)="selectTheme('sun')">
-                    <span class="pr-option-emoji">☀️</span>
-                    <span class="pr-option-label">Tema claro</span>
-                    <span class="pr-option-check" *ngIf="theme() === 'sun'">✓</span>
-                </button>
+
+                <div class="pr-level-badge">Nv.{{ level }}</div>
+            </div>
+
+            <h1 class="pr-username">{{ userName }}</h1>
+            <p class="pr-handle">{{ userHandle }}</p>
+
+            <!-- Upload error message -->
+            <p class="pr-upload-error" *ngIf="uploadError()">{{ uploadError() }}</p>
+
+            <div class="pr-meta-row">
+                <span class="pr-chip">{{ title }}</span>
+                <span class="pr-chip pr-chip--muted">Desde {{ memberSince }}</span>
             </div>
         </div>
 
-        <!-- Botón cerrar sesión: esquina superior derecha -->
-        <button class="pr-logout-btn" (click)="logout()">Cerrar Sesión</button>
+        <!-- ══ centred content block ════════════════════════════ -->
+        <div class="pr-inner">
 
-        <div class="pr-avatar-wrap">
-            <!-- Hidden file input for avatar selection -->
-            <input
-              #fileInput
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              style="display:none"
-              (change)="onAvatarChange($event)"
-            />
+            <!-- ══ XP BAR ═══════════════════════════════════════════ -->
+            <div class="pr-xp-card">
+                <div class="pr-xp-labels">
+                    <span>⭐ Experiencia</span>
+                    <span class="pr-xp-nums">{{ currentXP | number }} / {{ maxXP | number }} XP</span>
+                </div>
+                <div class="pr-xp-track">
+                    <div class="pr-xp-fill" [style.width.%]="xpPercent">
+                        <span class="pr-xp-glow"></span>
+                    </div>
+                </div>
+                <p class="pr-xp-hint">{{ maxXP - currentXP | number }} XP para el nivel {{ level + 1 }}</p>
+            </div>
 
-            <!-- Avatar button: click opens file picker -->
-            <button class="pr-avatar-btn" (click)="triggerFileInput()" [disabled]="uploading()" aria-label="Cambiar foto de perfil">
-                <!-- Real avatar image -->
-                <img
-                  *ngIf="avatarUrl && !uploading()"
-                  [src]="avatarUrl"
-                  #avatarImg
-                  alt="Avatar"
-                  class="pr-avatar-img"
-                  (error)="avatarImg.src=''; avatarImg.style.display='none'"
-                />
-
-                <!-- SVG fallback when no avatar set -->
-                <div class="pr-avatar-placeholder" *ngIf="!avatarUrl && !uploading()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2a5 5 0 1 1 0 10A5 5 0 0 1 12 2z" />
-                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7H4z" />
-                    </svg>
+            <!-- ══ LIFTING PRs ═══════════════════════════════════════ -->
+            <section class="pr-section">
+                <div class="pr-section-header">
+                    <h2 class="pr-section-title">🏆 Marcas personales</h2>
                 </div>
 
-                <!-- Upload spinner -->
-                <div class="pr-avatar-spinner" *ngIf="uploading()">
-                    <div class="pr-upload-spinner"></div>
+                <div *ngIf="liftingPRs().length === 0" class="pr-empty">
+                    Aún no tienes records. ¡Empieza a entrenar!
                 </div>
 
-                <!-- Camera overlay (shows on hover when not uploading) -->
-                <div class="pr-avatar-overlay" *ngIf="!uploading()">
-                    <span class="pr-camera-icon">📷</span>
+                <div class="pr-pr-grid">
+                    <div class="pr-pr-card" *ngFor="let pr of liftingPRs()" [style.--acc]="pr.accentColor">
+                        <div class="pr-pr-icon">{{ pr.emoji }}</div>
+                        <div class="pr-pr-body">
+                            <p class="pr-pr-name">{{ pr.name }}</p>
+                            <p class="pr-pr-date">{{ pr.date }}</p>
+                        </div>
+                        <div class="pr-pr-weight">
+                            <span class="pr-pr-kg">{{ pr.weightKg }}</span>
+                            <span class="pr-pr-unit">kg</span>
+                        </div>
+                    </div>
                 </div>
-            </button>
+            </section>
 
-            <div class="pr-level-badge">Nv.{{ level }}</div>
-        </div>
+            <!-- ══ VISITED GYMS ══════════════════════════════════════ -->
+            <section class="pr-section">
+                <div class="pr-section-header">
+                    <h2 class="pr-section-title">📍 Gimnasios visitados</h2>
+                    <span class="pr-total-badge">{{ totalVisits() }} visitas</span>
+                </div>
 
-        <h1 class="pr-username">{{ userName }}</h1>
-        <p class="pr-handle">{{ userHandle }}</p>
+                <div *ngIf="visitedGyms().length === 0" class="pr-empty">
+                    Empieza a visitar gimnasios para ver tu historial aquí.
+                </div>
 
-        <!-- Upload error message -->
-        <p class="pr-upload-error" *ngIf="uploadError()">{{ uploadError() }}</p>
+                <div class="pr-gym-list">
+                    <div class="pr-gym-row" *ngFor="let gym of visitedGyms(); let i = index">
+                        <span class="pr-gym-pos">{{ i + 1 }}</span>
+                        <div class="pr-gym-emoji">{{ gym.emoji }}</div>
+                        <div class="pr-gym-info">
+                            <p class="pr-gym-name">{{ gym.name }}</p>
+                            <p class="pr-gym-last">Última visita: {{ gym.lastVisit }}</p>
+                        </div>
+                        <div class="pr-gym-visits">
+                            <span class="pr-gym-visits-num">{{ gym.visits }}</span>
+                            <span class="pr-gym-visits-lbl">visitas</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div class="pr-meta-row">
-            <span class="pr-chip">{{ title }}</span>
-            <span class="pr-chip pr-chip--muted">Desde {{ memberSince }}</span>
-        </div>
+
+
+
+        </div><!-- /pr-inner -->
+
     </div>
 
-    <!-- ══ centred content block ════════════════════════════ -->
-    <div class="pr-inner">
+    <style>
+        .pr-empty {
+            color: #64748b;
+            font-size: 13px;
+            padding: 16px 0;
+            text-align: center;
+        }
 
-        <!-- ══ XP BAR ═══════════════════════════════════════════ -->
-        <div class="pr-xp-card">
-            <div class="pr-xp-labels">
-                <span>⭐ Experiencia</span>
-                <span class="pr-xp-nums">{{ currentXP | number }} / {{ maxXP | number }} XP</span>
-            </div>
-            <div class="pr-xp-track">
-                <div class="pr-xp-fill" [style.width.%]="xpPercent">
-                    <span class="pr-xp-glow"></span>
-                </div>
-            </div>
-            <p class="pr-xp-hint">{{ maxXP - currentXP | number }} XP para el nivel {{ level + 1 }}</p>
-        </div>
+        .pr-logout-btn {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 5px 12px;
+            background: #d1d5db;
+            border: none;
+            border-radius: 6px;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            padding: 5px 12px;
+            background: #d1d5db;
+            border: none;
+            border-radius: 6px;
+            color: #991b1b;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            z-index: 10;
+            animation: pr-pulse-red 3s infinite ease-in-out;
+            transition: background .2s, transform .15s;
+            z-index: 10;
+            animation: pr-pulse-red 3s infinite ease-in-out;
+            transition: background .2s, transform .15s;
+        }
 
-        <!-- ══ LIFTING PRs ═══════════════════════════════════════ -->
-        <section class="pr-section">
-            <div class="pr-section-header">
-                <h2 class="pr-section-title">🏆 Marcas personales</h2>
-            </div>
+        @keyframes pr-pulse-red {
 
-            <div *ngIf="liftingPRs().length === 0" class="pr-empty">
-                Aún no tienes records. ¡Empieza a entrenar!
-            </div>
+            0%,
+            100% {
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
 
-            <div class="pr-pr-grid">
-                <div class="pr-pr-card" *ngFor="let pr of liftingPRs()" [style.--acc]="pr.accentColor">
-                    <div class="pr-pr-icon">{{ pr.emoji }}</div>
-                    <div class="pr-pr-body">
-                        <p class="pr-pr-name">{{ pr.name }}</p>
-                        <p class="pr-pr-date">{{ pr.date }}</p>
-                    </div>
-                    <div class="pr-pr-weight">
-                        <span class="pr-pr-kg">{{ pr.weightKg }}</span>
-                        <span class="pr-pr-unit">kg</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+            50% {
+                box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+            }
+        }
 
-        <!-- ══ VISITED GYMS ══════════════════════════════════════ -->
-        <section class="pr-section">
-            <div class="pr-section-header">
-                <h2 class="pr-section-title">📍 Gimnasios visitados</h2>
-                <span class="pr-total-badge">{{ totalVisits() }} visitas</span>
-            </div>
+        .pr-logout-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+            animation-play-state: paused;
+            box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
+            background: #e5e7eb;
+            transform: translateY(-1px);
+            animation-play-state: paused;
+            box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
+        }
 
-            <div *ngIf="visitedGyms().length === 0" class="pr-empty">
-                Empieza a visitar gimnasios para ver tu historial aquí.
-            </div>
+        /* Video Uploader Button */
+        .pr-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
 
-            <div class="pr-gym-list">
-                <div class="pr-gym-row" *ngFor="let gym of visitedGyms(); let i = index">
-                    <span class="pr-gym-pos">{{ i + 1 }}</span>
-                    <div class="pr-gym-emoji">{{ gym.emoji }}</div>
-                    <div class="pr-gym-info">
-                        <p class="pr-gym-name">{{ gym.name }}</p>
-                        <p class="pr-gym-last">Última visita: {{ gym.lastVisit }}</p>
-                    </div>
-                    <div class="pr-gym-visits">
-                        <span class="pr-gym-visits-num">{{ gym.visits }}</span>
-                        <span class="pr-gym-visits-lbl">visitas</span>
-                    </div>
-                </div>
-            </div>
-        </section>
+        .pr-btn-navigate {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+        }
 
-
-
-    </div><!-- /pr-inner -->
-
-</div>
-
-<style>
-    .pr-empty {
-        color: #64748b;
-        font-size: 13px;
-        padding: 16px 0;
-        text-align: center;
-    }
-
-    .pr-logout-btn {
-        position: absolute;
-        top: 14px;
-        right: 14px;
-        padding: 5px 12px;
-        background: #d1d5db;
-        border: none;
-        border-radius: 6px;
-        color: #991b1b;
-        font-size: 10px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.02em;
-        cursor: pointer;
-        z-index: 10;
-        animation: pr-pulse-red 3s infinite ease-in-out;
-        transition: background .2s, transform .15s;
-    }
-
-    @keyframes pr-pulse-red {
-        0%, 100% { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); }
-        50% { box-shadow: 0 0 8px rgba(220, 38, 38, 0.4); }
-    }
-
-    .pr-logout-btn:hover {
-        background: #e5e7eb;
-        transform: translateY(-1px);
-        animation-play-state: paused;
-        box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
-    }
-
-    /* Video Uploader Button */
-    .pr-section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 24px;
-    }
-
-    .pr-btn-navigate {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background: linear-gradient(135deg, #3b82f6, #60a5fa);
-        color: white;
-        padding: 8px 16px;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        transition: transform 0.2s, opacity 0.2s;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-    }
-
-    .pr-btn-navigate:active {
-        transform: scale(0.96);
-    }
-</style>
+        .pr-btn-navigate:active {
+            transform: scale(0.96);
+        }
+    </style>

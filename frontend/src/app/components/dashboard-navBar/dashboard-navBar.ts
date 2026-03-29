@@ -16,10 +16,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 export class DashboardNavBar {
   // Lista de enlaces para mantener el HTML limpio
   navLinks = [
-    { label: 'Inicio', path: '/dashboard', icon: '🏠' },
-    { label: 'Ranking', path: '/ranking', icon: '📖' },
-    { label: 'Mapa', path: '/mapa', icon: '📍' },
-    { label: 'Misiones', path: '/missions', icon: '⚔️' },
-    { label: 'Perfil', path: '/profile', icon: '👤' }
+    { label: 'Inicio', path: '/dashboard', icon: 'home' },
+    { label: 'Ranking', path: '/ranking', icon: 'ranking' },
+    { label: 'Mapa', path: '/mapa', icon: 'map' },
+    { label: 'Misiones', path: '/missions', icon: 'missions' },
+    { label: 'Perfil', path: '/profile', icon: 'profile' }
   ];
 }

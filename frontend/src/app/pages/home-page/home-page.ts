@@ -24,7 +24,7 @@ export class HomePage {
         '/profile'
     ];
 
-    constructor(private router: Router) {}
+    constructor(private router: Router) { }
 
     @HostListener('touchstart', ['$event'])
     onTouchStart(event: TouchEvent) {
@@ -46,7 +46,12 @@ export class HomePage {
             // Check if the scroll is mostly horizontal (minimize interference with vertical scrolling)
             if (Math.abs(deltaX) > 50 && Math.abs(deltaY) < 40) {
                 const currentUrl = this.router.url;
-                
+
+                // Disable swipe navigation on the Map page
+                if (currentUrl.includes('/mapa')) {
+                    return;
+                }
+
                 // Find current page index in the array
                 const currentIndex = this.pageOrder.findIndex(path => currentUrl.includes(path));
 

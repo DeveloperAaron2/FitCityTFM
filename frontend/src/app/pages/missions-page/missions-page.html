@@ -49,16 +49,13 @@
     <div class="ms-roadmap-wrap">
         <div class="ms-roadmap">
             <ng-container *ngFor="let lv of roadmapLevels; let last = last">
-                <div class="ms-roadmap-node"
-                    [class.ms-roadmap-node--done]="lv < level"
-                    [class.ms-roadmap-node--current]="lv === level"
-                    [class.ms-roadmap-node--locked]="lv > level">
+                <div class="ms-roadmap-node" [class.ms-roadmap-node--done]="lv < level"
+                    [class.ms-roadmap-node--current]="lv === level" [class.ms-roadmap-node--locked]="lv > level">
                     <span *ngIf="lv < level">✓</span>
                     <span *ngIf="lv === level">{{ lv }}</span>
                     <span *ngIf="lv > level">{{ lv }}</span>
                 </div>
-                <div *ngIf="!last" class="ms-roadmap-line"
-                    [class.ms-roadmap-line--done]="lv < level"></div>
+                <div *ngIf="!last" class="ms-roadmap-line" [class.ms-roadmap-line--done]="lv < level"></div>
             </ng-container>
         </div>
         <p class="ms-roadmap-hint">{{ maxXP - currentXP | number }} XP para el nivel {{ level + 1 }}</p>
@@ -82,10 +79,7 @@
 
         <!-- Mission cards -->
         <div class="ms-missions-grid" *ngIf="!loading()">
-            <div
-                class="ms-mission-card"
-                *ngFor="let m of missions()"
-                [class.ms-mission-card--done]="m.completed">
+            <div class="ms-mission-card" *ngFor="let m of missions()" [class.ms-mission-card--done]="m.completed">
 
                 <div class="ms-mission-emoji">{{ m.emoji }}</div>
 
@@ -99,8 +93,7 @@
                     <!-- Progress bar -->
                     <div class="ms-mission-bar-wrap">
                         <div class="ms-mission-bar-track">
-                            <div class="ms-mission-bar-fill"
-                                [class.ms-mission-bar-fill--done]="m.completed"
+                            <div class="ms-mission-bar-fill" [class.ms-mission-bar-fill--done]="m.completed"
                                 [style.width.%]="progressPercent(m)">
                             </div>
                         </div>
@@ -113,9 +106,7 @@
                 <!-- Badge or Claim button -->
                 <div class="ms-mission-action">
                     <div *ngIf="m.completed" class="ms-mission-badge">✅</div>
-                    <button
-                        *ngIf="!m.completed && m.user_progress >= m.goal"
-                        class="ms-claim-btn"
+                    <button *ngIf="!m.completed && m.user_progress >= m.goal" class="ms-claim-btn"
                         (click)="claimMission(m)">
                         ¡Reclamar!
                     </button>
