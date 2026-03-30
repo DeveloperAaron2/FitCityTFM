@@ -6,16 +6,75 @@ body {
 }
 
 /* ── Barra de navegación inferior ─────────────────────── */
+
+/* Modo oscuro / defecto: fondo oscuro, iconos blancos */
 body.theme-moon nav.fixed.bottom-0,
 body:not(.theme-sun) nav.fixed.bottom-0 {
-    background-color: #000000 !important;
+    background-color: #111827 !important;
+    border-top-color: #22d3ee !important;
 }
 
-body.theme-sun nav.fixed.bottom-0 {
-    background-color: #f0f4f8 !important;
-    border-top-color: #0284c7 !important;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.08) !important;
+/* Iconos blancos en modo oscuro */
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon {
+    color: #e2e8f0 !important;
 }
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg {
+    stroke: #e2e8f0 !important;
+}
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg path,
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg polyline,
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg circle,
+body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg line {
+    stroke: #e2e8f0 !important;
+}
+
+/* Modo claro: fondo blanco, iconos oscuros */
+body.theme-sun nav.fixed.bottom-0 {
+    background-color: #ffffff !important;
+    border-top-color: rgba(0,0,0,0.1) !important;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.06) !important;
+}
+
+/* Iconos en modo claro */
+body.theme-sun nav.fixed.bottom-0 .nav-icon {
+    color: #475569 !important;
+}
+body.theme-sun nav.fixed.bottom-0 .nav-icon svg {
+    stroke: #475569 !important;
+}
+body.theme-sun nav.fixed.bottom-0 .nav-icon svg path,
+body.theme-sun nav.fixed.bottom-0 .nav-icon svg polyline,
+body.theme-sun nav.fixed.bottom-0 .nav-icon svg circle,
+body.theme-sun nav.fixed.bottom-0 .nav-icon svg line {
+    stroke: #475569 !important;
+}
+
+/* Icono activo en modo oscuro */
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon,
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg path,
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg polyline,
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg circle,
+body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg line {
+    stroke: #ffffff !important;
+}
+
+/* Icono activo en modo claro */
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon,
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg {
+    color: #0284c7 !important;
+    stroke: #0284c7 !important;
+}
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg path,
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg polyline,
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg circle,
+body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg line {
+    stroke: #0284c7 !important;
+}
+
 
 /* ═══════════════════════════════════════════════════════════
    TEMA SOL — Overrides globales para todas las páginas

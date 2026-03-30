@@ -1,41 +1,48 @@
+/*
+  ESTRATEGIA:
+  - stroke="currentColor" en el SVG hereda el CSS `color` del padre
+  - Controlamos el color del .nav-icon span via variable CSS
+  - Angular encapsula los estilos del componente pero sí llega
+    a elementos directos del template (incluidos los hijos de *ngSwitchCase)
+*/
+
 :host {
-    /* Variables para Modo Oscuro (Predeterminado) */
-    --nav-bg: #030712; /* gray-950 */
-    --nav-border: #22d3ee; /* core cyan (azul claro/cyan) */
-    --nav-icon: #ffffff;
-    --nav-active-glow: rgba(56, 189, 248, 0.4); 
+    /* Modo oscuro / defecto */
+    --nav-bg: #111827;
+    --nav-border: #22d3ee;
+    --icon-color: #e2e8f0;      /* slate-200, casi blanco */
+    --icon-active: #ffffff;
+    --nav-active-glow: rgba(56, 189, 248, 0.4);
     --nav-active-shadow: rgba(56, 189, 248, 0.3);
-    --nav-hover-from: #38bdf8; 
-    --nav-hover-to: #2563eb; 
+    --nav-hover-from: #38bdf8;
+    --nav-hover-to: #2563eb;
     --nav-hover-shadow: rgba(56, 189, 248, 0.4);
     --nav-shadow: rgba(0, 0, 0, 0.6);
 }
 
-:host-context(.theme-sun) {
-    /* Variables para Modo Claro */
-    --nav-bg: #f0f4f8; 
-    --nav-border: #22d3ee; /* core cyan (azul claro/cyan) */
-    --nav-icon: #1e293b; 
-    --nav-active-glow: rgba(14, 165, 233, 0.2);
+:host-context(body.theme-sun) {
+    /* Modo claro */
+    --nav-bg: #ffffff;
+    --nav-border: rgba(0, 0, 0, 0.1);
+    --icon-color: #475569;      /* slate-600 */
+    --icon-active: #0284c7;
+    --nav-active-glow: rgba(14, 165, 233, 0.15);
     --nav-active-shadow: rgba(14, 165, 233, 0.1);
     --nav-hover-from: #7dd3fc;
     --nav-hover-to: #38bdf8;
     --nav-hover-shadow: rgba(14, 165, 233, 0.2);
-    --nav-shadow: rgba(0, 0, 0, 0.08); /* Sombra mucho más suave para modo claro */
+    --nav-shadow: rgba(0, 0, 0, 0.06);
 }
 
+/* ── Contenedor ──────────────────────────────── */
 .nav-container {
-    background-color: var(--nav-bg);
-    border-top: 2px solid var(--nav-border);
+    background-color: var(--nav-bg) !important;
+    border-top: 2px solid var(--nav-border) !important;
     box-shadow: 0 -4px 24px var(--nav-shadow);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
-.nav-icon-wrap {
-    color: var(--nav-icon);
-    transition: color 0.4s ease;
-}
-
+/* ── Círculos ────────────────────────────────── */
 .active-circle {
     background-color: var(--nav-active-glow);
     box-shadow: 0 0 10px var(--nav-active-shadow);
@@ -46,16 +53,27 @@
     box-shadow: 0 0 12px var(--nav-hover-shadow);
 }
 
-/* Forzar opacidad en el círculo activo cuando la ruta coincide */
 :host ::ng-deep .active-link .active-circle {
     opacity: 1 !important;
 }
 
-/* Mantener iconos blancos sobre el fondo de brillo activo para mejor contraste en ambos modos si es necesario */
-:host-context(.theme-moon) ::ng-deep .active-link .nav-icon-wrap {
-    color: #ffffff;
+/* ── Iconos ──────────────────────────────────── */
+/*
+  `color` en .nav-icon se propaga via stroke="currentColor" en el SVG.
+  Angular sí puede poner el atributo de encapsulación en el span,
+  y el SVG hijo hereda el color CSS via currentColor.
+*/
+.nav-icon {
+    color: var(--icon-color);
+    transition: color 0.3s ease;
 }
 
-:host-context(.theme-sun) ::ng-deep .active-link .nav-icon-wrap {
-    color: #0284c7;
+/* Estado activo */
+:host ::ng-deep .active-link .nav-icon {
+    color: var(--icon-active);
+}
+
+/* Hover */
+.group:hover .nav-icon {
+    color: var(--icon-active);
 }

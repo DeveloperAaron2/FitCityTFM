@@ -75,6 +75,14 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
     }
 
+    /** Standalone AI validation — no user/gym association, no storage */
+    validateVideoOnly(videoFile: File, exerciseName: string): Observable<any> {
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        formData.append('exercise_name', exerciseName);
+        return this.http.post(`${API_URL}/validate-video`, formData);
+    }
+
     // ── Challenges ────────────────────────────────────────────────────────────
 
     getDailyChallenge(): Observable<any> {

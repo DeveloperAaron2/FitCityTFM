@@ -1,14 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service';
 import { AuthService } from '../../services/auth.service';
 import { RouterLink } from '@angular/router';
 import { ApiService } from '../../services/api.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -20,6 +21,13 @@ export class DashboardPage implements OnInit {
 
   private visitedTodayGyms = new Set<string>();
   visitingGyms = new Set<number>();
+
+  // ── Validate-only modal state ──────────────────────────────────────────────
+  showValidateModal = signal(false);
+  validateExercise = signal('');
+  validateFile = signal<File | null>(null);
+  isValidating = signal(false);
+  validateResult = signal<{ success: boolean; message: string; reason?: string; confidence?: string } | null>(null);
 
   // Shortcuts for template
   get user() { return this.auth.user(); }
@@ -107,11 +115,61 @@ export class DashboardPage implements OnInit {
       error: (err) => {
         this.visitingGyms.delete(gym.id);
         if (err.status === 400) {
-          // If the backend says it's already visited, just sync the UI silently
           this.visitedTodayGyms.add(gym.name);
         } else {
           console.error('Error al registrar la visita:', err);
         }
+      }
+    });
+  }
+
+  // ── Validate-only modal methods ────────────────────────────────────────────
+
+  openValidateModal(): void {
+    this.validateExercise.set('');
+    this.validateFile.set(null);
+    this.validateResult.set(null);
+    this.isValidating.set(false);
+    this.showValidateModal.set(true);
+  }
+
+  closeValidateModal(): void {
+    this.showValidateModal.set(false);
+  }
+
+  onValidateFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.validateFile.set(input.files[0]);
+    }
+  }
+
+  submitValidateOnly(): void {
+    const file = this.validateFile();
+    const exercise = this.validateExercise().trim();
+
+    if (!file || !exercise) {
+      this.validateResult.set({ success: false, message: 'Selecciona un vídeo y un ejercicio.' });
+      return;
+    }
+
+    this.isValidating.set(true);
+    this.validateResult.set(null);
+
+    this.api.validateVideoOnly(file, exercise).subscribe({
+      next: (res) => {
+        this.isValidating.set(false);
+        this.validateResult.set({
+          success: res.is_valid,
+          message: res.message,
+          reason: res.reason,
+          confidence: res.confidence
+        });
+      },
+      error: (err) => {
+        this.isValidating.set(false);
+        const detail = err.error?.detail || 'Error al conectar con el servicio de validación.';
+        this.validateResult.set({ success: false, message: detail });
       }
     });
   }

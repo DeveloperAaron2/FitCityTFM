@@ -293,4 +293,85 @@
         cursor: not-allowed;
     }
 
+    /* ═══════════════════════════════════════════════════
+       THEME-SUN (Light Mode) overrides
+       ═══════════════════════════════════════════════════ */
+
+    :host-context(body.theme-sun) .auth-screen {
+        background: #f0f4f8;
+    }
+
+    :host-context(body.theme-sun) .auth-card {
+        background: #ffffff;
+        border-color: rgba(0,0,0,0.1);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    }
+
+    :host-context(body.theme-sun) .auth-logo {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .auth-logo span {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .auth-subtitle {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .auth-field label {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .auth-field input {
+        background: #f8fafc;
+        border-color: rgba(0,0,0,0.12);
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .auth-field input::placeholder {
+        color: #94a3b8;
+    }
+
+    :host-context(body.theme-sun) .auth-field input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+
+    :host-context(body.theme-sun) .password-toggle {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .password-toggle:hover {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .auth-divider {
+        color: #94a3b8;
+    }
+
+    :host-context(body.theme-sun) .auth-divider::before,
+    :host-context(body.theme-sun) .auth-divider::after {
+        background: rgba(0,0,0,0.1);
+    }
+
+    :host-context(body.theme-sun) .google-btn {
+        background: #ffffff;
+        border-color: rgba(0,0,0,0.12);
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .google-btn:hover:not(:disabled) {
+        background: #f8fafc;
+        border-color: rgba(0,0,0,0.2);
+    }
+
+    :host-context(body.theme-sun) .auth-link {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .auth-link a {
+        color: #0284c7;
+    }
+
 </style>

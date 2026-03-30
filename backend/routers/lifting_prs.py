@@ -7,6 +7,9 @@ from Services.AIService import ai_service
 
 router = APIRouter(prefix="/users/{user_id}/lifting-prs", tags=["lifting_prs"])
 
+# ── Standalone router for video-only validation (no user/gym association) ───────
+validate_router = APIRouter(prefix="/validate-video", tags=["video_validation"])
+
 
 # ── Schemas ────────────────────────────────────────────────────────────────────
 
@@ -190,3 +193,65 @@ def upsert_lifting_pr(user_id: str, body: LiftingPRCreate):
         db.table("users").update({"total_xp": new_xp}).eq("id", user_id).execute()
 
     return {"pr": res.data[0], "is_new_record": is_new, "xp_awarded": xp_awarded}
+
+
+# ── Standalone video-only validation (no user, no gym, no storage) ─────────────
+
+@validate_router.post("")
+async def validate_video_only(
+    video: UploadFile = File(...),
+    exercise_name: str = Form(...)
+):
+    """
+    Validates a video using the AI service WITHOUT associating it to any user,
+    gym, or storing anything in the database. Purely for validation feedback.
+    """
+    import os
+
+    # 1. Validate MIME type
+    content_type = video.content_type or ""
+    if not any(content_type.startswith(p) for p in _ALLOWED_MIME_PREFIXES):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Tipo de archivo no permitido: '{content_type}'. Se esperaba un vídeo.",
+        )
+
+    # 2. Validate file extension
+    ext = os.path.splitext(video.filename or "")[1].lower()
+    if ext not in _ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Extensión no permitida: '{ext}'. Permitidas: {', '.join(_ALLOWED_EXTENSIONS)}",
+        )
+
+    # 3. Read and validate file size
+    total_bytes = 0
+    chunk_size = 1024 * 1024
+    video_bytes = bytearray()
+
+    while True:
+        chunk = await video.read(chunk_size)
+        if not chunk:
+            break
+        total_bytes += len(chunk)
+        if total_bytes > _MAX_VIDEO_BYTES:
+            raise HTTPException(
+                status_code=413,
+                detail=f"El vídeo supera el tamaño máximo permitido de {_MAX_VIDEO_SIZE_MB} MB.",
+            )
+        video_bytes.extend(chunk)
+
+    await video.close()
+
+    # 4. Analyze video via AI Service
+    analysis = await ai_service.analyze_lifting_video(bytes(video_bytes), exercise_name)
+
+    size_mb = round(total_bytes / (1024 * 1024), 2)
+
+    return {
+        "is_valid": analysis.get("is_valid", False),
+        "reason": analysis.get("reason", "Sin información"),
+        "confidence": analysis.get("confidence", "low"),
+        "size_mb": size_mb,
+        "message": "Levantamiento válido ✅" if analysis.get("is_valid") else "Levantamiento nulo ❌",
+    }

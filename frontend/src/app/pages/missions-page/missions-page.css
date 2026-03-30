@@ -529,3 +529,96 @@
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ═══════════════════════════════════════════════════
+   THEME-SUN (Light Mode) overrides
+   ═══════════════════════════════════════════════════ */
+
+:host-context(body.theme-sun) {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #f1f5f9;
+    --border: rgba(0, 0, 0, 0.1);
+    --text: #1e293b;
+    --muted: #64748b;
+    --gold: #0284c7;
+    --gold-light: #38bdf8;
+    --green: #0284c7;
+    --blue: #0284c7;
+}
+
+:host-context(body.theme-sun) .ms-hero-bg {
+    background: linear-gradient(160deg, #dbeafe 0%, #f0f4f8 60%);
+}
+
+:host-context(body.theme-sun) .ms-hero-bg::after {
+    background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%);
+}
+
+:host-context(body.theme-sun) .ms-level-orb {
+    background: linear-gradient(135deg, #0284c7, #22d3ee);
+    box-shadow:
+        0 0 0 4px rgba(2, 132, 199, 0.15),
+        0 0 24px rgba(2, 132, 199, 0.2),
+        0 8px 24px rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .ms-progress-chip {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.2);
+    color: #0284c7;
+}
+
+:host-context(body.theme-sun) .ms-roadmap-node--locked {
+    background: #e2e8f0;
+    color: #94a3b8;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .ms-roadmap-line {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .ms-mission-card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+:host-context(body.theme-sun) .ms-mission-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-color: rgba(0,0,0,0.12);
+}
+
+:host-context(body.theme-sun) .ms-mission-card--done {
+    border-color: rgba(2, 132, 199, 0.25);
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.04), #ffffff);
+}
+
+:host-context(body.theme-sun) .ms-mission-xp {
+    background: rgba(2, 132, 199, 0.08);
+    border-color: rgba(2, 132, 199, 0.2);
+    color: #0284c7;
+}
+
+:host-context(body.theme-sun) .ms-mission-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+:host-context(body.theme-sun) .ms-xp-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+:host-context(body.theme-sun) .ms-spinner {
+    border-color: rgba(0, 0, 0, 0.1);
+    border-top-color: #0284c7;
+}
+
+:host-context(body.theme-sun) .ms-levelup-card {
+    background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%);
+    border-color: rgba(2, 132, 199, 0.3);
+    box-shadow: 0 0 60px rgba(2, 132, 199, 0.15), 0 24px 48px rgba(0,0,0,0.15);
+}
+
+:host-context(body.theme-sun) .ms-levelup-level {
+    text-shadow: 0 0 30px rgba(2, 132, 199, 0.3);
+}
+

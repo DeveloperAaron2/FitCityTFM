@@ -433,3 +433,169 @@
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
+
+/* ═══════════════════════════════════════════════════
+   THEME-SUN (Light Mode) overrides
+   ═══════════════════════════════════════════════════ */
+
+:host-context(body.theme-sun) {
+  background-color: #f0f4f8;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-container {
+  background: #f0f4f8;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-header {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .header-title {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: #1e293b;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .segmented-control {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .segment-btn {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .segment-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+}
+
+:host-context(body.theme-sun) .ranking-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-card:hover {
+  background: #f8fafc;
+}
+
+:host-context(body.theme-sun) .rank-number {
+  color: #94a3b8;
+}
+
+:host-context(body.theme-sun) .username {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .handle {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .exercise {
+  color: #475569;
+}
+
+:host-context(body.theme-sun) .gym-badge {
+  background: rgba(0,0,0,0.05);
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .date {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .weight {
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .unit {
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .pr-title {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .user-avatar {
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .weight-display {
+  border-left-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .exercise-icon {
+  background: rgba(2, 132, 199, 0.1);
+}
+
+:host-context(body.theme-sun) .loading-state,
+:host-context(body.theme-sun) .empty-state {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .spinner {
+  border-color: rgba(2, 132, 199, 0.2);
+  border-top-color: #0284c7;
+}
+
+/* Gym ranking overrides */
+:host-context(body.theme-sun) .gym-group {
+  border-color: rgba(0,0,0,0.08);
+}
+
+:host-context(body.theme-sun) .gym-group-header {
+  background: rgba(2, 132, 199, 0.06);
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .gym-name {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .gym-stat-badge {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .gym-rank {
+  color: rgba(2, 132, 199, 0.5);
+}
+
+:host-context(body.theme-sun) .gym-pr-row {
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .gym-pr-row:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+:host-context(body.theme-sun) .gym-pr-position {
+  color: #94a3b8;
+}
+
+:host-context(body.theme-sun) .gym-pr-avatar {
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .gym-pr-username {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .gym-pr-exercise {
+  color: #64748b;
+}
+
+/* Preserve podium medal colors in light mode */
+:host-context(body.theme-sun) .top-1 { border-color: rgba(255, 215, 0, 0.4); background: rgba(255, 215, 0, 0.06); }
+:host-context(body.theme-sun) .top-2 { border-color: rgba(192, 192, 192, 0.4); background: rgba(192, 192, 192, 0.06); }
+:host-context(body.theme-sun) .top-3 { border-color: rgba(205, 127, 50, 0.4); background: rgba(205, 127, 50, 0.06); }
+
