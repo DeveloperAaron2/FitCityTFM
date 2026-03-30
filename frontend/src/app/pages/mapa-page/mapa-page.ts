@@ -1,26 +1,64 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation } from '@angular/core';
-
-// Overpass: load fitness/gym nodes within a given bounding box
-function buildOverpassQuery(south: number, west: number, north: number, east: number): string {
-    const bbox = `${south},${west},${north},${east}`;
-    return `
-[out:json][timeout:25];
-(
-  node["leisure"="fitness_centre"](${bbox});
-  node["amenity"="gym"](${bbox});
-  node["sport"="fitness"](${bbox});
-  way["leisure"="fitness_centre"](${bbox});
-  way["amenity"="gym"](${bbox});
-  way["leisure"="sports_centre"]["sport"="fitness"](${bbox});
-);
-out center;
-`.trim();
-}
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation, inject } from '@angular/core';
+import { API_URL, ApiService } from '../../services/api.service';
+import { AuthService } from '../../services/auth.service';
 
 // Grid cell key at ~5 km precision (0.05° ≈ 5 km)
 function tileKey(lat: number, lon: number, precision = 0.05): string {
     return `${Math.floor(lat / precision)}_${Math.floor(lon / precision)}`;
 }
+
+function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): number {
+    const R = 6371000;
+    const toRad = (v: number) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+/** 
+ * Fetch gyms from the Python Backend Proxy.
+ * The backend manages Overpass requests and caching to prevent 504 Gateway Timeouts.
+ */
+async function fetchGymsProxy(south: number, west: number, north: number, east: number): Promise<any> {
+    const url = `${API_URL}/gyms/nearby?south=${south}&west=${west}&north=${north}&east=${east}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.json();
+}
+
+/** Max displacement (metres) before we re-localise on map open */
+const CACHE_THRESHOLD_M = 500;
+
+/**
+ * Persistent cross-navigation cache for the map page.
+ * Stored as a module-level object so it survives Angular route changes.
+ */
+const mapCache: {
+    userLat: number | null;
+    userLon: number | null;
+    mapCenter: [number, number] | null;
+    mapZoom: number | null;
+    mapPitch: number | null;
+    mapBearing: number | null;
+    loadedTiles: Set<string>;
+    placedIds: Set<number>;
+    placedGyms: Array<{ lat: number; lon: number; tags: any }>;
+    totalCount: number;
+} = {
+    userLat: null,
+    userLon: null,
+    mapCenter: null,
+    mapZoom: null,
+    mapPitch: null,
+    mapBearing: null,
+    loadedTiles: new Set<string>(),
+    placedIds: new Set<number>(),
+    placedGyms: [],
+    totalCount: 0,
+};
 
 @Component({
     selector: 'app-mapa-page',
@@ -37,25 +75,54 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private userMarker: any = null;
     private locating = false;
 
-    /** Set of tile keys already fetched */
-    private loadedTiles = new Set<string>();
-    /** OSM node/way IDs already placed as markers */
-    private placedIds = new Set<number>();
-    /** Total count of markers on map */
-    private totalCount = 0;
-    /** True while an Overpass request is in flight */
-    private fetching = false;
-    /** Pending moveend timer (debounce) */
-    private moveTimer: any = null;
-    /** All markers on map (for cleanup) */
+    private api = inject(ApiService);
+    private auth = inject(AuthService);
+
+    // Instance-level references to shared cache sets
+    private get loadedTiles() { return mapCache.loadedTiles; }
+    private get placedIds() { return mapCache.placedIds; }
     private markers: any[] = [];
 
+    private fetching = false;
+    private moveTimer: any = null;
+
+    // Store gym names visited today to persist UI state
+    private visitedTodayGyms = new Set<string>();
+
     ngAfterViewInit(): void {
-        this.loadMapLibreAndInitMap();
+        const user = this.auth.user();
+        if (user && user.id) {
+            this.api.getGymVisits(user.id).subscribe({
+                next: (visits: any[]) => {
+                    const today = new Date().toISOString().split('T')[0];
+                    for (const v of visits) {
+                        if (v.visited_at === today && v.gym_name) {
+                            this.visitedTodayGyms.add(v.gym_name);
+                        }
+                    }
+                    this.loadMapLibreAndInitMap();
+                },
+                error: (err) => {
+                    console.warn('[FitCity Map] Failed to fetch daily visits', err);
+                    this.loadMapLibreAndInitMap();
+                }
+            });
+        } else {
+            this.loadMapLibreAndInitMap();
+        }
     }
 
     ngOnDestroy(): void {
-        if (this.map) this.map.remove();
+        // Save current map view to cache before destroying
+        if (this.map) {
+            const center = this.map.getCenter();
+            mapCache.mapCenter = [center.lng, center.lat];
+            mapCache.mapZoom = this.map.getZoom();
+            mapCache.mapPitch = this.map.getPitch();
+            mapCache.mapBearing = this.map.getBearing();
+            this.map.remove();
+            this.map = null;
+        }
     }
 
     /** Called by the "Mi ubicación" button */
@@ -69,10 +136,13 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 this.setLocatingState(false);
-                this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                const newLat = pos.coords.latitude;
+                const newLon = pos.coords.longitude;
+                mapCache.userLat = newLat;
+                mapCache.userLon = newLon;
+                this.flyToUser(newLat, newLon, pos.coords.accuracy);
             },
             (err) => {
-                // Si falla con alta precisión, reintentar con baja
                 if (highAccuracy && !isRetry) {
                     console.warn('High accuracy failed, retrying with low accuracy...');
                     this.requestLocation(false, true);
@@ -90,7 +160,6 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         );
     }
 
-    /** Fallback: geolocate by IP when browser geolocation fails */
     private fallbackIPGeolocation(): void {
         console.log('[FitCity Map] Trying IP geolocation fallback...');
         fetch('https://ipapi.co/json/')
@@ -99,6 +168,8 @@ export class MapaPage implements AfterViewInit, OnDestroy {
                 this.setLocatingState(false);
                 if (data.latitude && data.longitude) {
                     console.log('[FitCity Map] IP location:', data.city, data.latitude, data.longitude);
+                    mapCache.userLat = data.latitude;
+                    mapCache.userLon = data.longitude;
                     this.flyToUser(data.latitude, data.longitude, 5000);
                 } else {
                     this.loadVisibleArea();
@@ -116,7 +187,6 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     // ─────────────────────────────────────────────
 
     private loadMapLibreAndInitMap(): void {
-        // CSS
         if (!document.getElementById('maplibre-css')) {
             const link = document.createElement('link');
             link.id = 'maplibre-css';
@@ -125,7 +195,6 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             document.head.appendChild(link);
         }
 
-        // JS
         if ((window as any).maplibregl) {
             this.initMap();
             return;
@@ -137,6 +206,14 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             script.src = 'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js';
             script.onload = () => this.initMap();
             document.head.appendChild(script);
+        } else {
+            // Script tag exists but maplibregl isn't ready yet — poll
+            const poll = setInterval(() => {
+                if ((window as any).maplibregl) {
+                    clearInterval(poll);
+                    this.initMap();
+                }
+            }, 100);
         }
     }
 
@@ -154,24 +231,31 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         const ml = (window as any).maplibregl;
         this.maplibregl = ml;
 
+        // Restore last view position if cached, otherwise start at Madrid
+        const initialCenter: [number, number] = mapCache.mapCenter ?? [-3.7026, 40.4165];
+        const initialZoom = mapCache.mapZoom ?? 14;
+        const initialPitch = mapCache.mapPitch ?? 55;
+        const initialBearing = mapCache.mapBearing ?? -15;
+
         this.map = new ml.Map({
             container: 'map',
             style: 'https://tiles.openfreemap.org/styles/bright',
-            center: [-3.7026, 40.4165],   // Madrid
-            zoom: 14,
-            pitch: 55,                     // 3D tilt!
-            bearing: -15,                  // Slight rotation
+            center: initialCenter,
+            zoom: initialZoom,
+            pitch: initialPitch,
+            bearing: initialBearing,
             antialias: true,
         });
 
-        // Navigation controls (rotate + zoom)
         this.map.addControl(new ml.NavigationControl({
             showCompass: true,
             showZoom: true,
             visualizePitch: true,
         }), 'top-right');
 
-        // Disable scroll zoom on touch to avoid conflicts with page scrolling
+        // Allow toggling back to 3D view when clicking the compass in 2D mode
+        setTimeout(() => this.setupCompassToggle(), 100);
+
         this.map.scrollZoom.setWheelZoomRate(1 / 200);
 
         window.addEventListener('resize', () => {
@@ -181,32 +265,79 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         });
 
         this.map.on('load', () => {
-            // ── 3D Buildings layer ──────────────────────────────────
             this.add3DBuildings();
 
-            // ── Lazy load on pan/zoom (debounced 600 ms) ──
+            // Re-render cached markers (if any) without re-fetching
+            if (mapCache.placedGyms.length > 0) {
+                console.log('[FitCity Map] Restoring', mapCache.placedGyms.length, 'cached gym markers');
+                this.updateCount(mapCache.totalCount);
+                for (const gym of mapCache.placedGyms) {
+                    this.addMarker(gym.lat, gym.lon, gym.tags, gym.lat, gym.lon);
+                }
+            }
+
+            // Lazy load on pan/zoom (debounced 600 ms)
             this.map.on('moveend', () => {
                 clearTimeout(this.moveTimer);
                 this.moveTimer = setTimeout(() => this.loadVisibleArea(), 600);
             });
 
-            // ── Try to start at user's location ──
-            if ('geolocation' in navigator) {
-                this.setLocatingState(true);
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        this.setLocatingState(false);
-                        this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
-                    },
-                    (err) => {
-                        console.warn('Geolocation browser error:', err.message);
-                        // Fallback: intentar geolocalización por IP
-                        this.fallbackIPGeolocation();
-                    },
-                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
-                );
+            // ── Decide whether to re-localise ──────────────────────
+            const hasCachedLocation = mapCache.userLat !== null && mapCache.userLon !== null;
+
+            if (hasCachedLocation) {
+                // Silently check if user has moved significantly
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            const dist = haversineM(
+                                mapCache.userLat!, mapCache.userLon!,
+                                pos.coords.latitude, pos.coords.longitude
+                            );
+                            if (dist >= CACHE_THRESHOLD_M) {
+                                console.log('[FitCity Map] Moved', Math.round(dist), 'm — re-localising');
+                                mapCache.userLat = pos.coords.latitude;
+                                mapCache.userLon = pos.coords.longitude;
+                                this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                            } else {
+                                console.log('[FitCity Map] Using cached location (', Math.round(dist), 'm away)');
+                                // Place user marker at cached position without flying
+                                this.placeUserMarker(mapCache.userLat!, mapCache.userLon!);
+                                // Load any visible tiles not yet fetched
+                                this.loadVisibleArea();
+                            }
+                        },
+                        () => {
+                            // Can't get new location — stay at cached position
+                            this.placeUserMarker(mapCache.userLat!, mapCache.userLon!);
+                            this.loadVisibleArea();
+                        },
+                        { enableHighAccuracy: false, timeout: 8000, maximumAge: 120000 }
+                    );
+                } else {
+                    this.placeUserMarker(mapCache.userLat!, mapCache.userLon!);
+                    this.loadVisibleArea();
+                }
             } else {
-                this.fallbackIPGeolocation();
+                // First visit — full geolocation flow
+                if ('geolocation' in navigator) {
+                    this.setLocatingState(true);
+                    navigator.geolocation.getCurrentPosition(
+                        (pos) => {
+                            this.setLocatingState(false);
+                            mapCache.userLat = pos.coords.latitude;
+                            mapCache.userLon = pos.coords.longitude;
+                            this.flyToUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+                        },
+                        (err) => {
+                            console.warn('Geolocation browser error:', err.message);
+                            this.fallbackIPGeolocation();
+                        },
+                        { enableHighAccuracy: false, timeout: 5000, maximumAge: 60000 }
+                    );
+                } else {
+                    this.fallbackIPGeolocation();
+                }
             }
         });
     }
@@ -216,11 +347,9 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     // ─────────────────────────────────────────────
 
     private add3DBuildings(): void {
-        // Check if there's a building source available in the style
         const layers = this.map.getStyle().layers;
         if (!layers) return;
 
-        // Find the label layer to insert buildings below it
         let labelLayerId: string | undefined;
         for (const layer of layers) {
             if (layer.type === 'symbol' && (layer as any).layout?.['text-field']) {
@@ -229,7 +358,6 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             }
         }
 
-        // Try to add 3D buildings from the existing vector source
         try {
             this.map.addLayer({
                 'id': '3d-buildings',
@@ -270,7 +398,6 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         if (!this.map || this.fetching) return;
 
         const zoom = this.map.getZoom();
-        console.log('[FitCity Map] loadVisibleArea — zoom:', zoom);
         if (zoom < 13) {
             this.showTileHint(true);
             return;
@@ -315,17 +442,9 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         this.fetching = true;
         this.showChunkLoader(true);
 
-        const query = buildOverpassQuery(south, west, north, east);
-        const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
-        const ml = this.maplibregl;
-
         console.log('[FitCity Map] Fetching gyms for bbox:', { south, west, north, east });
 
-        fetch(url)
-            .then(res => {
-                console.log('[FitCity Map] Overpass response status:', res.status);
-                return res.json();
-            })
+        fetchGymsProxy(south, west, north, east)
             .then((data: any) => {
                 const elements: any[] = data.elements || [];
                 console.log('[FitCity Map] Received', elements.length, 'elements from Overpass');
@@ -341,49 +460,20 @@ export class MapaPage implements AfterViewInit, OnDestroy {
                     else if (el.center) { lat = el.center.lat; lon = el.center.lon; }
                     if (lat == null || lon == null) continue;
 
-                    const name = el.tags?.name || 'Centro de fitness';
-                    const address = [el.tags?.['addr:street'], el.tags?.['addr:housenumber']].filter(Boolean).join(', ');
-                    const phone = el.tags?.phone || el.tags?.['contact:phone'] || '';
-                    const web = el.tags?.website || el.tags?.['contact:website'] || '';
-                    const opening = el.tags?.opening_hours || '';
+                    const tags = el.tags ?? {};
+                    this.addMarker(lat, lon, tags, lat, lon);
 
-                    // Create marker element — outer div for MapLibre positioning (NO transform!),
-                    // inner div for visual styling and animation
-                    const markerEl = document.createElement('div');
-                    markerEl.className = 'gym-marker-wrap';
-                    markerEl.innerHTML = '<div class="gym-marker"><span class="gym-marker-emoji">🏋️</span></div>';
-
-                    // Popup HTML
-                    const popupHTML = `
-                        <div class="fitness-popup">
-                            <h3>🏋️ ${name}</h3>
-                            ${address ? `<p>📍 ${address}</p>` : ''}
-                            ${opening ? `<p>🕐 ${opening}</p>` : ''}
-                            ${phone ? `<p>📞 <a href="tel:${phone}">${phone}</a></p>` : ''}
-                            ${web ? `<p>🌐 <a href="${web}" target="_blank" rel="noopener">Sitio web</a></p>` : ''}
-                        </div>`;
-
-                    const popup = new ml.Popup({
-                        offset: [0, -42],
-                        closeButton: true,
-                        maxWidth: '250px',
-                    }).setHTML(popupHTML);
-
-                    const marker = new ml.Marker({ element: markerEl })
-                        .setLngLat([lon, lat])
-                        .setPopup(popup)
-                        .addTo(this.map);
-
-                    this.markers.push(marker);
-                    this.totalCount++;
+                    // Cache for re-render on revisit
+                    mapCache.placedGyms.push({ lat, lon, tags });
+                    mapCache.totalCount++;
                 }
 
-                console.log('[FitCity Map] Total markers placed:', this.totalCount);
-                this.updateCount(this.totalCount);
+                console.log('[FitCity Map] Total markers placed:', mapCache.totalCount);
+                this.updateCount(mapCache.totalCount);
             })
             .catch((err) => {
-                console.error('[FitCity Map] ERROR fetching gyms:', err);
-                this.showError('Error al cargar centros. Inténtalo de nuevo.');
+                console.error('[FitCity Map] ERROR fetching gyms after retries:', err);
+                this.showError('Error al cargar centros. Se reintentará en la próxima apertura.');
             })
             .finally(() => {
                 this.fetching = false;
@@ -392,17 +482,127 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     }
 
     // ─────────────────────────────────────────────
+    // Marker helpers
+    // ─────────────────────────────────────────────
+
+    private addMarker(lat: number, lon: number, tags: any, _refLat: number, _refLon: number): void {
+        const ml = this.maplibregl;
+        if (!ml || !this.map) return;
+
+        const name = tags?.name || 'Centro de fitness';
+        const address = [tags?.['addr:street'], tags?.['addr:housenumber']].filter(Boolean).join(', ');
+        const phone = tags?.phone || tags?.['contact:phone'] || '';
+        const web = tags?.website || tags?.['contact:website'] || '';
+        const opening = tags?.opening_hours || '';
+
+        const markerEl = document.createElement('div');
+        markerEl.className = 'gym-marker-wrap';
+        markerEl.innerHTML = '<div class="gym-marker"><span class="gym-marker-emoji">🏋️</span></div>';
+
+        const popup = new ml.Popup({
+            offset: [0, -42],
+            closeButton: true,
+            maxWidth: '250px',
+        });
+
+        popup.on('open', () => {
+            const popupContent = document.createElement('div');
+            popupContent.className = 'fitness-popup';
+            popupContent.innerHTML = `
+                <h3>🏋️ ${name}</h3>
+                ${address ? `<p>📍 ${address}</p>` : ''}
+                ${opening ? `<p>🕐 ${opening}</p>` : ''}
+                ${phone ? `<p>📞 <a href="tel:${phone}">${phone}</a></p>` : ''}
+                ${web ? `<p>🌐 <a href="${web}" target="_blank" rel="noopener">Sitio web</a></p>` : ''}
+            `;
+
+            const visitBtn = document.createElement('button');
+            visitBtn.className = 'visit-gym-btn map-visit-btn';
+
+            if (this.visitedTodayGyms.has(name)) {
+                visitBtn.innerText = '¡Visitado! ✓';
+                visitBtn.classList.add('visited-success');
+                visitBtn.disabled = true;
+                popupContent.appendChild(visitBtn);
+            } else {
+                const uLat = mapCache.userLat;
+                const uLon = mapCache.userLon;
+                if (uLat !== null && uLon !== null) {
+                    const distance = haversineM(uLat, uLon, lat, lon);
+                    if (distance <= 150) {
+                        visitBtn.innerText = 'Marcar como visitado';
+                        visitBtn.onclick = () => this.visitGym(name, address, lat, lon, visitBtn);
+                        popupContent.appendChild(visitBtn);
+                    }
+                }
+            }
+
+            popup.setDOMContent(popupContent);
+        });
+
+        const marker = new ml.Marker({ element: markerEl })
+            .setLngLat([lon, lat])
+            .setPopup(popup)
+            .addTo(this.map);
+
+        this.markers.push(marker);
+    }
+
+    private visitGym(name: string, address: string, lat: number, lon: number, btn: HTMLButtonElement): void {
+        const user = this.auth.user();
+        if (!user || !user.id) {
+            this.showError('Debes iniciar sesión para visitar un centro.');
+            return;
+        }
+
+        if (mapCache.userLat !== null && mapCache.userLon !== null) {
+            const distance = haversineM(mapCache.userLat, mapCache.userLon, lat, lon);
+            if (distance > 150) {
+                this.showError(`Estás a ${Math.round(distance)}m. Debes estar a menos de 150m para visitar el gimnasio.`);
+                return;
+            }
+        } else {
+            this.showError('No se pudo verificar tu ubicación actual.');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerText = 'Registrando...';
+
+        this.api.createGymVisit(user.id, {
+            gym_name: name,
+            gym_address: address,
+            gym_lat: lat,
+            gym_lon: lon
+        }).subscribe({
+            next: (res) => {
+                btn.innerText = '¡Visitado! ✓';
+                btn.classList.add('visited-success');
+                this.visitedTodayGyms.add(name);
+                // Add positive visual feedback and optionally update the local XP manually if it's synced
+                if (res.xp_awarded) {
+                    const currentXp = user.current_xp || 0;
+                    this.auth.updateUser({ current_xp: currentXp + res.xp_awarded });
+                }
+            },
+            error: (err) => {
+                btn.disabled = false;
+                btn.innerText = 'Marcar como visitado';
+                this.showError('Error al registrar la visita.');
+            }
+        });
+    }
+
+    // ─────────────────────────────────────────────
     // User location
     // ─────────────────────────────────────────────
 
-    private flyToUser(lat: number, lon: number, accuracy: number): void {
+    /** Place user marker at coords WITHOUT flying to it */
+    private placeUserMarker(lat: number, lon: number): void {
         if (!this.map) return;
         const ml = this.maplibregl;
-
-        // Remove old user marker
         if (this.userMarker) this.userMarker.remove();
 
-        // Create user marker element
         const el = document.createElement('div');
         el.className = 'user-marker-3d';
         el.innerHTML = `
@@ -413,8 +613,12 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         this.userMarker = new ml.Marker({ element: el, anchor: 'center' })
             .setLngLat([lon, lat])
             .addTo(this.map);
+    }
 
-        // flyTo with 3D angle
+    private flyToUser(lat: number, lon: number, accuracy: number): void {
+        if (!this.map) return;
+        this.placeUserMarker(lat, lon);
+
         this.map.flyTo({
             center: [lon, lat],
             zoom: 15,
@@ -456,5 +660,24 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private showError(msg: string): void {
         const el = document.getElementById('map-error');
         if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
+    }
+
+    private setupCompassToggle(): void {
+        const compassBtn = document.querySelector('.maplibregl-ctrl-compass');
+        if (!compassBtn || !this.map) return;
+
+        compassBtn.addEventListener('click', (e) => {
+            const pitch = this.map.getPitch();
+            // If current pitch is 0 (2D), clicking the compass (which usually resets to 0)
+            // should instead toggle to 3D view.
+            if (Math.round(pitch) === 0) {
+                this.map.easeTo({
+                    pitch: 55,
+                    bearing: -15,
+                    duration: 1000,
+                    essential: true
+                });
+            }
+        });
     }
 }

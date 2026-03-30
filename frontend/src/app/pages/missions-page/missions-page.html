@@ -1,0 +1,120 @@
+<div class="ms-page">
+
+    <!-- ══ LEVEL-UP OVERLAY ════════════════════════════════════════ -->
+    <div class="ms-levelup-backdrop" *ngIf="showLevelUp()" (click)="dismissLevelUp()">
+        <div class="ms-levelup-card" (click)="$event.stopPropagation()">
+            <div class="ms-levelup-stars">✨✨✨</div>
+            <div class="ms-levelup-icon">🏆</div>
+            <h2 class="ms-levelup-title">¡Subiste de nivel!</h2>
+            <p class="ms-levelup-level">Nivel {{ newLevel() }}</p>
+            <p class="ms-levelup-sub">Sigue así y alcanza la cima de FitCity</p>
+            <button class="ms-levelup-btn" (click)="dismissLevelUp()">¡Genial! 🎉</button>
+        </div>
+    </div>
+
+    <!-- ══ HERO — LEVEL CARD ════════════════════════════════════════ -->
+    <div class="ms-hero">
+        <div class="ms-hero-bg"></div>
+        <div class="ms-hero-content">
+            <div class="ms-level-orb">
+                <span class="ms-level-num">{{ level }}</span>
+                <span class="ms-level-lbl">NIVEL</span>
+            </div>
+            <div class="ms-hero-info">
+                <h1 class="ms-hero-title">{{ title }}</h1>
+                <p class="ms-hero-user">{{ user?.username }}</p>
+
+                <!-- XP Bar -->
+                <div class="ms-xp-bar-wrap">
+                    <div class="ms-xp-bar-track">
+                        <div class="ms-xp-bar-fill" [style.width.%]="xpPercent">
+                            <span class="ms-xp-bar-glow"></span>
+                        </div>
+                    </div>
+                    <div class="ms-xp-labels">
+                        <span>{{ currentXP | number }} XP</span>
+                        <span>{{ maxXP | number }} XP</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress summary chip -->
+        <div class="ms-progress-chip">
+            <span>⚔️ {{ completedCount() }} / {{ totalCount() }} misiones completadas</span>
+        </div>
+    </div>
+
+    <!-- ══ LEVEL ROADMAP ════════════════════════════════════════════ -->
+    <div class="ms-roadmap-wrap">
+        <div class="ms-roadmap">
+            <ng-container *ngFor="let lv of roadmapLevels; let last = last">
+                <div class="ms-roadmap-node" [class.ms-roadmap-node--done]="lv < level"
+                    [class.ms-roadmap-node--current]="lv === level" [class.ms-roadmap-node--locked]="lv > level">
+                    <span *ngIf="lv < level">✓</span>
+                    <span *ngIf="lv === level">{{ lv }}</span>
+                    <span *ngIf="lv > level">{{ lv }}</span>
+                </div>
+                <div *ngIf="!last" class="ms-roadmap-line" [class.ms-roadmap-line--done]="lv < level"></div>
+            </ng-container>
+        </div>
+        <p class="ms-roadmap-hint">{{ maxXP - currentXP | number }} XP para el nivel {{ level + 1 }}</p>
+    </div>
+
+    <!-- ══ MISSIONS LIST ════════════════════════════════════════════ -->
+    <div class="ms-inner">
+
+        <h2 class="ms-section-title">🗡️ Misiones</h2>
+
+        <!-- Loading state -->
+        <div *ngIf="loading()" class="ms-loading">
+            <div class="ms-spinner"></div>
+            <p>Cargando misiones...</p>
+        </div>
+
+        <!-- Empty state -->
+        <div *ngIf="!loading() && missions().length === 0" class="ms-empty">
+            No hay misiones disponibles aún.
+        </div>
+
+        <!-- Mission cards -->
+        <div class="ms-missions-grid" *ngIf="!loading()">
+            <div class="ms-mission-card" *ngFor="let m of missions()" [class.ms-mission-card--done]="m.completed">
+
+                <div class="ms-mission-emoji">{{ m.emoji }}</div>
+
+                <div class="ms-mission-body">
+                    <div class="ms-mission-header">
+                        <p class="ms-mission-title">{{ m.title }}</p>
+                        <span class="ms-mission-xp">+{{ m.xp_reward }} XP</span>
+                    </div>
+                    <p class="ms-mission-desc">{{ m.description }}</p>
+
+                    <!-- Progress bar -->
+                    <div class="ms-mission-bar-wrap">
+                        <div class="ms-mission-bar-track">
+                            <div class="ms-mission-bar-fill" [class.ms-mission-bar-fill--done]="m.completed"
+                                [style.width.%]="progressPercent(m)">
+                            </div>
+                        </div>
+                        <span class="ms-mission-bar-label">
+                            {{ m.user_progress }} / {{ m.goal }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Badge or Claim button -->
+                <div class="ms-mission-action">
+                    <div *ngIf="m.completed" class="ms-mission-badge">✅</div>
+                    <button *ngIf="!m.completed && m.user_progress >= m.goal" class="ms-claim-btn"
+                        (click)="claimMission(m)">
+                        ¡Reclamar!
+                    </button>
+                    <div *ngIf="!m.completed && m.user_progress < m.goal" class="ms-mission-lock">🔒</div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /ms-inner -->
+
+</div>

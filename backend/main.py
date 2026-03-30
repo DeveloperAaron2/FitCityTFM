@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, gym_visits, lifting_prs, challenges, ranking, auth
+from routers import users, gym_visits, lifting_prs, challenges, ranking, auth, gyms_proxy
+from routers.lifting_prs import validate_router
 
 app = FastAPI(
     title="FitCity API",
@@ -29,6 +30,8 @@ app.include_router(gym_visits.router)
 app.include_router(lifting_prs.router)
 app.include_router(challenges.router)
 app.include_router(ranking.router)
+app.include_router(gyms_proxy.router)
+app.include_router(validate_router)
 
 
 @app.get("/", tags=["health"])

@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service';
 import { AuthService } from '../../services/auth.service';
+import { RouterLink } from '@angular/router';
+import { ApiService } from '../../services/api.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink, FormsModule],
   templateUrl: './dashboard-page.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -14,6 +17,17 @@ export class DashboardPage implements OnInit {
 
   readonly gymsService = inject(NearbyGymsService);
   readonly auth = inject(AuthService);
+  readonly api = inject(ApiService);
+
+  private visitedTodayGyms = new Set<string>();
+  visitingGyms = new Set<number>();
+
+  // ── Validate-only modal state ──────────────────────────────────────────────
+  showValidateModal = signal(false);
+  validateExercise = signal('');
+  validateFile = signal<File | null>(null);
+  isValidating = signal(false);
+  validateResult = signal<{ success: boolean; message: string; reason?: string; confidence?: string } | null>(null);
 
   // Shortcuts for template
   get user() { return this.auth.user(); }
@@ -34,6 +48,20 @@ export class DashboardPage implements OnInit {
 
   ngOnInit(): void {
     this.gymsService.loadFromUserLocation();
+
+    const user = this.auth.user();
+    if (user && user.id) {
+      this.api.getGymVisits(user.id).subscribe({
+        next: (visits: any[]) => {
+          const today = new Date().toISOString().split('T')[0];
+          for (const v of visits) {
+            if (v.visited_at === today && v.gym_name) {
+              this.visitedTodayGyms.add(v.gym_name);
+            }
+          }
+        }
+      });
+    }
   }
 
   /** Format distance: "350 m" or "1.2 km" */
@@ -57,5 +85,92 @@ export class DashboardPage implements OnInit {
 
   trackById(_: number, gym: NearbyGym): number {
     return gym.id;
+  }
+
+  isVisited(gymName: string): boolean {
+    return this.visitedTodayGyms.has(gymName);
+  }
+
+  isVisiting(id: number): boolean {
+    return this.visitingGyms.has(id);
+  }
+
+  visitGym(gym: NearbyGym) {
+    const user = this.auth.user();
+    if (!user || !user.id || this.visitingGyms.has(gym.id)) return;
+
+    this.visitingGyms.add(gym.id);
+    this.api.createGymVisit(user.id, {
+      gym_name: gym.name,
+      gym_address: gym.address
+    }).subscribe({
+      next: (res) => {
+        this.visitedTodayGyms.add(gym.name);
+        this.visitingGyms.delete(gym.id);
+        if (res.xp_awarded) {
+          const currentXp = user.current_xp || 0;
+          this.auth.updateUser({ current_xp: currentXp + res.xp_awarded });
+        }
+      },
+      error: (err) => {
+        this.visitingGyms.delete(gym.id);
+        if (err.status === 400) {
+          this.visitedTodayGyms.add(gym.name);
+        } else {
+          console.error('Error al registrar la visita:', err);
+        }
+      }
+    });
+  }
+
+  // ── Validate-only modal methods ────────────────────────────────────────────
+
+  openValidateModal(): void {
+    this.validateExercise.set('');
+    this.validateFile.set(null);
+    this.validateResult.set(null);
+    this.isValidating.set(false);
+    this.showValidateModal.set(true);
+  }
+
+  closeValidateModal(): void {
+    this.showValidateModal.set(false);
+  }
+
+  onValidateFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.validateFile.set(input.files[0]);
+    }
+  }
+
+  submitValidateOnly(): void {
+    const file = this.validateFile();
+    const exercise = this.validateExercise().trim();
+
+    if (!file || !exercise) {
+      this.validateResult.set({ success: false, message: 'Selecciona un vídeo y un ejercicio.' });
+      return;
+    }
+
+    this.isValidating.set(true);
+    this.validateResult.set(null);
+
+    this.api.validateVideoOnly(file, exercise).subscribe({
+      next: (res) => {
+        this.isValidating.set(false);
+        this.validateResult.set({
+          success: res.is_valid,
+          message: res.message,
+          reason: res.reason,
+          confidence: res.confidence
+        });
+      },
+      error: (err) => {
+        this.isValidating.set(false);
+        const detail = err.error?.detail || 'Error al conectar con el servicio de validación.';
+        this.validateResult.set({ success: false, message: detail });
+      }
+    });
   }
 }

@@ -43,7 +43,7 @@ def get_daily_challenge():
     return res.data
 
 
-@router.get("/challenges/")
+@router.get("/challenges")
 def list_challenges():
     """List all available challenges."""
     db = get_supabase_client()
@@ -62,6 +62,41 @@ def get_user_challenges(user_id: str):
         .execute()
     )
     return res.data or []
+
+
+@router.get("/users/{user_id}/challenges/all")
+def get_all_challenges_with_progress(user_id: str):
+    """Return ALL challenges with the user's progress embedded.
+    Challenges the user hasn't started show progress=0, completed=False."""
+    db = get_supabase_client()
+
+    # Fetch all challenges
+    ch_res = db.table("challenges").select("*").order("created_at").execute()
+    all_challenges = ch_res.data or []
+
+    # Fetch user progress for all challenges at once
+    uc_res = (
+        db.table("user_challenges")
+        .select("challenge_id, progress, completed")
+        .eq("user_id", user_id)
+        .execute()
+    )
+    # Map: challenge_id → {progress, completed}
+    progress_map = {
+        row["challenge_id"]: row
+        for row in (uc_res.data or [])
+    }
+
+    result = []
+    for ch in all_challenges:
+        user_progress = progress_map.get(ch["id"], {})
+        result.append({
+            **ch,
+            "user_progress": user_progress.get("progress", 0),
+            "completed": user_progress.get("completed", False),
+        })
+
+    return result
 
 
 @router.post("/users/{user_id}/challenges/{challenge_id}/progress")

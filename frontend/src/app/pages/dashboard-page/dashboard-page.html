@@ -2,9 +2,10 @@
 
     <!-- ── TOP BAR ────────────────────────────────── -->
     <header class="fc-topbar flex justify-center align-items-center">
-        <div class="fc-trainer flex justify-center align-items-center">
+        <div class="fc-trainer flex justify-center align-items-center" routerLink="/profile">
             <div class="fc-avatar">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <img *ngIf="user?.avatar_url" [src]="user?.avatar_url" alt="Avatar" class="fc-avatar-img">
+                <svg *ngIf="!user?.avatar_url" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M4 7a1 1 0 0 1 1 1v8a1 1 0 0 1 -2 0v-3h-1a1 1 0 0 1 0 -2h1v-3a1 1 0 0 1 1 -1" />
                     <path d="M20 7a1 1 0 0 1 1 1v3h1a1 1 0 0 1 0 2h-1v3a1 1 0 0 1 -2 0v-8a1 1 0 0 1 1 -1" />
                     <path
@@ -18,26 +19,17 @@
         </div>
 
         <span class="fc-logo">FIT<span>CITY</span></span>
-
-        <button class="" aria-label="Notificaciones">
-
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                stroke="#000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M10 6h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />
-                <path d="M17 7m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-            </svg>
-            <!-- <span class="fc-dot"></span> -->
-        </button>
     </header>
 
     <!-- ── XP BAR ─────────────────────────────────── -->
     <div class="fc-xp">
-        <div class="fc-xp-labels">
-            <span>XP</span>
-            <span>{{ currentXP }} / {{ maxXP }}</span>
-        </div>
-        <div class="fc-xp-track">
-            <div class="fc-xp-fill" [style.width.%]="xpPercent"></div>
+        <div class="fc-xp-labels fc-camera-zone">
+            <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Actualizar PR en vídeo">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Actualizar PR</span>
+            </a>
+            <a (click)="openValidateModal()" class="fc-camera-action" aria-label="Validar PR en vídeo" style="cursor:pointer">
+                <span class="fc-cam-label"><span class="fc-btn-emoji">🤖</span> <br> Validar PR</span>
+            </a>
         </div>
     </div>
 
@@ -108,7 +100,15 @@
                         <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn">📞</a>
                         <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener"
                             class="fc-gym-action-btn">🌐</a>
-                        <span class="fc-gym-dist-badge">{{ formatDistance(gym.distanceM) }}</span>
+                        <button class="fc-gym-action-btn" 
+                                *ngIf="gym.distanceM <= 150 && !isVisited(gym.name)"
+                                (click)="visitGym(gym)" 
+                                [disabled]="isVisiting(gym.id)"
+                                title="Marcar como visitado">
+                            📍
+                        </button>
+                        <span class="fc-gym-dist-badge" *ngIf="isVisited(gym.name)" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: rgba(16, 185, 129, 0.4);">✓ Visitado</span>
+                        <span class="fc-gym-dist-badge" *ngIf="!isVisited(gym.name)">{{ formatDistance(gym.distanceM) }}</span>
                     </div>
                 </div>
             </ng-container>
@@ -120,14 +120,74 @@
 
 </div>
 
+<!-- ── VALIDATE-ONLY MODAL ─────────────────────────────────── -->
+<div class="vm-overlay" *ngIf="showValidateModal()" (click)="closeValidateModal()">
+    <div class="vm-modal" (click)="$event.stopPropagation()">
+        <div class="vm-header">
+            <h2 class="vm-title">🤖 Validar Levantamiento</h2>
+            <button class="vm-close" (click)="closeValidateModal()">&times;</button>
+        </div>
+
+        <p class="vm-desc">Sube un vídeo y la IA analizará si el movimiento es válido según la normativa de la AEP/IPF.<br>
+            <strong>Este vídeo no se almacena ni se asocia a tu perfil.</strong>
+        </p>
+
+        <div class="vm-form">
+            <!-- Exercise select -->
+            <div class="vm-field">
+                <label class="vm-label">Ejercicio</label>
+                <select class="vm-input vm-select" [ngModel]="validateExercise()" (ngModelChange)="validateExercise.set($event)">
+                    <option value="">Selecciona ejercicio...</option>
+                    <option value="Press de banca">Press de banca</option>
+                    <option value="Sentadilla">Sentadilla</option>
+                    <option value="Peso muerto">Peso muerto</option>
+                </select>
+            </div>
+
+            <!-- Video upload -->
+            <div class="vm-field">
+                <label class="vm-label">Vídeo del levantamiento</label>
+                <label for="vmVideoFile" class="vm-file-drop">
+                    <ng-container *ngIf="!validateFile()">
+                        <span class="vm-file-icon">📹</span>
+                        <span class="vm-file-text">Toca para seleccionar un vídeo</span>
+                    </ng-container>
+                    <ng-container *ngIf="validateFile() as file">
+                        <span class="vm-file-icon">✅</span>
+                        <span class="vm-file-name">{{ file.name }}</span>
+                        <span class="vm-file-sub">Listo para validar</span>
+                    </ng-container>
+                </label>
+                <input type="file" id="vmVideoFile" accept="video/*" class="vm-file-input" (change)="onValidateFileSelected($event)">
+            </div>
+
+            <!-- Result -->
+            <div *ngIf="validateResult() as res" class="vm-alert" [class.is-success]="res.success" [class.is-error]="!res.success">
+                <span class="vm-alert-icon">{{ res.success ? '✅' : '❌' }}</span>
+                <div class="vm-alert-body">
+                    <span class="vm-alert-msg">{{ res.message }}</span>
+                    <span class="vm-alert-reason" *ngIf="res.reason">{{ res.reason }}</span>
+                    <span class="vm-alert-confidence" *ngIf="res.confidence">Confianza: {{ res.confidence }}</span>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <button class="vm-btn-submit" (click)="submitValidateOnly()" [disabled]="isValidating() || !validateFile() || !validateExercise()">
+                <span *ngIf="!isValidating()">Analizar con IA</span>
+                <span *ngIf="isValidating()" class="vm-loading">Analizando...</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <style>
     /* ── Variables ────────────────────────────────────────── */
-    :root {
-        --bg: #0b0f1c;
-        --surface: rgba(255, 255, 255, 0.06);
+    :host {
+        --bg: #000000;
+        --surface: rgba(255, 255, 255, 0.05);
         --border: rgba(255, 255, 255, 0.1);
-        --cyan: #06b6d4;
-        --text: #e2e8f0;
+        --cyan: #22d3ee;
+        --text: #ffffff;
         --muted: #94a3b8;
     }
 
@@ -153,22 +213,34 @@
 
     /* ── TOP BAR ──────────────────────────────────────────── */
     .fc-topbar {
-        display: flex;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         align-items: center;
-        justify-content: space-between;
         padding: 48px 16px 12px;
         gap: 8px;
     }
 
     .fc-trainer {
+        justify-self: start;
         display: flex;
         align-items: center;
         gap: 10px;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.12); /* Más grisáceo */
         border: 1px solid var(--border);
         border-radius: 40px;
         padding: 6px 14px 6px 6px;
         flex-shrink: 0;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+    }
+
+    .fc-trainer:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: translateY(-1px);
+    }
+
+    .fc-trainer:active {
+        transform: scale(0.98);
     }
 
     .fc-avatar {
@@ -180,6 +252,13 @@
         align-items: center;
         justify-content: center;
         font-size: 18px;
+        overflow: hidden; /* Para que la imagen respete el redondeo */
+    }
+
+    .fc-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .fc-name {
@@ -193,6 +272,8 @@
     }
 
     .fc-logo {
+        justify-self: center;
+        transform: translateX(10px); /* Ajustado a 10px según feedback */
         font-size: 18px;
         font-weight: 900;
         letter-spacing: 1px;
@@ -203,59 +284,83 @@
         color: var(--cyan);
     }
 
-    .fc-bell {
-        position: relative;
-        width: 38px;
-        height: 38px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 50%;
-        font-size: 16px;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-
-    .fc-dot {
-        position: absolute;
-        top: 6px;
-        right: 6px;
-        width: 7px;
-        height: 7px;
-        background: #ef4444;
-        border-radius: 50%;
-        border: 1.5px solid var(--bg);
-    }
+    /* ── BELL / CAMERA ────────────────────────────────────── */
 
     /* ── XP ───────────────────────────────────────────────── */
     .fc-xp {
+        margin-top: 15px;
         padding: 0 16px 8px;
     }
 
-    .fc-xp-labels {
+    .fc-camera-zone {
         display: flex;
         justify-content: space-between;
-        font-size: 10px;
-        font-weight: 700;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin-bottom: 4px;
+        align-items: center;
+        margin-bottom: 8px;
     }
 
-    .fc-xp-labels span:last-child {
-        color: var(--cyan);
-    }
-
-    .fc-xp-track {
-        height: 5px;
-        background: rgba(255, 255, 255, .1);
-        border-radius: 20px;
+    .fc-camera-action {
+        width: 42%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(34, 211, 238, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(34, 211, 238, 0.3);
+        border-radius: 18px;
+        padding: 10px 8px;
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
         overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(34, 211, 238, 0.05);
     }
 
-    .fc-xp-fill {
-        height: 100%;
-        background: linear-gradient(90deg, var(--cyan), #3b82f6);
-        border-radius: 20px;
+    .fc-camera-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .fc-camera-action:hover {
+        transform: translateY(-3px) scale(1.02);
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.6);
+        box-shadow: 
+            inset 0 0 15px rgba(34, 211, 238, 0.1),
+            0 8px 25px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-camera-action:hover::before {
+        opacity: 1;
+    }
+
+    .fc-cam-label {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        font-size: 10px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #ffffff;
+        text-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+    }
+
+    .fc-btn-emoji {
+        display: block;
+        font-size: 28px;
+        margin-bottom: 8px;
+        filter: drop-shadow(0 0 12px rgba(34, 211, 238, 0.5));
+    }
+
+    .fc-cam-icon {
+        font-size: 16px;
     }
 
     /* ── STATS ────────────────────────────────────────────── */
@@ -348,6 +453,31 @@
         z-index: 2;
         position: relative;
         box-shadow: 0 0 16px rgba(59, 130, 246, .6);
+    }
+
+    .fc-camera-btn {
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3b82f6, #60a5fa);
+        color: white;
+        border-radius: 50%;
+        font-size: 18px;
+        text-decoration: none;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    .fc-camera-btn:hover {
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        transform: translateY(-1px);
+    }
+
+    .fc-camera-btn:active {
+        transform: scale(0.94);
     }
 
     .fc-pin-pulse {
@@ -487,11 +617,17 @@
         display: flex;
         align-items: center;
         gap: 12px;
-        background: var(--surface);
+        background: rgba(255, 255, 255, 0.08); /* Un pelín más claro que el surface base */
         border: 1px solid var(--border);
         border-left: 3px solid var(--accent);
         border-radius: 14px;
         padding: 12px;
+        transition: transform 0.2s;
+    }
+
+    .fc-gym-card:hover {
+        transform: translateY(-2px);
+        background: rgba(255, 255, 255, 0.12);
     }
 
     .fc-gym-emoji {
@@ -681,7 +817,501 @@
         }
 
         .fc-gyms-list {
+            display: grid;
             grid-template-columns: repeat(2, 1fr);
         }
     }
+
+    /* ═══════════════════════════════════════════════════
+       THEME-SUN (Light Mode) overrides
+       ═══════════════════════════════════════════════════ */
+
+    :host-context(body.theme-sun) .fc-dashboard {
+        background: #f0f4f8;
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .fc-topbar {
+        background: #ffffff;
+        border-bottom: 1px solid rgba(0,0,0,0.08);
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+
+    :host-context(body.theme-sun) .fc-trainer {
+        background: rgba(0, 0, 0, 0.06);
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    :host-context(body.theme-sun) .fc-trainer:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    :host-context(body.theme-sun) .fc-avatar {
+        background: linear-gradient(135deg, #0284c7, #22d3ee);
+    }
+
+    :host-context(body.theme-sun) .fc-name {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .fc-level {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .fc-logo {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .fc-logo span {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .fc-camera-action {
+        background: rgba(2, 132, 199, 0.06);
+        border-color: rgba(2, 132, 199, 0.25);
+        box-shadow: inset 0 0 10px rgba(2, 132, 199, 0.05);
+    }
+
+    :host-context(body.theme-sun) .fc-camera-action::before {
+        background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), transparent);
+    }
+
+    :host-context(body.theme-sun) .fc-camera-action:hover {
+        background: rgba(2, 132, 199, 0.1);
+        border-color: rgba(2, 132, 199, 0.45);
+        box-shadow:
+            inset 0 0 15px rgba(2, 132, 199, 0.08),
+            0 8px 25px rgba(2, 132, 199, 0.15);
+    }
+
+    :host-context(body.theme-sun) .fc-cam-label {
+        color: #1e293b;
+        text-shadow: none;
+    }
+
+    :host-context(body.theme-sun) .fc-btn-emoji {
+        filter: drop-shadow(0 0 8px rgba(2, 132, 199, 0.3));
+    }
+
+    :host-context(body.theme-sun) .fc-quest {
+        background: linear-gradient(135deg, rgba(234, 179, 8, 0.08), rgba(239, 68, 68, 0.04));
+        border-color: rgba(234, 179, 8, 0.2);
+    }
+
+    :host-context(body.theme-sun) .fc-quest-desc {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .fc-quest-bar {
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    :host-context(body.theme-sun) .fc-quest-xp {
+        background: rgba(234, 179, 8, 0.08);
+        border-color: rgba(234, 179, 8, 0.2);
+    }
+
+    :host-context(body.theme-sun) .fc-section-header h2 {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .fc-gyms-count {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .fc-gym-card {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    :host-context(body.theme-sun) .fc-gym-card:hover {
+        background: #f8fafc;
+    }
+
+    :host-context(body.theme-sun) .fc-gym-name {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .fc-gym-meta {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .fc-gym-hours {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .fc-gym-action-btn {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    :host-context(body.theme-sun) .fc-gym-action-btn:hover {
+        background: rgba(0, 0, 0, 0.08);
+    }
+
+    :host-context(body.theme-sun) .fc-gym-dist-badge {
+        background: rgba(2, 132, 199, 0.06);
+        border-color: rgba(2, 132, 199, 0.15);
+    }
+
+    :host-context(body.theme-sun) .fc-gym-skeleton .skeleton-icon,
+    :host-context(body.theme-sun) .fc-gym-skeleton .skeleton-line {
+        background: linear-gradient(90deg, rgba(0,0,0,0.06) 25%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.06) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s infinite;
+    }
+
+    :host-context(body.theme-sun) .fc-gyms-error {
+        color: #dc2626;
+    }
+
+    :host-context(body.theme-sun) .fc-gyms-empty {
+        color: #64748b;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       VALIDATE-ONLY MODAL
+       ═══════════════════════════════════════════════════ */
+
+    .vm-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        animation: vmFadeIn 0.25s ease;
+    }
+
+    @keyframes vmFadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .vm-modal {
+        background: #1c1c1c;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 24px;
+        width: 100%;
+        max-width: 440px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: vmSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes vmSlideUp {
+        from { transform: translateY(40px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .vm-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .vm-title {
+        font-size: 18px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0;
+    }
+
+    .vm-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 28px;
+        line-height: 1;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: background 0.2s, color 0.2s;
+    }
+
+    .vm-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+    }
+
+    .vm-desc {
+        font-size: 13px;
+        color: #94a3b8;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .vm-desc strong {
+        color: #22d3ee;
+    }
+
+    .vm-form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .vm-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .vm-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #e2e8f0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .vm-input {
+        appearance: none;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 15px;
+        color: #ffffff;
+        transition: all 0.2s;
+        outline: none;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: inherit;
+    }
+
+    .vm-input:focus {
+        border-color: #22d3ee;
+        background: rgba(34, 211, 238, 0.05);
+        box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
+    }
+
+    .vm-select {
+        cursor: pointer;
+    }
+
+    .vm-file-input {
+        display: none;
+    }
+
+    .vm-file-drop {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 28px 20px;
+        border: 2px dashed rgba(255, 255, 255, 0.12);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+        transition: border-color 0.2s, background 0.2s;
+        text-align: center;
+    }
+
+    .vm-file-drop:hover {
+        border-color: rgba(34, 211, 238, 0.4);
+        background: rgba(34, 211, 238, 0.03);
+    }
+
+    .vm-file-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+    }
+
+    .vm-file-text {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .vm-file-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #22d3ee;
+        margin-bottom: 2px;
+        word-break: break-all;
+    }
+
+    .vm-file-sub {
+        font-size: 11px;
+        color: #64748b;
+    }
+
+    .vm-btn-submit {
+        border: none;
+        background: linear-gradient(135deg, #a855f7, #7c3aed);
+        color: white;
+        padding: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        border-radius: 14px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(168, 85, 247, 0.3);
+        transition: transform 0.2s, opacity 0.2s;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .vm-btn-submit:active {
+        transform: scale(0.98);
+    }
+
+    .vm-btn-submit:disabled {
+        background: rgba(255, 255, 255, 0.08);
+        box-shadow: none;
+        cursor: not-allowed;
+        color: #64748b;
+    }
+
+    .vm-loading {
+        display: inline-block;
+        position: relative;
+        padding-left: 24px;
+    }
+
+    .vm-loading::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 14px;
+        height: 14px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: vmSpin 0.8s linear infinite;
+    }
+
+    @keyframes vmSpin {
+        to { transform: translateY(-50%) rotate(360deg); }
+    }
+
+    .vm-alert {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
+    .vm-alert-icon {
+        font-size: 20px;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    .vm-alert-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .vm-alert-msg {
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .vm-alert-reason {
+        font-size: 12px;
+        opacity: 0.85;
+    }
+
+    .vm-alert-confidence {
+        font-size: 11px;
+        opacity: 0.65;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .vm-alert.is-success {
+        background: rgba(34, 211, 238, 0.1);
+        color: #22d3ee;
+        border: 1px solid rgba(34, 211, 238, 0.2);
+    }
+
+    .vm-alert.is-error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* ── THEME-SUN overrides for validate modal ─────────── */
+
+    :host-context(body.theme-sun) .vm-overlay {
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    :host-context(body.theme-sun) .vm-modal {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.08);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    }
+
+    :host-context(body.theme-sun) .vm-title {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vm-close {
+        color: #94a3b8;
+    }
+
+    :host-context(body.theme-sun) .vm-close:hover {
+        background: rgba(0, 0, 0, 0.06);
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vm-desc {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .vm-desc strong {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .vm-label {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .vm-input {
+        background: #f8fafc;
+        border-color: rgba(0, 0, 0, 0.12);
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vm-input:focus {
+        border-color: #0284c7;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+    }
+
+    :host-context(body.theme-sun) .vm-file-drop {
+        background: #f8fafc;
+        border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    :host-context(body.theme-sun) .vm-file-drop:hover {
+        border-color: rgba(2, 132, 199, 0.4);
+        background: rgba(2, 132, 199, 0.04);
+    }
+
+    :host-context(body.theme-sun) .vm-file-text {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .vm-btn-submit:disabled {
+        background: #e2e8f0;
+        color: #94a3b8;
+    }
+
 </style>

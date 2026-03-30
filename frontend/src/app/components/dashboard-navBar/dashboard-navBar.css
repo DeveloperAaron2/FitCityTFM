@@ -1,0 +1,79 @@
+/*
+  ESTRATEGIA:
+  - stroke="currentColor" en el SVG hereda el CSS `color` del padre
+  - Controlamos el color del .nav-icon span via variable CSS
+  - Angular encapsula los estilos del componente pero sí llega
+    a elementos directos del template (incluidos los hijos de *ngSwitchCase)
+*/
+
+:host {
+    /* Modo oscuro / defecto */
+    --nav-bg: #111827;
+    --nav-border: #22d3ee;
+    --icon-color: #e2e8f0;      /* slate-200, casi blanco */
+    --icon-active: #ffffff;
+    --nav-active-glow: rgba(56, 189, 248, 0.4);
+    --nav-active-shadow: rgba(56, 189, 248, 0.3);
+    --nav-hover-from: #38bdf8;
+    --nav-hover-to: #2563eb;
+    --nav-hover-shadow: rgba(56, 189, 248, 0.4);
+    --nav-shadow: rgba(0, 0, 0, 0.6);
+}
+
+:host-context(body.theme-sun) {
+    /* Modo claro */
+    --nav-bg: #ffffff;
+    --nav-border: rgba(0, 0, 0, 0.1);
+    --icon-color: #475569;      /* slate-600 */
+    --icon-active: #0284c7;
+    --nav-active-glow: rgba(14, 165, 233, 0.15);
+    --nav-active-shadow: rgba(14, 165, 233, 0.1);
+    --nav-hover-from: #7dd3fc;
+    --nav-hover-to: #38bdf8;
+    --nav-hover-shadow: rgba(14, 165, 233, 0.2);
+    --nav-shadow: rgba(0, 0, 0, 0.06);
+}
+
+/* ── Contenedor ──────────────────────────────── */
+.nav-container {
+    background-color: var(--nav-bg) !important;
+    border-top: 2px solid var(--nav-border) !important;
+    box-shadow: 0 -4px 24px var(--nav-shadow);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* ── Círculos ────────────────────────────────── */
+.active-circle {
+    background-color: var(--nav-active-glow);
+    box-shadow: 0 0 10px var(--nav-active-shadow);
+}
+
+.hover-circle {
+    background: linear-gradient(to bottom right, var(--nav-hover-from), var(--nav-hover-to));
+    box-shadow: 0 0 12px var(--nav-hover-shadow);
+}
+
+:host ::ng-deep .active-link .active-circle {
+    opacity: 1 !important;
+}
+
+/* ── Iconos ──────────────────────────────────── */
+/*
+  `color` en .nav-icon se propaga via stroke="currentColor" en el SVG.
+  Angular sí puede poner el atributo de encapsulación en el span,
+  y el SVG hijo hereda el color CSS via currentColor.
+*/
+.nav-icon {
+    color: var(--icon-color);
+    transition: color 0.3s ease;
+}
+
+/* Estado activo */
+:host ::ng-deep .active-link .nav-icon {
+    color: var(--icon-active);
+}
+
+/* Hover */
+.group:hover .nav-icon {
+    color: var(--icon-active);
+}

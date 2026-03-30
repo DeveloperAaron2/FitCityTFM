@@ -1,9 +1,14 @@
 :host {
   display: block;
   min-height: 100vh;
-  background-color: var(--fc-bg-main, #0d0d0d);
+  background-color: #000000;
   color: #fff;
   font-family: 'Inter', system-ui, sans-serif;
+}
+
+:root {
+  --fc-primary: #22d3ee;
+  --fc-primary-glow: rgba(34, 211, 238, 0.4);
 }
 
 .ranking-container {
@@ -16,29 +21,40 @@
 /* Header */
 .ranking-header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
   animation: fadeInDown 0.6s ease-out;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 0.6rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .header-icon {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+  font-size: 1.4rem;
+  margin-bottom: 0;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5));
+  flex-shrink: 0;
 }
 
 .header-title {
-  font-size: 2rem;
+  font-size: 1.2rem;
   font-weight: 800;
-  margin: 0 0 0.5rem 0;
+  margin: 0;
   background: linear-gradient(135deg, #fff, #a0a0a0);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .header-subtitle {
   color: #888;
-  font-size: 0.95rem;
+  font-size: 0.75rem;
   margin: 0;
+  display: none;
 }
 
 /* Segmented Control */
@@ -66,9 +82,12 @@
 }
 
 .segment-btn.active {
-  background: var(--fc-primary, #b0ff00);
-  color: #000;
-  box-shadow: 0 4px 15px rgba(176, 255, 0, 0.3);
+  background: var(--fc-primary);
+  color: #fff;
+  font-weight: 600;
+  transform: scale(1.05);
+  box-shadow: 0 4px 15px rgba(34, 211, 238, 0.5), 0 0 10px rgba(34, 211, 238, 0.3);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 /* Lists */
@@ -82,8 +101,8 @@
 .ranking-card {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 1rem;
   gap: 1rem;
@@ -137,45 +156,65 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.35rem;
+  min-width: 0;
 }
 
 .user-info {
   display: flex;
   align-items: baseline;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .username {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1.05rem;
   color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 .handle {
   font-size: 0.85rem;
   color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
 .pr-details {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .exercise {
-  font-size: 0.9rem;
-  color: #ccc;
-  font-weight: 500;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
 }
 
 .gym-badge {
-  font-size: 0.75rem;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 2px 8px;
-  border-radius: 4px;
-  color: #aaa;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 1;
 }
 
 .date {
@@ -195,19 +234,19 @@
 .weight {
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--fc-primary, #b0ff00);
+  color: var(--fc-primary);
 }
 
 .unit {
   font-size: 0.9rem;
-  color: var(--fc-primary, #b0ff00);
+  color: var(--fc-primary);
   opacity: 0.8;
   font-weight: 600;
 }
 
 /* My PRs Specific */
 .my-pr-card {
-  border-left: 4px solid var(--fc-primary, #b0ff00);
+  border-left: 4px solid var(--fc-primary);
 }
 
 .exercise-icon {
@@ -217,7 +256,7 @@
   align-items: center;
   justify-content: center;
   font-size: 1.8rem;
-  background: rgba(176, 255, 0, 0.1);
+  background: rgba(34, 211, 238, 0.15);
   border-radius: 12px;
 }
 
@@ -237,8 +276,8 @@
 .spinner {
   width: 30px;
   height: 30px;
-  border: 3px solid rgba(176, 255, 0, 0.2);
-  border-top-color: var(--fc-primary, #b0ff00);
+  border: 3px solid rgba(34, 211, 238, 0.2);
+  border-top-color: var(--fc-primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -282,7 +321,7 @@
   align-items: center;
   gap: 0.75rem;
   padding: 1rem 1.25rem;
-  background: rgba(176, 255, 0, 0.06);
+  background: rgba(34, 211, 238, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -306,8 +345,8 @@
 
 .gym-stat-badge {
   font-size: 0.75rem;
-  background: rgba(176, 255, 0, 0.15);
-  color: var(--fc-primary, #b0ff00);
+  background: rgba(34, 211, 238, 0.2);
+  color: var(--fc-primary);
   padding: 2px 8px;
   border-radius: 20px;
   width: fit-content;
@@ -317,7 +356,7 @@
 .gym-rank {
   font-size: 1.4rem;
   font-weight: 800;
-  color: rgba(176, 255, 0, 0.5);
+  color: rgba(34, 211, 238, 0.6);
 }
 
 /* PRs list inside each gym */
@@ -394,3 +433,169 @@
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
+
+/* ═══════════════════════════════════════════════════
+   THEME-SUN (Light Mode) overrides
+   ═══════════════════════════════════════════════════ */
+
+:host-context(body.theme-sun) {
+  background-color: #f0f4f8;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-container {
+  background: #f0f4f8;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-header {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .header-title {
+  background: none;
+  -webkit-background-clip: unset;
+  background-clip: unset;
+  -webkit-text-fill-color: #1e293b;
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .segmented-control {
+  background: rgba(0,0,0,0.05);
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .segment-btn {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .segment-btn.active {
+  background: #0284c7;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+}
+
+:host-context(body.theme-sun) .ranking-card {
+  background: #ffffff;
+  border-color: rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .ranking-card:hover {
+  background: #f8fafc;
+}
+
+:host-context(body.theme-sun) .rank-number {
+  color: #94a3b8;
+}
+
+:host-context(body.theme-sun) .username {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .handle {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .exercise {
+  color: #475569;
+}
+
+:host-context(body.theme-sun) .gym-badge {
+  background: rgba(0,0,0,0.05);
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .date {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .weight {
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .unit {
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .pr-title {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .user-avatar {
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .weight-display {
+  border-left-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .exercise-icon {
+  background: rgba(2, 132, 199, 0.1);
+}
+
+:host-context(body.theme-sun) .loading-state,
+:host-context(body.theme-sun) .empty-state {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .spinner {
+  border-color: rgba(2, 132, 199, 0.2);
+  border-top-color: #0284c7;
+}
+
+/* Gym ranking overrides */
+:host-context(body.theme-sun) .gym-group {
+  border-color: rgba(0,0,0,0.08);
+}
+
+:host-context(body.theme-sun) .gym-group-header {
+  background: rgba(2, 132, 199, 0.06);
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .gym-name {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .gym-stat-badge {
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+}
+
+:host-context(body.theme-sun) .gym-rank {
+  color: rgba(2, 132, 199, 0.5);
+}
+
+:host-context(body.theme-sun) .gym-pr-row {
+  border-bottom-color: rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .gym-pr-row:hover {
+  background: rgba(0,0,0,0.02);
+}
+
+:host-context(body.theme-sun) .gym-pr-position {
+  color: #94a3b8;
+}
+
+:host-context(body.theme-sun) .gym-pr-avatar {
+  border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .gym-pr-username {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .gym-pr-exercise {
+  color: #64748b;
+}
+
+/* Preserve podium medal colors in light mode */
+:host-context(body.theme-sun) .top-1 { border-color: rgba(255, 215, 0, 0.4); background: rgba(255, 215, 0, 0.06); }
+:host-context(body.theme-sun) .top-2 { border-color: rgba(192, 192, 192, 0.4); background: rgba(192, 192, 192, 0.06); }
+:host-context(body.theme-sun) .top-3 { border-color: rgba(205, 127, 50, 0.4); background: rgba(205, 127, 50, 0.06); }
+
