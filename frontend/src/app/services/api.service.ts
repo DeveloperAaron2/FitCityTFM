@@ -68,10 +68,13 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs`, body);
     }
 
-    validatePRVideo(userId: string, videoFile: File, exerciseName: string): Observable<any> {
+    validatePRVideo(userId: string, videoFile: File, exerciseName: string, gymName: string = '', weightKg: number = 0, reps: number = 1): Observable<any> {
         const formData = new FormData();
         formData.append('video', videoFile);
         formData.append('exercise_name', exerciseName);
+        formData.append('gym_name', gymName);
+        formData.append('weight_kg', weightKg.toString());
+        formData.append('reps', reps.toString());
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
     }
 
@@ -109,5 +112,9 @@ export class ApiService {
 
     getGymPrsRanking(): Observable<any> {
         return this.http.get(`${API_URL}/ranking/prs/by-gym`);
+    }
+
+    getGymBestLifts(gymName: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/ranking/prs/by-gym/${encodeURIComponent(gymName)}/best-lifts`);
     }
 }

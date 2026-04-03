@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from database import get_supabase_client
 from utils import level_info, get_title, XP_PER_LEVEL
 
@@ -21,7 +21,9 @@ def get_global_prs(limit: int = 50):
 
 @router.get("/prs/by-gym")
 def get_prs_by_gym(top_per_gym: int = 5):
-    """Return top PRs grouped by gym, sorted by weight descending within each gym."""
+    """Return top PRs grouped by gym, sorted by weight descending within each gym.
+    Also includes gym best lift video info for each gym.
+    """
     db = get_supabase_client()
     res = (
         db.table("lifting_prs")
@@ -31,7 +33,21 @@ def get_prs_by_gym(top_per_gym: int = 5):
     )
     records = res.data or []
 
-    # Group by gym_name
+    # Fetch all gym best lifts (with user info for display)
+    best_lifts_res = (
+        db.table("gym_best_lifts")
+        .select("*, users!inner(username, handle, avatar_url)")
+        .execute()
+    )
+    best_lifts = best_lifts_res.data or []
+
+    # Index best lifts by gym_name
+    best_lifts_by_gym: dict[str, list] = {}
+    for bl in best_lifts:
+        gym = bl.get("gym_name") or "Sin gimnasio"
+        best_lifts_by_gym.setdefault(gym, []).append(bl)
+
+    # Group PRs by gym_name
     grouped: dict[str, list] = {}
     for pr in records:
         gym = pr.get("gym_name") or "Sin gimnasio"
@@ -41,13 +57,31 @@ def get_prs_by_gym(top_per_gym: int = 5):
     result = []
     for gym_name in sorted(grouped.keys()):
         prs = grouped[gym_name]  # already sorted by weight_kg desc from the query
+        gym_best = best_lifts_by_gym.get(gym_name, [])
         result.append({
             "gym_name": gym_name,
             "total_prs": len(prs),
             "top_prs": prs[:top_per_gym],
+            "has_videos": len(gym_best) > 0,
+            "best_lifts": gym_best,
         })
 
     return result
+
+
+@router.get("/prs/by-gym/{gym_name}/best-lifts")
+def get_gym_best_lifts(gym_name: str):
+    """Return the best validated lift videos for a specific gym."""
+    db = get_supabase_client()
+    res = (
+        db.table("gym_best_lifts")
+        .select("*, users!inner(username, handle, avatar_url)")
+        .eq("gym_name", gym_name)
+        .order("weight_kg", desc=True)
+        .execute()
+    )
+    return res.data or []
+
 
 @router.get("")
 def get_ranking(limit: int = 20):

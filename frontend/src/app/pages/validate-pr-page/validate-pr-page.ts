@@ -95,9 +95,9 @@ export class ValidatePrPage implements OnInit {
         this.result.set(null);
 
         try {
-            // STEP 1: Validate Video
-            await new Promise((resolve, reject) => {
-                this.api.validatePRVideo(userId, file, ex).subscribe({
+            // STEP 1: Validate Video (also checks for gym best lift)
+            const validationRes = await new Promise<any>((resolve, reject) => {
+                this.api.validatePRVideo(userId, file, ex, gym, weight, 1).subscribe({
                     next: resolve,
                     error: reject
                 });
@@ -122,12 +122,17 @@ export class ValidatePrPage implements OnInit {
                 });
             });
 
-            this.result.set({
-                success: true,
-                message: prRes.is_new_record
-                    ? `¡Nuevo record guardado! (+${prRes.xp_awarded} XP) 🚀`
-                    : `Record actualizado. (+${prRes.xp_awarded} XP) 🔥`
-            });
+            // Build success message
+            let message = prRes.is_new_record
+                ? `¡Nuevo record guardado! (+${prRes.xp_awarded} XP) 🚀`
+                : `Record actualizado. (+${prRes.xp_awarded} XP) 🔥`;
+
+            // If it's the gym best lift, add a celebration
+            if (validationRes.is_gym_best) {
+                message += `\n🏆 ¡MEJOR LEVANTAMIENTO DEL GIMNASIO! (+${validationRes.best_lift_xp_awarded} XP extra)`;
+            }
+
+            this.result.set({ success: true, message });
 
             // Navigate back to profile after 3 seconds on success
             setTimeout(() => this.goBack(), 3000);
