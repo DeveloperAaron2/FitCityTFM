@@ -78,6 +78,9 @@
             <span class="gym-name">{{ gym.gym_name }}</span>
             <span class="gym-stat-badge">{{ gym.total_prs }} {{ gym.total_prs === 1 ? 'récord' : 'récords' }}</span>
           </div>
+          <button *ngIf="gym.has_videos" class="gym-video-btn" (click)="openVideoModal(gym)" title="Ver mejores levantamientos">
+            🎬
+          </button>
           <div class="gym-rank">#{{ gi + 1 }}</div>
         </div>
 
@@ -139,4 +142,77 @@
     </ng-container>
   </div>
 
+</div>
+
+<!-- ── VIDEO MODAL ─────────────────────────────────────────────── -->
+<div class="video-overlay" *ngIf="showVideoModal()" (click)="closeVideoModal()">
+  <div class="video-modal" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="video-modal-header">
+      <div class="video-modal-title-row">
+        <span class="video-modal-icon">🎬</span>
+        <div>
+          <h2 class="video-modal-title">Mejores Levantamientos</h2>
+          <p class="video-modal-gym">{{ videoModalGymName() }}</p>
+        </div>
+      </div>
+      <button class="video-modal-close" (click)="closeVideoModal()">&times;</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingVideos()" class="video-loading">
+      <div class="spinner"></div>
+      <p>Cargando vídeos...</p>
+    </div>
+
+    <!-- Content -->
+    <ng-container *ngIf="!loadingVideos() && videoModalLifts().length > 0">
+      <!-- Exercise tabs -->
+      <div class="video-exercise-tabs">
+        <button *ngFor="let lift of videoModalLifts(); let i = index"
+                class="video-exercise-tab"
+                [class.active]="activeVideoIndex() === i"
+                (click)="selectVideo(i)">
+          {{ getExerciseEmoji(lift.exercise_name) }} {{ lift.exercise_name }}
+        </button>
+      </div>
+
+      <!-- Video Player -->
+      <div class="video-player-wrapper" *ngIf="videoModalLifts()[activeVideoIndex()] as lift">
+        <video class="video-player"
+               [src]="lift.video_url"
+               controls
+               playsinline
+               preload="metadata">
+          Tu navegador no soporta la reproducción de vídeos.
+        </video>
+
+        <div class="video-info-bar">
+          <div class="video-user-info">
+            <img #modalAvatar
+                 [src]="lift.users?.avatar_url || 'assets/default-avatar.png'"
+                 alt="Avatar"
+                 class="video-user-avatar"
+                 (error)="modalAvatar.src='assets/default-avatar.png'" />
+            <div>
+              <span class="video-username">{{ lift.users?.username || 'Usuario' }}</span>
+              <span class="video-handle">{{ '@' + (lift.users?.handle || 'anon') }}</span>
+            </div>
+          </div>
+          <div class="video-lift-stats">
+            <span class="video-weight">{{ lift.weight_kg }}<small>kg</small></span>
+            <span class="video-reps" *ngIf="lift.reps > 1">× {{ lift.reps }} reps</span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Empty -->
+    <div *ngIf="!loadingVideos() && videoModalLifts().length === 0" class="video-empty">
+      <span class="video-empty-icon">📹</span>
+      <p>No hay vídeos registrados en este gimnasio todavía.</p>
+    </div>
+
+  </div>
 </div>

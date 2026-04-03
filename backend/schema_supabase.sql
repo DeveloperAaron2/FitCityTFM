@@ -129,3 +129,25 @@ ALTER TABLE user_levels ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "allow_all_user_levels" ON user_levels
     FOR ALL USING (true) WITH CHECK (true);
+
+-- ── 7. GYM BEST LIFTS ──────────────────────────────────────────────────────
+-- Stores the best validated lift video per exercise per gym.
+-- Max 3 rows per gym (bench press, squat, deadlift).
+CREATE TABLE IF NOT EXISTS gym_best_lifts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    gym_name        TEXT NOT NULL,
+    exercise_name   TEXT NOT NULL,
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    weight_kg       NUMERIC(6,2) NOT NULL,
+    reps            INTEGER NOT NULL DEFAULT 1,
+    video_url       TEXT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(gym_name, exercise_name)   -- Solo un mejor vídeo por ejercicio+gimnasio
+);
+
+CREATE INDEX IF NOT EXISTS idx_gym_best_lifts_gym_name ON gym_best_lifts(gym_name);
+
+ALTER TABLE gym_best_lifts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_all_gym_best_lifts" ON gym_best_lifts
+    FOR ALL USING (true) WITH CHECK (true);

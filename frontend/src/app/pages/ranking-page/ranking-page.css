@@ -599,3 +599,367 @@
 :host-context(body.theme-sun) .top-2 { border-color: rgba(192, 192, 192, 0.4); background: rgba(192, 192, 192, 0.06); }
 :host-context(body.theme-sun) .top-3 { border-color: rgba(205, 127, 50, 0.4); background: rgba(205, 127, 50, 0.06); }
 
+/* ═══════════════════════════════════════════════════
+   GYM VIDEO BUTTON
+   ═══════════════════════════════════════════════════ */
+
+.gym-video-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2));
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.gym-video-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.4), rgba(236, 72, 153, 0.4));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.gym-video-btn:hover {
+  transform: scale(1.12);
+  box-shadow: 0 0 18px rgba(168, 85, 247, 0.5), 0 0 6px rgba(236, 72, 153, 0.3);
+  border-color: rgba(168, 85, 247, 0.7);
+}
+
+.gym-video-btn:hover::before {
+  opacity: 1;
+}
+
+.gym-video-btn:active {
+  transform: scale(0.95);
+}
+
+/* ═══════════════════════════════════════════════════
+   VIDEO MODAL OVERLAY
+   ═══════════════════════════════════════════════════ */
+
+.video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.video-modal {
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  background: rgba(20, 20, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  overflow-y: auto;
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Modal Header */
+.video-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.25rem 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.video-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.video-modal-icon {
+  font-size: 1.6rem;
+  filter: drop-shadow(0 0 8px rgba(168, 85, 247, 0.5));
+}
+
+.video-modal-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.video-modal-gym {
+  font-size: 0.8rem;
+  color: #a78bfa;
+  margin: 0;
+  font-weight: 600;
+}
+
+.video-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1.5rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.video-modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: scale(1.08);
+}
+
+/* Exercise Tabs */
+.video-exercise-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+}
+
+.video-exercise-tab {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #888;
+  padding: 0.5rem 1rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
+}
+
+.video-exercise-tab.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3), rgba(236, 72, 153, 0.3));
+  border-color: rgba(168, 85, 247, 0.6);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.video-exercise-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ccc;
+}
+
+/* Video Player */
+.video-player-wrapper {
+  padding: 0 1.25rem 1.25rem;
+}
+
+.video-player {
+  width: 100%;
+  border-radius: 14px;
+  background: #000;
+  max-height: 340px;
+  object-fit: contain;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Video Info Bar */
+.video-info-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.video-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.video-user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(168, 85, 247, 0.4);
+}
+
+.video-username {
+  display: block;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+}
+
+.video-handle {
+  display: block;
+  font-size: 0.75rem;
+  color: #888;
+}
+
+.video-lift-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+}
+
+.video-weight {
+  font-size: 1.4rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a78bfa, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.video-weight small {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.video-reps {
+  font-size: 0.75rem;
+  color: #a78bfa;
+  font-weight: 600;
+}
+
+/* Loading & Empty inside modal */
+.video-loading,
+.video-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  color: #888;
+  text-align: center;
+}
+
+.video-empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.6;
+}
+
+/* ═══════════════════════════════════════════════════
+   THEME-SUN — Video Modal overrides
+   ═══════════════════════════════════════════════════ */
+
+:host-context(body.theme-sun) .gym-video-btn {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.1), rgba(219, 39, 119, 0.1));
+  border-color: rgba(147, 51, 234, 0.3);
+}
+
+:host-context(body.theme-sun) .gym-video-btn:hover {
+  box-shadow: 0 0 14px rgba(147, 51, 234, 0.3);
+}
+
+:host-context(body.theme-sun) .video-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+:host-context(body.theme-sun) .video-modal {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15);
+}
+
+:host-context(body.theme-sun) .video-modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+:host-context(body.theme-sun) .video-modal-title {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .video-modal-gym {
+  color: #7c3aed;
+}
+
+:host-context(body.theme-sun) .video-modal-close {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .video-modal-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .video-exercise-tab {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .video-exercise-tab.active {
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15), rgba(219, 39, 119, 0.15));
+  border-color: rgba(147, 51, 234, 0.4);
+  color: #1e293b;
+  box-shadow: 0 4px 12px rgba(147, 51, 234, 0.15);
+}
+
+:host-context(body.theme-sun) .video-exercise-tab:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.06);
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .video-info-bar {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:host-context(body.theme-sun) .video-username {
+  color: #1e293b;
+}
+
+:host-context(body.theme-sun) .video-handle {
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .video-user-avatar {
+  border-color: rgba(147, 51, 234, 0.3);
+}
+
+:host-context(body.theme-sun) .video-weight {
+  background: linear-gradient(135deg, #7c3aed, #db2777);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:host-context(body.theme-sun) .video-reps {
+  color: #7c3aed;
+}
+
+:host-context(body.theme-sun) .video-loading,
+:host-context(body.theme-sun) .video-empty {
+  color: #64748b;
+}

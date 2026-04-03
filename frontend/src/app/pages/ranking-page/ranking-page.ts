@@ -25,6 +25,13 @@ export class RankingPage implements OnInit {
   loadingMe = signal(false);
   loadingGyms = signal(false);
 
+  // ── Video modal state ──────────────────────────────────────────────────
+  showVideoModal = signal(false);
+  videoModalGymName = signal('');
+  videoModalLifts = signal<any[]>([]);
+  loadingVideos = signal(false);
+  activeVideoIndex = signal(0);
+
   ngOnInit() {
     this.loadGlobalPrs();
     this.loadMyPrs();
@@ -66,5 +73,46 @@ export class RankingPage implements OnInit {
         next: (res) => this.gymRanking.set(res),
         error: (err) => console.error('Error fetching gym ranking', err)
       });
+  }
+
+  // ── Video modal methods ────────────────────────────────────────────────
+
+  openVideoModal(gym: any) {
+    this.videoModalGymName.set(gym.gym_name);
+    this.activeVideoIndex.set(0);
+
+    // If we already have best_lifts in the gym data, use them directly
+    if (gym.best_lifts && gym.best_lifts.length > 0) {
+      this.videoModalLifts.set(gym.best_lifts);
+      this.showVideoModal.set(true);
+    } else {
+      // Otherwise fetch from the API
+      this.loadingVideos.set(true);
+      this.showVideoModal.set(true);
+      this.api.getGymBestLifts(gym.gym_name)
+        .pipe(finalize(() => this.loadingVideos.set(false)))
+        .subscribe({
+          next: (lifts) => this.videoModalLifts.set(lifts),
+          error: (err) => console.error('Error fetching gym best lifts:', err)
+        });
+    }
+  }
+
+  closeVideoModal() {
+    this.showVideoModal.set(false);
+    this.videoModalLifts.set([]);
+  }
+
+  selectVideo(index: number) {
+    this.activeVideoIndex.set(index);
+  }
+
+  getExerciseEmoji(exerciseName: string): string {
+    const map: Record<string, string> = {
+      'Press de banca': '🏋️',
+      'Sentadilla': '🦵',
+      'Peso muerto': '💀',
+    };
+    return map[exerciseName] || '🏋️';
   }
 }
