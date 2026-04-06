@@ -18,9 +18,11 @@ body:not(.theme-sun) nav.fixed.bottom-0 {
 body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon {
     color: #e2e8f0 !important;
 }
+
 body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg {
     stroke: #e2e8f0 !important;
 }
+
 body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg path,
 body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg polyline,
 body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg circle,
@@ -31,17 +33,19 @@ body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg line {
 /* Modo claro: fondo blanco, iconos oscuros */
 body.theme-sun nav.fixed.bottom-0 {
     background-color: #ffffff !important;
-    border-top-color: rgba(0,0,0,0.1) !important;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.06) !important;
+    border-top-color: rgba(0, 0, 0, 0.1) !important;
+    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Iconos en modo claro */
 body.theme-sun nav.fixed.bottom-0 .nav-icon {
     color: #475569 !important;
 }
+
 body.theme-sun nav.fixed.bottom-0 .nav-icon svg {
     stroke: #475569 !important;
 }
+
 body.theme-sun nav.fixed.bottom-0 .nav-icon svg path,
 body.theme-sun nav.fixed.bottom-0 .nav-icon svg polyline,
 body.theme-sun nav.fixed.bottom-0 .nav-icon svg circle,
@@ -55,6 +59,7 @@ body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg {
     color: #ffffff !important;
     stroke: #ffffff !important;
 }
+
 body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg path,
 body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg polyline,
 body:not(.theme-sun) nav.fixed.bottom-0 .active-link .nav-icon svg circle,
@@ -68,6 +73,7 @@ body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg {
     color: #0284c7 !important;
     stroke: #0284c7 !important;
 }
+
 body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg path,
 body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg polyline,
 body.theme-sun nav.fixed.bottom-0 .active-link .nav-icon svg circle,
@@ -92,44 +98,83 @@ body.theme-sun .fc-dashboard {
 
 body.theme-sun .fc-topbar {
     background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-body.theme-sun .fc-name { color: #1e293b; }
-body.theme-sun .fc-level { color: #64748b; }
-body.theme-sun .fc-logo { color: #1e293b; }
-body.theme-sun .fc-logo span { color: #0284c7; }
+body.theme-sun .fc-name {
+    color: #1e293b;
+}
+
+body.theme-sun .fc-level {
+    color: #64748b;
+}
+
+body.theme-sun .fc-logo {
+    color: #1e293b;
+}
+
+body.theme-sun .fc-logo span {
+    color: #0284c7;
+}
 
 body.theme-sun .fc-xp {
     background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 body.theme-sun .fc-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
     color: #1e293b;
 }
 
-body.theme-sun .fc-card-title { color: #1e293b; }
-body.theme-sun .fc-card-value { color: #0284c7; }
-body.theme-sun .fc-card-sub { color: #64748b; }
+body.theme-sun .fc-card-title {
+    color: #1e293b;
+}
 
-body.theme-sun .fc-section-title { color: #1e293b; }
-body.theme-sun .fc-activity-item { background: #ffffff; border-color: rgba(0,0,0,0.08); }
-body.theme-sun .fc-activity-label { color: #1e293b; }
-body.theme-sun .fc-activity-sub { color: #64748b; }
-body.theme-sun .fc-activity-val { color: #0284c7; }
+body.theme-sun .fc-card-value {
+    color: #0284c7;
+}
+
+body.theme-sun .fc-card-sub {
+    color: #64748b;
+}
+
+body.theme-sun .fc-section-title {
+    color: #1e293b;
+}
+
+body.theme-sun .fc-activity-item {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-sun .fc-activity-label {
+    color: #1e293b;
+}
+
+body.theme-sun .fc-activity-sub {
+    color: #64748b;
+}
+
+body.theme-sun .fc-activity-val {
+    color: #0284c7;
+}
 
 body.theme-sun .fc-gym-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
+    border-color: rgba(0, 0, 0, 0.08);
 }
 
-body.theme-sun .fc-gym-name { color: #1e293b; }
-body.theme-sun .fc-gym-sub { color: #64748b; }
+body.theme-sun .fc-gym-name {
+    color: #1e293b;
+}
+
+body.theme-sun .fc-gym-sub {
+    color: #64748b;
+}
 
 body.theme-sun .fc-avatar {
     background: rgba(2, 132, 199, 0.1);
@@ -146,58 +191,100 @@ body.theme-sun .ranking-container {
 
 body.theme-sun .ranking-header {
     background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
-body.theme-sun .header-title { color: #1e293b; }
-body.theme-sun .header-subtitle { color: #64748b; }
+body.theme-sun .header-title {
+    color: #1e293b;
+}
+
+body.theme-sun .header-subtitle {
+    color: #64748b;
+}
 
 body.theme-sun .segmented-control {
-    background: rgba(0,0,0,0.05);
-    border-color: rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.05);
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
-body.theme-sun .segment-btn { color: #64748b; }
+body.theme-sun .segment-btn {
+    color: #64748b;
+}
 
 body.theme-sun .segment-btn.active {
     background: #0284c7;
     color: #ffffff;
-    box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
 }
 
 body.theme-sun .ranking-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     color: #1e293b;
 }
 
-body.theme-sun .username { color: #1e293b; }
-body.theme-sun .handle { color: #64748b; }
-body.theme-sun .weight { color: #0284c7; }
-body.theme-sun .unit { color: #64748b; }
-body.theme-sun .exercise { color: #475569; }
-body.theme-sun .pr-title { color: #1e293b; }
-body.theme-sun .date { color: #64748b; }
+body.theme-sun .username {
+    color: #1e293b;
+}
+
+body.theme-sun .handle {
+    color: #64748b;
+}
+
+body.theme-sun .weight {
+    color: #0284c7;
+}
+
+body.theme-sun .unit {
+    color: #64748b;
+}
+
+body.theme-sun .exercise {
+    color: #475569;
+}
+
+body.theme-sun .pr-title {
+    color: #1e293b;
+}
+
+body.theme-sun .date {
+    color: #64748b;
+}
 
 body.theme-sun .gym-group-header {
-    background: rgba(0,0,0,0.03);
-    border-color: rgba(0,0,0,0.08);
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
 }
 
-body.theme-sun .gym-name { color: #1e293b; }
-body.theme-sun .gym-pr-username { color: #1e293b; }
-body.theme-sun .gym-pr-exercise { color: #64748b; }
+body.theme-sun .gym-name {
+    color: #1e293b;
+}
+
+body.theme-sun .gym-pr-username {
+    color: #1e293b;
+}
+
+body.theme-sun .gym-pr-exercise {
+    color: #64748b;
+}
 
 body.theme-sun .gym-pr-row {
-    border-color: rgba(0,0,0,0.06);
+    border-color: rgba(0, 0, 0, 0.06);
 }
 
-body.theme-sun .empty-state { color: #64748b; }
-body.theme-sun .loading-state { color: #64748b; }
+body.theme-sun .empty-state {
+    color: #64748b;
+}
 
-body.theme-sun .rank-number { color: #94a3b8; }
+body.theme-sun .loading-state {
+    color: #64748b;
+}
+
+body.theme-sun .rank-number {
+    color: #94a3b8;
+}
 
 /* ── Mapa ─────────────────────────────────────────────── */
 body.theme-sun .map-wrapper {
@@ -207,11 +294,16 @@ body.theme-sun .map-wrapper {
 body.theme-sun .map-header {
     background: rgba(255, 255, 255, 0.92);
     border-bottom-color: rgba(2, 132, 199, 0.15);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-body.theme-sun .map-title { color: #1e293b; }
-body.theme-sun .map-subtitle { color: rgba(2, 132, 199, 0.7); }
+body.theme-sun .map-title {
+    color: #1e293b;
+}
+
+body.theme-sun .map-subtitle {
+    color: rgba(2, 132, 199, 0.7);
+}
 
 body.theme-sun .locate-btn {
     background: rgba(2, 132, 199, 0.08);
@@ -237,11 +329,16 @@ body.theme-sun .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
 body.theme-sun .maplibregl-popup-content {
     background: rgba(255, 255, 255, 0.97) !important;
     border-color: rgba(2, 132, 199, 0.15) !important;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.12) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
 }
 
-body.theme-sun .fitness-popup h3 { color: #1e293b; }
-body.theme-sun .fitness-popup p { color: #64748b; }
+body.theme-sun .fitness-popup h3 {
+    color: #1e293b;
+}
+
+body.theme-sun .fitness-popup p {
+    color: #64748b;
+}
 
 /* ── Misiones ─────────────────────────────────────────── */
 body.theme-sun .ms-page {
@@ -257,51 +354,85 @@ body.theme-sun .ms-hero-bg::after {
     background: radial-gradient(circle, rgba(2, 132, 199, 0.1) 0%, transparent 70%);
 }
 
-body.theme-sun .ms-hero-title { -webkit-text-fill-color: #0284c7; }
-body.theme-sun .ms-hero-user { color: #64748b; }
+body.theme-sun .ms-hero-title {
+    -webkit-text-fill-color: #0284c7;
+}
+
+body.theme-sun .ms-hero-user {
+    color: #64748b;
+}
 
 body.theme-sun .ms-level-orb {
     background: linear-gradient(135deg, #0284c7, #22d3ee);
-    box-shadow: 0 0 0 4px rgba(2,132,199,0.15), 0 0 24px rgba(2,132,199,0.2), 0 8px 24px rgba(0,0,0,0.1);
+    box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15), 0 0 24px rgba(2, 132, 199, 0.2), 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
-body.theme-sun .ms-xp-labels { color: #64748b; }
-body.theme-sun .ms-xp-bar-track { background: rgba(0,0,0,0.08); }
+body.theme-sun .ms-xp-labels {
+    color: #64748b;
+}
+
+body.theme-sun .ms-xp-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
 
 body.theme-sun .ms-progress-chip {
-    background: rgba(2,132,199,0.1);
-    border-color: rgba(2,132,199,0.2);
+    background: rgba(2, 132, 199, 0.1);
+    border-color: rgba(2, 132, 199, 0.2);
     color: #0284c7;
 }
 
 body.theme-sun .ms-roadmap-node--locked {
     background: #e2e8f0;
     color: #94a3b8;
-    border-color: rgba(0,0,0,0.1);
+    border-color: rgba(0, 0, 0, 0.1);
 }
 
-body.theme-sun .ms-roadmap-line { background: rgba(0,0,0,0.1); }
-body.theme-sun .ms-roadmap-hint { color: #64748b; }
+body.theme-sun .ms-roadmap-line {
+    background: rgba(0, 0, 0, 0.1);
+}
 
-body.theme-sun .ms-section-title { color: #1e293b; }
+body.theme-sun .ms-roadmap-hint {
+    color: #64748b;
+}
+
+body.theme-sun .ms-section-title {
+    color: #1e293b;
+}
 
 body.theme-sun .ms-mission-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-body.theme-sun .ms-mission-title { color: #1e293b; }
-body.theme-sun .ms-mission-desc { color: #64748b; }
-body.theme-sun .ms-mission-bar-track { background: rgba(0,0,0,0.08); }
-body.theme-sun .ms-mission-bar-label { color: #64748b; }
-body.theme-sun .ms-mission-emoji { background: #f1f5f9; }
+body.theme-sun .ms-mission-title {
+    color: #1e293b;
+}
+
+body.theme-sun .ms-mission-desc {
+    color: #64748b;
+}
+
+body.theme-sun .ms-mission-bar-track {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+body.theme-sun .ms-mission-bar-label {
+    color: #64748b;
+}
+
+body.theme-sun .ms-mission-emoji {
+    background: #f1f5f9;
+}
+
 body.theme-sun .ms-loading p,
-body.theme-sun .ms-empty { color: #64748b; }
+body.theme-sun .ms-empty {
+    color: #64748b;
+}
 
 body.theme-sun .ms-levelup-card {
     background: linear-gradient(135deg, #dbeafe 0%, #ffffff 100%);
-    border-color: rgba(2,132,199,0.3);
+    border-color: rgba(2, 132, 199, 0.3);
 }
 
 /* ── Validar PR ─────────────────────────────────────── */
@@ -312,67 +443,103 @@ body.theme-sun .vpr-page {
 
 body.theme-sun .vpr-header {
     background: #ffffff;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-body.theme-sun .vpr-title { color: #1e293b; }
-body.theme-sun .vpr-btn-back { color: #0284c7; background: rgba(2,132,199,0.08); }
+body.theme-sun .vpr-title {
+    color: #1e293b;
+}
+
+body.theme-sun .vpr-btn-back {
+    color: #0284c7;
+    background: rgba(2, 132, 199, 0.08);
+}
 
 body.theme-sun .vpr-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.08);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
 }
 
-body.theme-sun .vpr-desc { color: #475569; }
-body.theme-sun .vpr-label { color: #64748b; }
+body.theme-sun .vpr-desc {
+    color: #475569;
+}
+
+body.theme-sun .vpr-label {
+    color: #64748b;
+}
 
 body.theme-sun .vpr-input {
     background: #f8fafc;
-    border-color: rgba(0,0,0,0.12);
+    border-color: rgba(0, 0, 0, 0.12);
     color: #1e293b;
 }
 
 body.theme-sun .vpr-file-drop {
     background: #f8fafc;
-    border-color: rgba(2,132,199,0.3);
+    border-color: rgba(2, 132, 199, 0.3);
 }
 
-body.theme-sun .vpr-file-text { color: #64748b; }
+body.theme-sun .vpr-file-text {
+    color: #64748b;
+}
 
 body.theme-sun .vpr-geo-banner {
     background: #f1f5f9;
-    border-color: rgba(0,0,0,0.1);
+    border-color: rgba(0, 0, 0, 0.1);
     color: #475569;
 }
 
 body.theme-sun .vpr-geo-banner.is-error {
-    background: rgba(239,68,68,0.08);
-    border-color: rgba(239,68,68,0.2);
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
 }
 
-body.theme-sun .vpr-geo-banner.is-error .vpr-geo-text { color: #dc2626; }
+body.theme-sun .vpr-geo-banner.is-error .vpr-geo-text {
+    color: #dc2626;
+}
 
 /* ── Login / Registro ──────────────────────────────── */
-body.theme-sun .auth-screen { background: #f0f4f8; }
+body.theme-sun .auth-screen {
+    background: #f0f4f8;
+}
 
 body.theme-sun .auth-card {
     background: #ffffff;
-    border-color: rgba(0,0,0,0.1);
-    box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
-body.theme-sun .auth-logo { color: #1e293b; }
-body.theme-sun .auth-logo span { color: #0284c7; }
-body.theme-sun .auth-subtitle { color: #64748b; }
-body.theme-sun .auth-field label { color: #475569; }
-
-body.theme-sun .auth-field input {
-    background: #f8fafc;
-    border-color: rgba(0,0,0,0.12);
+body.theme-sun .auth-logo {
     color: #1e293b;
 }
 
-body.theme-sun .auth-link { color: #475569; }
-body.theme-sun .auth-link a { color: #0284c7; }
-body.theme-sun .password-toggle { color: #64748b; }
+body.theme-sun .auth-logo span {
+    color: #0284c7;
+}
+
+body.theme-sun .auth-subtitle {
+    color: #64748b;
+}
+
+body.theme-sun .auth-field label {
+    color: #475569;
+}
+
+body.theme-sun .auth-field input {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1e293b;
+}
+
+body.theme-sun .auth-link {
+    color: #475569;
+}
+
+body.theme-sun .auth-link a {
+    color: #0284c7;
+}
+
+body.theme-sun .password-toggle {
+    color: #64748b;
+}

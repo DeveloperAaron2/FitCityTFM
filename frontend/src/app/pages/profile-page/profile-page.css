@@ -430,7 +430,7 @@
 
 .pr-xp-track {
     height: 10px;
-    background: rgba(255, 255, 255, .06);
+    background: var(--pr-accent-dim);
     border-radius: 20px;
     overflow: hidden;
     position: relative;
