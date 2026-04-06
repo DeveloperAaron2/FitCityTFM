@@ -7,11 +7,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: `./dashboard-navBar.html`,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    :host ::ng-deep .active-link .active-circle {
-      opacity: 1 !important;
-    }
-  `]
+  styleUrl: './dashboard-navBar.css'
 })
 export class DashboardNavBar {
   // Lista de enlaces para mantener el HTML limpio
