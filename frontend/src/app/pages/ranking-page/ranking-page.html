@@ -20,17 +20,34 @@
 
   <!-- Global PRs View -->
   <div class="ranking-list" *ngIf="activeTab() === 'global'">
+    
+    <!-- Category Filter -->
+    <div class="exercise-filter-tabs" *ngIf="globalPrs().length > 0 || !loadingGlobal()">
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Todos'" (click)="setGlobalExercise('Todos')">
+        🌍 Todos
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Press de banca'" (click)="setGlobalExercise('Press de banca')">
+        🏋️ Press de banca
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Sentadilla'" (click)="setGlobalExercise('Sentadilla')">
+        🦵 Sentadilla
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Peso muerto'" (click)="setGlobalExercise('Peso muerto')">
+        💀 Peso muerto
+      </button>
+    </div>
+
     <div *ngIf="loadingGlobal()" class="loading-state">
       <div class="spinner"></div>
       <p>Cargando campeones...</p>
     </div>
 
-    <div *ngIf="!loadingGlobal() && globalPrs().length === 0" class="empty-state">
-      <p>Aún no hay récords registrados.</p>
+    <div *ngIf="!loadingGlobal() && filteredGlobalPrs().length === 0" class="empty-state">
+      <p>Aún no hay récords registrados en esta categoría.</p>
     </div>
 
     <ng-container *ngIf="!loadingGlobal()">
-      <div *ngFor="let pr of globalPrs(); let i = index" class="ranking-card" [class.top-1]="i === 0"
+      <div *ngFor="let pr of filteredGlobalPrs(); let i = index" class="ranking-card" [class.top-1]="i === 0"
         [class.top-2]="i === 1" [class.top-3]="i === 2">
         <div class="rank-number">#{{ i + 1 }}</div>
 

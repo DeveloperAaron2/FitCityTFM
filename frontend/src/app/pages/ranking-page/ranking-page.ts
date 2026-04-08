@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
@@ -16,8 +16,20 @@ export class RankingPage implements OnInit {
   private auth = inject(AuthService);
 
   activeTab = signal<'global' | 'me' | 'gyms'>('global');
+  selectedGlobalExercise = signal<string>('Todos');
 
   globalPrs = signal<any[]>([]);
+
+  filteredGlobalPrs = computed(() => {
+    const all = this.globalPrs();
+    const curr = this.selectedGlobalExercise();
+    if (curr === 'Todos') return all;
+    return all.filter(pr => pr.exercise_name === curr);
+  });
+
+  setGlobalExercise(ex: string) {
+    this.selectedGlobalExercise.set(ex);
+  }
   myPrs = signal<any[]>([]);
   gymRanking = signal<any[]>([]);
 

@@ -90,6 +90,44 @@
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
+/* Exercise Filter Tabs */
+.exercise-filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  padding: 6px 4px 14px 4px; /* Sufficient padding to avoid clipping shadow and scale */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.exercise-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+.exercise-tab {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+.exercise-tab.active {
+  background: rgba(34, 211, 238, 0.15);
+  border-color: rgba(34, 211, 238, 0.4);
+  color: var(--fc-primary);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.15);
+  transform: scale(1.05);
+}
+.exercise-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* Lists */
 .ranking-list {
   display: flex;
@@ -475,6 +513,24 @@
   background: #0284c7;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+}
+
+:host-context(body.theme-sun) .exercise-tab {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .exercise-tab.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+:host-context(body.theme-sun) .exercise-tab:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
 }
 
 :host-context(body.theme-sun) .ranking-card {
