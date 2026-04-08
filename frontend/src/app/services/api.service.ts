@@ -117,4 +117,14 @@ export class ApiService {
     getGymBestLifts(gymName: string): Observable<any[]> {
         return this.http.get<any[]>(`${API_URL}/ranking/prs/by-gym/${encodeURIComponent(gymName)}/best-lifts`);
     }
+
+    // ── PR Reports ────────────────────────────────────────────────────────────
+
+    reportPR(prId: string, reporterId: string, reason: string = 'weight_mismatch'): Observable<any> {
+        return this.http.post(`${API_URL}/prs/${prId}/report`, { reporter_id: reporterId, reason });
+    }
+
+    getPRReportCount(prId: string): Observable<any> {
+        return this.http.get(`${API_URL}/prs/${prId}/reports/count`);
+    }
 }

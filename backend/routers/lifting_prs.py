@@ -51,6 +51,51 @@ def _is_better_lift(new_weight: float, new_reps: int, old_weight: float, old_rep
     return False
 
 
+_PLAUSIBILITY_THRESHOLD = 0.20  # Max 20% increase over previous PR
+
+
+def _check_weight_plausibility(user_id: str, exercise_name: str, new_weight: float) -> dict | None:
+    """Check if the declared weight is plausible based on the user's history.
+    Returns a warning dict if the jump is suspicious, or None if OK.
+    """
+    if new_weight <= 0:
+        return None
+
+    db = get_supabase_client()
+    existing = (
+        db.table("lifting_prs")
+        .select("weight_kg")
+        .eq("user_id", user_id)
+        .eq("exercise_name", exercise_name)
+        .order("weight_kg", desc=True)
+        .limit(1)
+        .execute()
+    )
+
+    if not existing.data:
+        return None  # First PR for this exercise — no reference
+
+    prev_weight = float(existing.data[0]["weight_kg"])
+    if prev_weight <= 0:
+        return None
+
+    increase_pct = (new_weight - prev_weight) / prev_weight
+
+    if increase_pct > _PLAUSIBILITY_THRESHOLD:
+        return {
+            "previous_weight": prev_weight,
+            "new_weight": new_weight,
+            "increase_percent": round(increase_pct * 100, 1),
+            "threshold_percent": round(_PLAUSIBILITY_THRESHOLD * 100, 1),
+            "message": (
+                f"⚠️ Salto de peso sospechoso: {prev_weight} kg → {new_weight} kg "
+                f"(+{round(increase_pct * 100, 1)}%). El máximo habitual es +{round(_PLAUSIBILITY_THRESHOLD * 100)}%."
+            ),
+        }
+
+    return None
+
+
 # ── Endpoints ──────────────────────────────────────────────────────────────────
 
 @router.post("/validate-video")
@@ -106,8 +151,9 @@ async def validate_pr_video(
 
     await video.close()
     
-    # 4. Analyze video via AI Service
-    analysis = await ai_service.analyze_lifting_video(bytes(video_bytes), exercise_name)
+    # 4. Analyze video via AI Service (movement validation)
+    video_data = bytes(video_bytes)
+    analysis = await ai_service.analyze_lifting_video(video_data, exercise_name)
     
     if not analysis.get("is_valid", False):
         raise HTTPException(
@@ -117,7 +163,21 @@ async def validate_pr_video(
 
     size_mb = round(total_bytes / (1024 * 1024), 2)
 
-    # 5. Check if this is the best lift for this gym+exercise and upload to Storage
+    # 5. LAYER 1 — Weight plausibility check
+    weight_plausibility_warning = None
+    if weight_kg > 0:
+        weight_plausibility_warning = _check_weight_plausibility(
+            user_id, exercise_name, weight_kg
+        )
+
+    # 6. LAYER 2 — AI weight estimation
+    weight_ai_check = None
+    if weight_kg > 0:
+        weight_ai_check = await ai_service.estimate_weight_from_video(
+            video_data, exercise_name, weight_kg
+        )
+
+    # 7. Check if this is the best lift for this gym+exercise and upload to Storage
     is_gym_best = False
     best_lift_xp_awarded = 0
     video_url = None
@@ -133,7 +193,7 @@ async def validate_pr_video(
             exercise_name=exercise_name.strip(),
             weight_kg=weight_kg,
             reps=reps,
-            video_bytes=bytes(video_bytes),
+            video_bytes=video_data,
             content_type=content_type,
         )
 
@@ -146,6 +206,8 @@ async def validate_pr_video(
         "ai_confidence": analysis.get("confidence"),
         "is_gym_best": is_gym_best,
         "best_lift_xp_awarded": best_lift_xp_awarded,
+        "weight_plausibility_warning": weight_plausibility_warning,
+        "weight_ai_check": weight_ai_check,
         "message": f"Vídeo validado correctamente por la IA ({size_mb} MB). Puedes registrar tu PR.",
     }
 
