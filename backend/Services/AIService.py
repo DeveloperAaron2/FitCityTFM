@@ -93,6 +93,118 @@ class AIService:
                 "confidence": "low"
             }
 
+    async def estimate_weight_from_video(
+        self, video_bytes: bytes, exercise_name: str, declared_weight: float
+    ) -> dict:
+        """
+        Extracts frames from the video and asks the model to estimate
+        the total weight on the barbell by identifying visible plates.
+        Returns a comparison against the declared weight.
+        """
+        try:
+            base64_frames = self._extract_frames(video_bytes, num_frames=3)
+
+            if not base64_frames:
+                return {
+                    "estimated_weight": None,
+                    "matches_declared": True,
+                    "confidence": "none",
+                    "detail": "No se pudieron extraer frames para estimar el peso.",
+                }
+
+            prompt = self._build_weight_estimation_prompt(exercise_name, declared_weight)
+
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.post(
+                        f"{self.base_url}/api/generate",
+                        headers=self.headers,
+                        json={
+                            "model": self.model,
+                            "prompt": prompt,
+                            "images": base64_frames,
+                            "stream": False,
+                            "format": "json",
+                        },
+                        timeout=120.0,
+                    )
+                    response.raise_for_status()
+                    result = response.json()
+                except (httpx.HTTPStatusError, httpx.RequestError):
+                    return {
+                        "estimated_weight": None,
+                        "matches_declared": True,
+                        "confidence": "none",
+                        "detail": "No se pudo conectar con el servicio de IA para estimar el peso.",
+                    }
+
+                llm_text = result.get("response", "{}")
+                try:
+                    data = json.loads(llm_text)
+                    estimated = data.get("estimated_weight_kg")
+                    if estimated is not None:
+                        try:
+                            estimated = float(estimated)
+                        except (ValueError, TypeError):
+                            estimated = None
+
+                    # Compare: allow a tolerance of ±20% between estimated and declared
+                    if estimated is not None and estimated > 0:
+                        tolerance = 0.20
+                        lower = estimated * (1 - tolerance)
+                        upper = estimated * (1 + tolerance)
+                        matches = lower <= declared_weight <= upper
+                    else:
+                        matches = True  # Can't estimate → assume OK
+
+                    return {
+                        "estimated_weight": estimated,
+                        "matches_declared": matches,
+                        "confidence": data.get("confidence", "low"),
+                        "detail": data.get("detail", ""),
+                    }
+                except json.JSONDecodeError:
+                    return {
+                        "estimated_weight": None,
+                        "matches_declared": True,
+                        "confidence": "none",
+                        "detail": "Respuesta no válida del modelo al estimar peso.",
+                    }
+        except Exception as e:
+            return {
+                "estimated_weight": None,
+                "matches_declared": True,
+                "confidence": "none",
+                "detail": f"Error interno al estimar peso: {str(e)}",
+            }
+
+    def _build_weight_estimation_prompt(
+        self, exercise_name: str, declared_weight: float
+    ) -> str:
+        return (
+            "Eres un asistente de IA experto en identificar discos de pesas en imágenes de gimnasio. "
+            f"El usuario dice que está levantando {declared_weight} kg en '{exercise_name}'.\n\n"
+            "Analiza las imágenes e intenta estimar el peso total en la barra contando los discos visibles.\n\n"
+            "REFERENCIA DE DISCOS CALIBRADOS (colores IPF estándar):\n"
+            "- Rojo = 25 kg\n"
+            "- Azul = 20 kg\n"
+            "- Amarillo = 15 kg\n"
+            "- Verde = 10 kg\n"
+            "- Blanco = 5 kg\n"
+            "- Discos pequeños: 2.5 kg, 1.25 kg\n"
+            "- La barra olímpica pesa 20 kg normalmente\n\n"
+            "NOTA: Los discos se cargan a ambos lados de la barra (simétricos). "
+            "Si ves discos solo en un lado, multiplica por 2.\n\n"
+            "Si NO puedes ver los discos con claridad (ángulo malo, discos negros sin marcar, "
+            "mala iluminación), indica confidence 'low' y estimated_weight_kg como null.\n\n"
+            "Devuelve ÚNICAMENTE este JSON:\n"
+            '{\n'
+            '  "estimated_weight_kg": <número o null si no es posible estimar>,\n'
+            '  "confidence": "high|medium|low",\n'
+            '  "detail": "<breve explicación de qué discos has identificado o por qué no puedes estimar>"\n'
+            '}'
+        )
+
     def _build_prompt(self, exercise_name: str) -> str:
         base_prompt = (
             "Eres un asistente de IA muy amistoso y comprensivo que valida levantamientos en un gimnasio aficionado. "

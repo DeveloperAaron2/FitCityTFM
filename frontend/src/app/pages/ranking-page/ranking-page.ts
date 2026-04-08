@@ -115,4 +115,65 @@ export class RankingPage implements OnInit {
     };
     return map[exerciseName] || '🏋️';
   }
+
+  // ── Report modal state ─────────────────────────────────────────────────
+  showReportModal = signal(false);
+  reportTargetPR = signal<any>(null);
+  reportLoading = signal(false);
+  reportResult = signal<{ success: boolean; message: string } | null>(null);
+  reportedPRs = signal<Set<string>>(new Set());
+
+  openReportModal(pr: any) {
+    const user = this.auth.user();
+    if (!user) return;
+
+    // Cannot report own PR
+    if (pr.user_id === user.id) {
+      return;
+    }
+
+    // Already reported
+    if (this.reportedPRs().has(pr.id)) {
+      return;
+    }
+
+    this.reportTargetPR.set(pr);
+    this.reportResult.set(null);
+    this.showReportModal.set(true);
+  }
+
+  closeReportModal() {
+    this.showReportModal.set(false);
+    this.reportTargetPR.set(null);
+  }
+
+  confirmReport() {
+    const pr = this.reportTargetPR();
+    const user = this.auth.user();
+    if (!pr || !user) return;
+
+    this.reportLoading.set(true);
+    this.api.reportPR(pr.id, user.id, 'weight_mismatch').subscribe({
+      next: (res) => {
+        this.reportLoading.set(false);
+        this.reportResult.set({ success: true, message: res.message });
+        // Track reported PRs locally
+        const updated = new Set(this.reportedPRs());
+        updated.add(pr.id);
+        this.reportedPRs.set(updated);
+        // Close modal after a short delay
+        setTimeout(() => this.closeReportModal(), 2000);
+      },
+      error: (err) => {
+        this.reportLoading.set(false);
+        const detail = err.error?.detail || 'Error al enviar el reporte.';
+        this.reportResult.set({ success: false, message: detail });
+      }
+    });
+  }
+
+  isOwnPR(pr: any): boolean {
+    const user = this.auth.user();
+    return user ? pr.user_id === user.id : false;
+  }
 }

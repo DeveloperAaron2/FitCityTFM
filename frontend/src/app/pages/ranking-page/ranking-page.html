@@ -52,11 +52,18 @@
           <span class="weight">{{ pr.weight_kg }}</span>
           <span class="unit">kg</span>
         </div>
+
+        <button class="report-btn"
+                *ngIf="!isOwnPR(pr)"
+                [class.reported]="reportedPRs().has(pr.id)"
+                [disabled]="reportedPRs().has(pr.id)"
+                (click)="openReportModal(pr); $event.stopPropagation()"
+                title="Reportar peso sospechoso">
+          {{ reportedPRs().has(pr.id) ? '✓' : '🚩' }}
+        </button>
       </div>
     </ng-container>
   </div>
-
-  <!-- Gyms Ranking View -->
   <div class="ranking-list" *ngIf="activeTab() === 'gyms'">
     <div *ngIf="loadingGyms()" class="loading-state">
       <div class="spinner"></div>
@@ -104,6 +111,15 @@
               <span class="weight">{{ pr.weight_kg }}</span>
               <span class="unit">kg</span>
             </div>
+
+            <button class="report-btn report-btn--small"
+                    *ngIf="!isOwnPR(pr)"
+                    [class.reported]="reportedPRs().has(pr.id)"
+                    [disabled]="reportedPRs().has(pr.id)"
+                    (click)="openReportModal(pr); $event.stopPropagation()"
+                    title="Reportar peso sospechoso">
+              {{ reportedPRs().has(pr.id) ? '✓' : '🚩' }}
+            </button>
           </div>
         </div>
 
@@ -212,6 +228,51 @@
     <div *ngIf="!loadingVideos() && videoModalLifts().length === 0" class="video-empty">
       <span class="video-empty-icon">📹</span>
       <p>No hay vídeos registrados en este gimnasio todavía.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── REPORT MODAL ─────────────────────────────────────────────── -->
+<div class="report-overlay" *ngIf="showReportModal()" (click)="closeReportModal()">
+  <div class="report-modal" (click)="$event.stopPropagation()">
+    <div class="report-modal-header">
+      <span class="report-modal-icon">🚩</span>
+      <h2 class="report-modal-title">Reportar PR sospechoso</h2>
+      <button class="report-modal-close" (click)="closeReportModal()">&times;</button>
+    </div>
+
+    <div class="report-modal-body" *ngIf="reportTargetPR() as pr">
+      <p class="report-desc">
+        ¿Crees que el peso declarado en este PR no coincide con el vídeo o es sospechoso?
+      </p>
+
+      <div class="report-pr-summary">
+        <div class="report-pr-info">
+          <span class="report-pr-user">{{ pr.users?.username || 'Usuario' }}</span>
+          <span class="report-pr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+        </div>
+        <div class="report-pr-weight">
+          <span class="weight">{{ pr.weight_kg }}</span>
+          <span class="unit">kg</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div *ngIf="reportResult() as res" class="report-result"
+           [class.is-success]="res.success" [class.is-error]="!res.success">
+        <span>{{ res.success ? '✅' : '❌' }}</span>
+        <span>{{ res.message }}</span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="report-actions" *ngIf="!reportResult()">
+        <button class="report-btn-cancel" (click)="closeReportModal()">Cancelar</button>
+        <button class="report-btn-confirm" (click)="confirmReport()" [disabled]="reportLoading()">
+          <span *ngIf="!reportLoading()">Enviar reporte</span>
+          <span *ngIf="reportLoading()">Enviando...</span>
+        </button>
+      </div>
     </div>
 
   </div>
