@@ -33,7 +33,7 @@ body:not(.theme-sun) nav.fixed.bottom-0 .nav-icon svg line {
 /* Modo claro: fondo blanco, iconos oscuros */
 body.theme-sun nav.fixed.bottom-0 {
     background-color: #ffffff !important;
-    border-top-color: rgba(0, 0, 0, 0.1) !important;
+    border-top-color: #7dd3fc !important;
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06) !important;
 }
 

@@ -26,13 +26,31 @@
     <div class="fc-xp">
         <div class="fc-xp-labels fc-camera-zone">
             <a routerLink="/validate-pr" class="fc-camera-action" aria-label="Actualizar PR en vídeo">
-                <span class="fc-cam-label"><span class="fc-btn-emoji">📷</span> <br> Actualizar PR</span>
+                <span class="fc-cam-label">
+                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="fc-btn-svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path fill="currentColor"
+                                d="M211.832 39.06c-15.022 15.31-15.894 22.83-23.473 43.903 2.69 9.14 5.154 16.927 9.148 25.117 5.158.283 10.765.47 15.342.43-6.11-10.208-8.276-19.32-4.733-35.274 4.3 19.05 12.847 29.993 21.203 34.332 3.032-.334 5.957-.714 8.776-1.146-6.255-10.337-8.494-19.47-4.914-35.588 3.897 17.27 11.287 27.876 18.86 32.94 4.658-1.043 9.283-2.243 13.927-3.534-5.517-9.69-7.36-18.692-3.97-33.957 3.357 14.876 9.307 24.81 15.732 30.516 5.095-1.57 9.296-2.898 13.852-4.347-.685-5.782-.416-12.187 1.064-19.115l1.883-8.8 17.603 3.76-1.88 8.804c-3.636 17.008 1.324 24.42 7.306 28.666 5.98 4.244 14.69 3.46 16.03 2.6l7.576-4.86 9.72 15.15c-3.857 2.34-7.9 5.44-11.822 7.06 18.65 27.678 32.183 61.465 24.756 93.55-2.365 9.474-6.03 18.243-11.715 24.986 12.725 12.13 21.215 22.026 31.032 34.5-3.713-2.387-7.586-4.844-11.692-7.37-11.397-7.01-23.832-14.214-34.98-19.802-16.012-7.8-31.367-18.205-47.73-20.523-22.552-2.967-46.27 4.797-73.32 21.06 7.872 8.72 13.282 15.474 20.312 24.288-6.98-4.338-14.652-9.07-23.16-14.23-32.554-17.48-65.39-48.227-100.438-49.99-30.56-1.092-59.952 14.955-89.677 38.568L18 254.293V494h31.963c45.184-17.437 80.287-57.654 97.03-94.52l.25-.564.325-.52c9.463-15.252 11.148-29.688 16.79-44.732 5.645-15.044 16.907-29.718 41.884-38.756 4.353-2.16 5.07-1.415 8.633 1.395 30.468 24.01 57.29 32.02 83.24 32.35 32.61-15.57 58.442-9.882 85.682-19.38-3.966 3.528-8.77 7.21-13.986 10.762-15.323 10.436-34.217 19.928-46.304 24.8-14.716 2.006-28.36 2.416-41.967.616-9.96 12.09-25.574 20.358-37.35 26.673 63.92 14.023 115.88.91 167.386-22.896-9.522-1.817-19.008-3.692-27.994-5.42 31.634-4.422 64.984-3.766 94.705-3.53 4.084-.02 7.213-.453 8.7-.886 14.167-51.072-4.095-97.893-34.294-145.216-30.263-47.425-72.18-94.107-101.896-143.04-21.1-17.257-48.6-31.455-77.522-46.175-20.386 4.25-41.026 9.336-61.443 14.1zm85.385 70.49c-11.678 3.6-23.71 7.425-33.852 10.012 2.527 4.93 3.735 10.664 3.395 16.202 11.028.877 21.082-2.018 28.965-6.356 4.845-2.666 8.74-6.048 11.414-8.96-3.854-2.735-7.26-6.41-9.923-10.9zm-54.213 14.698c-11.76 1.143-24.59 2.362-35.06 2.236 2.39 4.772 3.78 12.067 8.51 14.84 11.18 1.164 20.6 1.997 29.91-1.746 5.435-3.214 1.818-15.058-3.36-15.33zm-34.98 209.332c-17.593 7.233-22.586 15.14-26.813 26.406-3.998 10.66-6.227 25.076-14.48 41.014 32.29-6.38 69.625-21.23 93.852-40.088-17.017-5.098-34.553-13.852-52.557-27.332zm9.318 71.385c-18.723 7.237-40.836 16.144-59.696 14.062C143.774 446.68 124.012 474.03 91.762 494h84.68c21.564-29.798 38.067-56.575 40.9-89.035z">
+                            </path>
+                        </g>
+                    </svg>
+                    Actualizar PR
+                </span>
             </a>
             <a (click)="openValidateModal()" class="fc-camera-action" aria-label="Validar PR en vídeo"
                 style="cursor:pointer">
                 <span class="fc-cam-label">
-                    <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" class="fc-btn-svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"><path fill="currentColor" d="M211.832 39.06c-15.022 15.31-15.894 22.83-23.473 43.903 2.69 9.14 5.154 16.927 9.148 25.117 5.158.283 10.765.47 15.342.43-6.11-10.208-8.276-19.32-4.733-35.274 4.3 19.05 12.847 29.993 21.203 34.332 3.032-.334 5.957-.714 8.776-1.146-6.255-10.337-8.494-19.47-4.914-35.588 3.897 17.27 11.287 27.876 18.86 32.94 4.658-1.043 9.283-2.243 13.927-3.534-5.517-9.69-7.36-18.692-3.97-33.957 3.357 14.876 9.307 24.81 15.732 30.516 5.095-1.57 9.296-2.898 13.852-4.347-.685-5.782-.416-12.187 1.064-19.115l1.883-8.8 17.603 3.76-1.88 8.804c-3.636 17.008 1.324 24.42 7.306 28.666 5.98 4.244 14.69 3.46 16.03 2.6l7.576-4.86 9.72 15.15c-3.857 2.34-7.9 5.44-11.822 7.06 18.65 27.678 32.183 61.465 24.756 93.55-2.365 9.474-6.03 18.243-11.715 24.986 12.725 12.13 21.215 22.026 31.032 34.5-3.713-2.387-7.586-4.844-11.692-7.37-11.397-7.01-23.832-14.214-34.98-19.802-16.012-7.8-31.367-18.205-47.73-20.523-22.552-2.967-46.27 4.797-73.32 21.06 7.872 8.72 13.282 15.474 20.312 24.288-6.98-4.338-14.652-9.07-23.16-14.23-32.554-17.48-65.39-48.227-100.438-49.99-30.56-1.092-59.952 14.955-89.677 38.568L18 254.293V494h31.963c45.184-17.437 80.287-57.654 97.03-94.52l.25-.564.325-.52c9.463-15.252 11.148-29.688 16.79-44.732 5.645-15.044 16.907-29.718 41.884-38.756 4.353-2.16 5.07-1.415 8.633 1.395 30.468 24.01 57.29 32.02 83.24 32.35 32.61-1.557 58.442-9.882 85.682-19.38-3.966 3.528-8.77 7.21-13.986 10.762-15.323 10.436-34.217 19.928-46.304 24.8-14.716 2.006-28.36 2.416-41.967.616-9.96 12.09-25.574 20.358-37.35 26.673 63.92 14.023 115.88.91 167.386-22.896-9.522-1.817-19.008-3.692-27.994-5.42 31.634-4.422 64.984-3.766 94.705-3.53 4.084-.02 7.213-.453 8.7-.886 14.167-51.072-4.095-97.893-34.294-145.216-30.263-47.425-72.18-94.107-101.896-143.04-21.1-17.257-48.6-31.455-77.522-46.175-20.386 4.25-41.026 9.336-61.443 14.1zm85.385 70.49c-11.678 3.6-23.71 7.425-33.852 10.012 2.527 4.93 3.735 10.664 3.395 16.202 11.028.877 21.082-2.018 28.965-6.356 4.845-2.666 8.74-6.048 11.414-8.96-3.854-2.735-7.26-6.41-9.923-10.9zm-54.213 14.698c-11.76 1.143-24.59 2.362-35.06 2.236 2.39 4.772 3.78 12.067 8.51 14.84 11.18 1.164 20.6 1.997 29.91-1.746 5.435-3.214 1.818-15.058-3.36-15.33zm-34.98 209.332c-17.593 7.233-22.586 15.14-26.813 26.406-3.998 10.66-6.227 25.076-14.48 41.014 32.29-6.38 69.625-21.23 93.852-40.088-17.017-5.098-34.553-13.852-52.557-27.332zm9.318 71.385c-18.723 7.237-40.836 16.144-59.696 14.062C143.774 446.68 124.012 474.03 91.762 494h84.68c21.564-29.798 38.067-56.575 40.9-89.035z"></path></g></svg>
-                    <br> Validar PR
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="fc-btn-svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier"> 
+                            <path d="M8.5 12.5L10.5 14.5L15.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> 
+                            <path d="M22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C21.5093 4.43821 21.8356 5.80655 21.9449 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path> 
+                        </g>
+                    </svg>
+                    Validar PR
                 </span>
             </a>
         </div>
@@ -234,29 +252,32 @@
         justify-self: start;
         display: flex;
         align-items: center;
-        gap: 10px;
-        background: rgba(255, 255, 255, 0.12);
-        /* Más grisáceo */
-        border: 1px solid var(--border);
+        gap: 12px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 40px;
-        padding: 6px 14px 6px 6px;
+        padding: 6px 16px 6px 6px;
         flex-shrink: 0;
         cursor: pointer;
-        transition: background 0.2s, transform 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
     .fc-trainer:hover {
-        background: rgba(255, 255, 255, 0.18);
-        transform: translateY(-1px);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
     }
 
     .fc-trainer:active {
-        transform: scale(0.98);
+        transform: scale(0.96);
     }
 
     .fc-avatar {
-        width: 36px;
-        height: 36px;
+        width: 38px;
+        height: 38px;
         background: linear-gradient(135deg, #4ade80, #06b6d4);
         border-radius: 50%;
         display: flex;
@@ -264,7 +285,8 @@
         justify-content: center;
         font-size: 18px;
         overflow: hidden;
-        /* Para que la imagen respete el redondeo */
+        border: 2px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     .fc-avatar-img {
@@ -308,59 +330,85 @@
     .fc-camera-zone {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: stretch;
         margin-bottom: 8px;
+        gap: 12px;
     }
 
     .fc-camera-action {
-        width: 32% !important;
+        flex: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: rgba(255, 255, 255, 0.08); /* Grisaceo oscuro */
-        backdrop-filter: blur(10px);
-        border: 1px solid var(--border);
-        border-radius: 14px; /* Un poco menos rádio para acompañar el tamaño más pequeño */
-        padding: 6px 4px;
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.03));
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 16px;
+        padding: 14px 8px;
         text-decoration: none;
         color: var(--text);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         position: relative;
         overflow: hidden;
     }
+    
+    .fc-camera-action::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at top right, rgba(34, 211, 238, 0.2), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    }
 
     .fc-camera-action:hover {
-        transform: translateY(-3px) scale(1.02);
-        background: rgba(255, 255, 255, 0.15);
-        border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        transform: translateY(-4px) scale(1.02);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06));
+        border-color: rgba(34, 211, 238, 0.4);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+    }
+    
+    .fc-camera-action:hover::before {
+        opacity: 1;
     }
 
     .fc-cam-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
         position: relative;
         z-index: 2;
         text-align: center;
-        font-size: 9px;
-        font-weight: 800;
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 0.5px;
         color: var(--text);
+        opacity: 0.95;
     }
 
     .fc-btn-emoji {
         display: block;
         font-size: 24px;
-        margin: 0 auto 6px;
         filter: none;
     }
 
     .fc-btn-svg {
         display: block;
-        width: 24px;
-        height: 24px;
-        margin: 0 auto 6px;
-        color: #ffffff;
+        width: 32px;
+        height: 32px;
+        color: var(--cyan);
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+        transition: transform 0.3s ease;
+    }
+    
+    .fc-camera-action:hover .fc-btn-svg {
+        transform: scale(1.1) rotate(-3deg);
     }
 
     .fc-cam-icon {
@@ -843,16 +891,21 @@
     }
 
     :host-context(body.theme-sun) .fc-trainer {
-        background: rgba(0, 0, 0, 0.06);
-        border-color: rgba(0, 0, 0, 0.1);
+        background: linear-gradient(145deg, #ffffff, #f1f5f9);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     :host-context(body.theme-sun) .fc-trainer:hover {
-        background: rgba(0, 0, 0, 0.1);
+        background: linear-gradient(145deg, #ffffff, #e2e8f0);
+        border-color: rgba(0, 0, 0, 0.12);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 1);
     }
 
     :host-context(body.theme-sun) .fc-avatar {
         background: linear-gradient(135deg, #0284c7, #22d3ee);
+        border-color: rgba(255, 255, 255, 0.6);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     :host-context(body.theme-sun) .fc-name {
@@ -877,23 +930,25 @@
     }
 
     :host-context(body.theme-sun) .fc-camera-action {
-        background: transparent !important;
+        background: linear-gradient(145deg, #ffffff, #f8fafc) !important;
         backdrop-filter: none !important;
-        border: 1px solid #cbd5e1 !important;
-        color: #000000 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        color: #1e293b !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
     }
 
     :host-context(body.theme-sun) .fc-camera-action:hover {
-        background: rgba(2, 132, 199, 0.1) !important;
-        border-color: rgba(2, 132, 199, 0.45) !important;
-        box-shadow:
-            inset 0 0 15px rgba(2, 132, 199, 0.08),
-            0 8px 25px rgba(2, 132, 199, 0.15) !important;
+        background: linear-gradient(145deg, #ffffff, #f1f5f9) !important;
+        border-color: rgba(2, 132, 199, 0.3) !important;
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
+    }
+    
+    :host-context(body.theme-sun) .fc-camera-action::before {
+        display: none !important;
     }
 
     :host-context(body.theme-sun) .fc-cam-label {
-        color: #000000 !important;
+        color: #475569 !important;
         text-shadow: none !important;
     }
 
@@ -934,6 +989,7 @@
     :host-context(body.theme-sun) .fc-gym-card {
         background: #ffffff;
         border-color: rgba(0, 0, 0, 0.08);
+        border-left-color: var(--accent);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 
