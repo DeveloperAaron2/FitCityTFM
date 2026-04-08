@@ -24,7 +24,7 @@
 :host-context(body.theme-sun) {
     /* Modo claro */
     --nav-bg: #ffffff;
-    --nav-border: rgba(0, 0, 0, 0.1);
+    --nav-border: #7dd3fc;
     --icon-color: #475569;
     /* slate-600 */
     --icon-active: #0284c7;
