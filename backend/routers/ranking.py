@@ -16,7 +16,20 @@ def get_global_prs(limit: int = 50):
         .limit(limit)
         .execute()
     )
-    return res.data or []
+    records = res.data or []
+
+    # Fetch gym_best_lifts to map video URLs for the Global PRs
+    bl_res = db.table("gym_best_lifts").select("gym_name, exercise_name, user_id, video_url").execute()
+    bl_data = bl_res.data or []
+    
+    bl_map = {(r["gym_name"], r["exercise_name"], r["user_id"]): r["video_url"] for r in bl_data}
+    
+    for r in records:
+        key = (r.get("gym_name"), r.get("exercise_name"), r.get("user_id"))
+        if key in bl_map:
+            r["video_url"] = bl_map[key]
+
+    return records
 
 
 @router.get("/prs/by-gym")

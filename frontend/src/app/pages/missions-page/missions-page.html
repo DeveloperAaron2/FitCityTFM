@@ -47,7 +47,7 @@
 
     <!-- ══ LEVEL ROADMAP ════════════════════════════════════════════ -->
     <div class="ms-roadmap-wrap">
-        <div class="ms-roadmap">
+        <div class="ms-roadmap" (touchstart)="$event.stopPropagation()" (touchmove)="$event.stopPropagation()" (touchend)="$event.stopPropagation()">
             <ng-container *ngFor="let lv of roadmapLevels; let last = last">
                 <div class="ms-roadmap-node" [class.ms-roadmap-node--done]="lv < level"
                     [class.ms-roadmap-node--current]="lv === level" [class.ms-roadmap-node--locked]="lv > level">

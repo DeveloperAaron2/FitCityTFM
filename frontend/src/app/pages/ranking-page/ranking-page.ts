@@ -44,6 +44,30 @@ export class RankingPage implements OnInit {
   loadingVideos = signal(false);
   activeVideoIndex = signal(0);
 
+  // ── Global PR expansion state ──────────────────────────────────────────
+  openSingleVideoModal(pr: any) {
+    this.videoModalGymName.set(pr.gym_name ? `Récord en ${pr.gym_name}` : 'Récord Global');
+    this.activeVideoIndex.set(0);
+    this.videoModalLifts.set([pr]);
+    this.showVideoModal.set(true);
+  }
+
+  /** Open video modal for a gym ranking PR card.
+   *  If the gym has a best_lift for that exercise, show that video.
+   *  Otherwise open an empty modal (no video). */
+  openGymPrVideo(pr: any, gym: any) {
+    const bestLifts: any[] = gym.best_lifts || [];
+    const match = bestLifts.find((bl: any) =>
+      bl.exercise_name === pr.exercise_name && bl.user_id === pr.user_id
+    ) || bestLifts.find((bl: any) => bl.exercise_name === pr.exercise_name);
+
+    const liftToShow = match ?? { ...pr, video_url: null };
+    this.videoModalGymName.set(gym.gym_name);
+    this.activeVideoIndex.set(0);
+    this.videoModalLifts.set([liftToShow]);
+    this.showVideoModal.set(true);
+  }
+
   ngOnInit() {
     this.loadGlobalPrs();
     this.loadMyPrs();

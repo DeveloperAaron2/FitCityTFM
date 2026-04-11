@@ -1,0 +1,66 @@
+[33m❯[39m Building...
+[32m✔[39m Building...
+[1mInitial chunk files[22m  [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-Q473Y6UO.js[39m    [2m | [22m[2m-[22m               [2m | [22m[36m162.29 kB[39m[2m | [22m               [36m47.26 kB[39m
+[32mchunk-MJEIQQFB.js[39m    [2m | [22m[2m-[22m               [2m | [22m [36m89.83 kB[39m[2m | [22m               [36m22.62 kB[39m
+[32mmain-5FTYGZ3D.js[39m     [2m | [22m[2mmain[22m            [2m | [22m [36m50.43 kB[39m[2m | [22m               [36m11.65 kB[39m
+[32mchunk-ZCEHZLTL.js[39m    [2m | [22m[2m-[22m               [2m | [22m [36m34.90 kB[39m[2m | [22m                [36m7.41 kB[39m
+[32mpolyfills-B6TNHZQ6.js[39m[2m | [22m[2mpolyfills[22m       [2m | [22m [36m34.58 kB[39m[2m | [22m               [36m11.32 kB[39m
+[32mchunk-QPQUDIHV.js[39m    [2m | [22m[2m-[22m               [2m | [22m [36m27.15 kB[39m[2m | [22m                [36m8.01 kB[39m
+[32mstyles-3RQYZY4J.css[39m  [2m | [22m[2mstyles[22m          [2m | [22m [36m18.30 kB[39m[2m | [22m                [36m3.59 kB[39m
+[32mchunk-R7RRKMLZ.js[39m    [2m | [22m[2m-[22m               [2m | [22m  [36m2.60 kB[39m[2m | [22m                [36m1.16 kB[39m
+[32mchunk-FHQLBHCB.js[39m    [2m | [22m[2m-[22m               [2m | [22m  [36m1.15 kB[39m[2m | [22m              [36m463 bytes[39m
+
+[1m [22m                    [2m | [22m[1mInitial total[22m   [2m | [22m[1m421.23 kB[22m[2m | [22m              [1m113.48 kB[22m
+
+[1mLazy chunk files[22m     [2m | [22m[1mNames[22m           [2m | [22m [1mRaw size[22m[2m | [22m[1mEstimated transfer size[22m
+[32mchunk-2EQ5IMZB.js[39m    [2m | [22m[2m-[22m               [2m | [22m[36m198.39 kB[39m[2m | [22m               [36m43.26 kB[39m
+[32mchunk-UZVOZ3VI.js[39m    [2m | [22m[2mranking-page[22m    [2m | [22m [36m47.73 kB[39m[2m | [22m                [36m8.15 kB[39m
+[32mchunk-YLJNXFXG.js[39m    [2m | [22m[2mvalidate-pr-page[22m[2m | [22m [36m23.27 kB[39m[2m | [22m                [36m5.69 kB[39m
+[32mchunk-WIVNAYKJ.js[39m    [2m | [22m[2mprofile-page[22m    [2m | [22m [36m23.15 kB[39m[2m | [22m                [36m5.72 kB[39m
+[32mchunk-5UCZJ7HP.js[39m    [2m | [22m[2mmapa-page[22m       [2m | [22m [36m19.95 kB[39m[2m | [22m                [36m6.07 kB[39m
+[32mchunk-VPR3OCES.js[39m    [2m | [22m[2mmissions-page[22m   [2m | [22m [36m19.74 kB[39m[2m | [22m                [36m4.69 kB[39m
+[32mchunk-JHUOPDKX.js[39m    [2m | [22m[2mlogin-page[22m      [2m | [22m [36m11.67 kB[39m[2m | [22m                [36m3.02 kB[39m
+[32mchunk-YGKP27S5.js[39m    [2m | [22m[2mregister-page[22m   [2m | [22m  [36m9.75 kB[39m[2m | [22m                [36m2.56 kB[39m
+[32mchunk-IARNE6XZ.js[39m    [2m | [22m[2mauth-callback[22m   [2m | [22m  [36m3.13 kB[39m[2m | [22m                [36m1.31 kB[39m
+
+Application bundle generation failed. [4.045 seconds]
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;9d2659e9833dd36862184994b96e49e7003c0a285717f80328fd9b3adeebd70c;C:\Users\Dani\Documents\FitCity\frontend\src\app\pages\dashboard-page\dashboard-page.html exceeded maximum budget. Budget 4.00 kB was not met by 12.99 kB with a total of 16.99 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;82c46d3c4a6f8ea44ef20cabd2ff49dc6957a77585f68f7883f1861bad1ca0f6;C:\Users\Dani\Documents\FitCity\frontend\src\app\pages\login-page\login-page.html exceeded maximum budget. Budget 4.00 kB was not met by 428 bytes with a total of 4.43 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mangular:styles/component:css;e7a0834c2d79167ca6c975e51a1f013220dc3faa61230af2d8c76b7483489dc5;C:\Users\Dani\Documents\FitCity\frontend\src\app\pages\validate-pr-page\validate-pr-page.html exceeded maximum budget. Budget 4.00 kB was not met by 3.87 kB with a total of 7.87 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/pages/mapa-page/mapa-page.css exceeded maximum budget. Budget 4.00 kB was not met by 3.25 kB with a total of 7.25 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/pages/missions-page/missions-page.css exceeded maximum budget. Budget 4.00 kB was not met by 5.54 kB with a total of 9.54 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/pages/ranking-page/ranking-page.css exceeded maximum budget. Budget 4.00 kB was not met by 15.56 kB with a total of 19.56 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1msrc/app/pages/profile-page/profile-page.css exceeded maximum budget. Budget 4.00 kB was not met by 5.02 kB with a total of 9.02 kB.[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1m2 rules skipped due to selector errors:
+  & -> Empty sub-selector
+  & -> Empty sub-selector[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mangular:styles/component:css;9d2659e9833dd36862184994b96e49e7003c0a285717f80328fd9b3adeebd70c;C:\Users\Dani\Documents\FitCity\frontend\src\app\pages\dashboard-page\dashboard-page.html exceeded maximum budget. Budget 8.00 kB was not met by 8.99 kB with a total of 16.99 kB.[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1msrc/app/pages/missions-page/missions-page.css exceeded maximum budget. Budget 8.00 kB was not met by 1.54 kB with a total of 9.54 kB.[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1msrc/app/pages/ranking-page/ranking-page.css exceeded maximum budget. Budget 8.00 kB was not met by 11.56 kB with a total of 19.56 kB.[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1msrc/app/pages/profile-page/profile-page.css exceeded maximum budget. Budget 8.00 kB was not met by 1.02 kB with a total of 9.02 kB.[0m
+
+[39m[22m
