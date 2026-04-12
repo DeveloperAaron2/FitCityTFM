@@ -16,6 +16,10 @@ export class ApiService {
         return this.http.post(`${API_URL}/auth/login`, { email, password });
     }
 
+    googleCallback(accessToken: string, refreshToken: string): Observable<any> {
+        return this.http.post(`${API_URL}/auth/google/callback`, { access_token: accessToken, refresh_token: refreshToken });
+    }
+
     register(email: string, password: string, username: string, handle: string): Observable<any> {
         return this.http.post(`${API_URL}/auth/register`, { email, password, username, handle });
     }
@@ -64,11 +68,22 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs`, body);
     }
 
-    validatePRVideo(userId: string, videoFile: File, exerciseName: string): Observable<any> {
+    validatePRVideo(userId: string, videoFile: File, exerciseName: string, gymName: string = '', weightKg: number = 0, reps: number = 1): Observable<any> {
         const formData = new FormData();
         formData.append('video', videoFile);
         formData.append('exercise_name', exerciseName);
+        formData.append('gym_name', gymName);
+        formData.append('weight_kg', weightKg.toString());
+        formData.append('reps', reps.toString());
         return this.http.post(`${API_URL}/users/${userId}/lifting-prs/validate-video`, formData);
+    }
+
+    /** Standalone AI validation — no user/gym association, no storage */
+    validateVideoOnly(videoFile: File, exerciseName: string): Observable<any> {
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        formData.append('exercise_name', exerciseName);
+        return this.http.post(`${API_URL}/validate-video`, formData);
     }
 
     // ── Challenges ────────────────────────────────────────────────────────────
@@ -79,6 +94,18 @@ export class ApiService {
 
     getUserChallengesAll(userId: string): Observable<any[]> {
         return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/all`);
+    }
+
+    getActiveChallenges(userId: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/active`);
+    }
+
+    syncChallengeProgress(userId: string): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/sync`, {});
+    }
+
+    claimChallenge(userId: string, challengeId: string): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/${challengeId}/claim`, {});
     }
 
     updateChallengeProgress(userId: string, challengeId: string, progress: number): Observable<any> {
@@ -97,5 +124,19 @@ export class ApiService {
 
     getGymPrsRanking(): Observable<any> {
         return this.http.get(`${API_URL}/ranking/prs/by-gym`);
+    }
+
+    getGymBestLifts(gymName: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/ranking/prs/by-gym/${encodeURIComponent(gymName)}/best-lifts`);
+    }
+
+    // ── PR Reports ────────────────────────────────────────────────────────────
+
+    reportPR(prId: string, reporterId: string, reason: string = 'weight_mismatch'): Observable<any> {
+        return this.http.post(`${API_URL}/prs/${prId}/report`, { reporter_id: reporterId, reason });
+    }
+
+    getPRReportCount(prId: string): Observable<any> {
+        return this.http.get(`${API_URL}/prs/${prId}/reports/count`);
     }
 }

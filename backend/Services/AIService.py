@@ -93,52 +93,157 @@ class AIService:
                 "confidence": "low"
             }
 
+    async def estimate_weight_from_video(
+        self, video_bytes: bytes, exercise_name: str, declared_weight: float
+    ) -> dict:
+        """
+        Extracts frames from the video and asks the model to estimate
+        the total weight on the barbell by identifying visible plates.
+        Returns a comparison against the declared weight.
+        """
+        try:
+            base64_frames = self._extract_frames(video_bytes, num_frames=3)
+
+            if not base64_frames:
+                return {
+                    "estimated_weight": None,
+                    "matches_declared": True,
+                    "confidence": "none",
+                    "detail": "No se pudieron extraer frames para estimar el peso.",
+                }
+
+            prompt = self._build_weight_estimation_prompt(exercise_name, declared_weight)
+
+            async with httpx.AsyncClient() as client:
+                try:
+                    response = await client.post(
+                        f"{self.base_url}/api/generate",
+                        headers=self.headers,
+                        json={
+                            "model": self.model,
+                            "prompt": prompt,
+                            "images": base64_frames,
+                            "stream": False,
+                            "format": "json",
+                        },
+                        timeout=120.0,
+                    )
+                    response.raise_for_status()
+                    result = response.json()
+                except (httpx.HTTPStatusError, httpx.RequestError):
+                    return {
+                        "estimated_weight": None,
+                        "matches_declared": True,
+                        "confidence": "none",
+                        "detail": "No se pudo conectar con el servicio de IA para estimar el peso.",
+                    }
+
+                llm_text = result.get("response", "{}")
+                try:
+                    data = json.loads(llm_text)
+                    estimated = data.get("estimated_weight_kg")
+                    if estimated is not None:
+                        try:
+                            estimated = float(estimated)
+                        except (ValueError, TypeError):
+                            estimated = None
+
+                    # Compare: allow a tolerance of ±20% between estimated and declared
+                    if estimated is not None and estimated > 0:
+                        tolerance = 0.20
+                        lower = estimated * (1 - tolerance)
+                        upper = estimated * (1 + tolerance)
+                        matches = lower <= declared_weight <= upper
+                    else:
+                        matches = True  # Can't estimate → assume OK
+
+                    return {
+                        "estimated_weight": estimated,
+                        "matches_declared": matches,
+                        "confidence": data.get("confidence", "low"),
+                        "detail": data.get("detail", ""),
+                    }
+                except json.JSONDecodeError:
+                    return {
+                        "estimated_weight": None,
+                        "matches_declared": True,
+                        "confidence": "none",
+                        "detail": "Respuesta no válida del modelo al estimar peso.",
+                    }
+        except Exception as e:
+            return {
+                "estimated_weight": None,
+                "matches_declared": True,
+                "confidence": "none",
+                "detail": f"Error interno al estimar peso: {str(e)}",
+            }
+
+    def _build_weight_estimation_prompt(
+        self, exercise_name: str, declared_weight: float
+    ) -> str:
+        return (
+            "Eres un asistente de IA experto en identificar discos de pesas en imágenes de gimnasio. "
+            f"El usuario dice que está levantando {declared_weight} kg en '{exercise_name}'.\n\n"
+            "Analiza las imágenes e intenta estimar el peso total en la barra contando los discos visibles.\n\n"
+            "REFERENCIA DE DISCOS CALIBRADOS (colores IPF estándar):\n"
+            "- Rojo = 25 kg\n"
+            "- Azul = 20 kg\n"
+            "- Amarillo = 15 kg\n"
+            "- Verde = 10 kg\n"
+            "- Blanco = 5 kg\n"
+            "- Discos pequeños: 2.5 kg, 1.25 kg\n"
+            "- La barra olímpica pesa 20 kg normalmente\n\n"
+            "NOTA: Los discos se cargan a ambos lados de la barra (simétricos). "
+            "Si ves discos solo en un lado, multiplica por 2.\n\n"
+            "Si NO puedes ver los discos con claridad (ángulo malo, discos negros sin marcar, "
+            "mala iluminación), indica confidence 'low' y estimated_weight_kg como null.\n\n"
+            "Devuelve ÚNICAMENTE este JSON:\n"
+            '{\n'
+            '  "estimated_weight_kg": <número o null si no es posible estimar>,\n'
+            '  "confidence": "high|medium|low",\n'
+            '  "detail": "<breve explicación de qué discos has identificado o por qué no puedes estimar>"\n'
+            '}'
+        )
+
     def _build_prompt(self, exercise_name: str) -> str:
         base_prompt = (
-            "Eres un árbitro profesional estricto de Powerlifting de la AEP (Asociación Española de Powerlifting) e IPF. "
-            "Se te proporcionará una secuencia temporal de 5 imágenes (frames) extraídas de un vídeo que muestran la "
-            f"ejecución de un usuario realizando el levantamiento de '{exercise_name}'.\n\n"
+            "Eres un asistente de IA muy amistoso y comprensivo que valida levantamientos en un gimnasio aficionado. "
+            f"A continuación, verás un montaje de 5 imágenes extraídas de un vídeo del usuario haciendo '{exercise_name}'.\n\n"
+            "REGLA DE ORO DE ESTE GIMNASIO: Asume SIEMPRE que el levantamiento es VÁLIDO por defecto. Da por válido el levantamiento "
+            "a menos que haya un fallo técnico gigantesco y catastrófico (ej: la barra se cae, no hace absolutamente ningún recorrido, "
+            "el vídeo muestra otra persona u otro deporte distinto).\n\n"
         )
         
         name_lower = exercise_name.lower()
         if "sentadilla" in name_lower or "squat" in name_lower:
             rules = (
-                "## Normativa Oficial de Sentadilla (Squat):\n"
-                "1. Profundidad: El pliegue de la cadera (la parte superior del muslo en la articulación de la cadera) "
-                "debe descender notablemente por debajo del nivel de la parte superior de las rodillas ('romper el paralelo').\n"
-                
+                "## Criterios SUPER permisivos para Sentadilla:\n"
+                "1. Profundidad: Con que se note claramente que el usuario baja y vuelve a subir, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
+                "2. Si las imágenes no muestran bien el ángulo de la rodilla, asume que ha roto el paralelo y bájalo a válido.\n"
             )
         elif "banca" in name_lower or "bench" in name_lower:
             rules = (
-                "## Normativa Oficial de Press de Banca (Bench Press):\n"
-                "1. Contacto: La barra debe descender hasta tocar el pecho (o el área abdominal) y hacer una visible pausa perdiendo "
-                "inercia antes del empuje concéntrico.\n"
-                "2. Posición: La cabeza, hombros y nalgas deben estar en contacto con el banco en todo momento. "
-                "Ambos pies deben estar apoyados planos sobre el suelo o bloques.\n"
-                "3. Extensión: Al finalizar el movimiento, los brazos deben lograr una extensión simultánea "
-                "y un bloqueo completo de los codos.\n"
+                "## Criterios SUPER permisivos para Press de Banca:\n"
+                "1. Con que la barra baje un poco hacia el pecho y vuelva a subir hacia arriba, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
+                "2. NO exijas pausas, ni que la barra toque obligatoriamente el pecho. NO exijas bloqueo de codos exacto.\n"
             )
         elif "muerto" in name_lower or "deadlift" in name_lower:
             rules = (
-                "## Normativa Oficial de Peso Muerto (Deadlift):\n"
-                "1. Hitching: No se permite apoyar la barra sobre los muslos durante el levantamiento "
-                "para utilizar los muslos como apoyo antes de lograr el bloqueo.\n"
-                "2. Movimiento: No está permitido cualquier movimiento descendente de la barra antes de alcanzar el bloqueo final.\n"
-                "3. Bloqueo: En el final del movimiento, las rodillas deben estar rectas y los hombros hacia atrás "
-                "(posición erguida completa).\n"
+                "## Criterios SUPER permisivos para Peso Muerto:\n"
+                "1. Si el usuario levanta la barra del suelo y más o menos termina de pie de nuevo con ella en las manos, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
+                "2. Ignora tirones irregulares, la curvatura de la espalda o rebotes.\n"
             )
         else:
             rules = (
-                "## Criterios de evaluación técnica:\n"
-                "Evalúa de la forma más estricta si el rango de movimiento es completo, si la ejecución es "
-                "biomecánicamente segura, controlada y sin inercias innecesarias.\n"
+                "## Criterios generales muy permisivos:\n"
+                "Valida el movimiento siempre que se aprecie intención de esfuerzo y exista algo de recorrido aparente.\n"
             )
             
         json_instruct = (
-            "\nTU TRABAJO:\n"
-            "Examina las 5 imágenes proporcionadas buscando infracciones a la normativa mencionada.\n"
-            "Devuelve tu respuesta estricta y ÚNICAMENTE en este esquema de JSON válido en español:\n"
-            '{\n  "is_valid": true|false,\n  "reason": "<Breve explicación arbitral (1 frase) justificando el nulo o válido>",\n  "confidence": "high|medium|low"\n}'
+            "\nIMPORTANTE: Como solo puedes ver 5 fotos estáticas sueltas del vídeo, lógicamente te estás perdiendo gran parte de la información fluida del movimiento y de los ángulos exactos. "
+            "Por este motivo limitante de la tecnología, ante CUALQUIER mínima duda, debes priorizar siempre que la ejecución fue buena en los momentos que no viste y debes emitir un 'is_valid': true.\n\n"
+            "Devuelve tu respuesta ÚNICAMENTE usando este modelo JSON exacto:\n"
+            '{\n  "is_valid": true|false,\n  "reason": "<Breve mensaje de ánimo destacando que el levantamiento es válido (o un motivo muy claro y grave si fueras a darlo nulo)>",\n  "confidence": "high|medium|low"\n}'
         )
         
         return base_prompt + rules + json_instruct

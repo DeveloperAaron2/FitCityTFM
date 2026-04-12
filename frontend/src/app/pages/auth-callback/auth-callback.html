@@ -1,0 +1,90 @@
+<div class="callback-screen">
+    <div class="callback-card">
+        <div class="auth-logo">FIT<span>CITY</span></div>
+
+        <div *ngIf="!error()" class="callback-loading">
+            <div class="auth-spinner"></div>
+            <p>Iniciando sesión con Google…</p>
+        </div>
+
+        <div *ngIf="error()" class="auth-error">
+            <span>⚠️</span> {{ error() }}
+            <a routerLink="/login" class="retry-link">Volver al login</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .callback-screen {
+        min-height: 100dvh;
+        background: #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        font-family: system-ui, sans-serif;
+    }
+
+    .callback-card {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(255, 255, 255, .05);
+        border: 1px solid rgba(255, 255, 255, .1);
+        border-radius: 24px;
+        padding: 36px 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }
+
+    .auth-logo {
+        text-align: center;
+        font-size: 28px;
+        font-weight: 900;
+        letter-spacing: 2px;
+        color: #e2e8f0;
+    }
+
+    .auth-logo span { color: #22d3ee; }
+
+    .callback-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        color: #94a3b8;
+        font-size: 14px;
+    }
+
+    .auth-error {
+        background: rgba(239, 68, 68, .1);
+        border: 1px solid rgba(239, 68, 68, .3);
+        color: #f87171;
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 13px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        text-align: center;
+    }
+
+    .retry-link {
+        color: #22d3ee;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .auth-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid rgba(34, 211, 238, .2);
+        border-top-color: #22d3ee;
+        border-radius: 50%;
+        animation: spin .8s linear infinite;
+    }
+</style>

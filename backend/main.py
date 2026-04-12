@@ -1,12 +1,24 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routers import users, gym_visits, lifting_prs, challenges, ranking, auth, gyms_proxy
+from contextlib import asynccontextmanager
+from routers import users, gym_visits, lifting_prs, challenges, ranking, auth, gyms_proxy, reports
+from routers.lifting_prs import validate_router
+from gyms_updater import monthly_gyms_updater_task
+import asyncio
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Start the background task (runs immediately then sleeps for 24h)
+    task = asyncio.create_task(monthly_gyms_updater_task())
+    yield
+    task.cancel()
 
 app = FastAPI(
     title="FitCity API",
     description="API REST para la aplicación FitCity — gestión de usuarios, visitas a gimnasios, records personales, retos y ranking.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # ── CORS ───────────────────────────────────────────────────────────────────────
@@ -30,6 +42,8 @@ app.include_router(lifting_prs.router)
 app.include_router(challenges.router)
 app.include_router(ranking.router)
 app.include_router(gyms_proxy.router)
+app.include_router(validate_router)
+app.include_router(reports.router)
 
 
 @app.get("/", tags=["health"])

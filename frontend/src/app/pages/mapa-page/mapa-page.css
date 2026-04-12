@@ -426,3 +426,83 @@ app-mapa-page {
     background: linear-gradient(135deg, #10b981, #059669);
     box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
 }
+
+/* ═══════════════════════════════════════════════════
+   THEME-SUN (Light Mode) overrides
+   ═══════════════════════════════════════════════════ */
+
+:host-context(body.theme-sun) .map-wrapper {
+    background: #f0f4f8;
+}
+
+:host-context(body.theme-sun) .map-header {
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom-color: rgba(2, 132, 199, 0.15);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+
+:host-context(body.theme-sun) .map-title {
+    color: #1e293b;
+}
+
+:host-context(body.theme-sun) .map-subtitle {
+    color: rgba(2, 132, 199, 0.7);
+}
+
+:host-context(body.theme-sun) .locate-btn {
+    background: rgba(2, 132, 199, 0.08);
+    color: #0284c7;
+    border-color: rgba(2, 132, 199, 0.3);
+}
+
+:host-context(body.theme-sun) .locate-btn:hover:not(:disabled) {
+    background: rgba(2, 132, 199, 0.15);
+}
+
+:host-context(body.theme-sun) .zoom-hint {
+    background: rgba(255, 255, 255, 0.95);
+    color: #475569;
+    border-color: rgba(2, 132, 199, 0.2);
+}
+
+:host-context(body.theme-sun) #map {
+    background: #e0f2fe;
+}
+
+:host-context(body.theme-sun) .maplibregl-ctrl-group {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+}
+
+:host-context(body.theme-sun) .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+    filter: none;
+}
+
+:host-context(body.theme-sun) .maplibregl-popup-content {
+    background: rgba(255, 255, 255, 0.97) !important;
+    border-color: rgba(2, 132, 199, 0.15) !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12) !important;
+}
+
+:host-context(body.theme-sun) .maplibregl-popup-tip {
+    border-top-color: rgba(255, 255, 255, 0.97) !important;
+}
+
+:host-context(body.theme-sun) .maplibregl-popup-close-button {
+    color: #64748b !important;
+}
+
+:host-context(body.theme-sun) .fitness-popup h3 {
+    color: #1e293b;
+}
+
+:host-context(body.theme-sun) .fitness-popup p {
+    color: #64748b;
+}
+
+:host-context(body.theme-sun) .maplibregl-ctrl-attrib {
+    background: rgba(255, 255, 255, 0.7) !important;
+    color: #64748b !important;
+}

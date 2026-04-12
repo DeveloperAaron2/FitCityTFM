@@ -85,7 +85,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
     private fetching = false;
     private moveTimer: any = null;
-    
+
     // Store gym names visited today to persist UI state
     private visitedTodayGyms = new Set<string>();
 
@@ -252,6 +252,9 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             showZoom: true,
             visualizePitch: true,
         }), 'top-right');
+
+        // Allow toggling back to 3D view when clicking the compass in 2D mode
+        setTimeout(() => this.setupCompassToggle(), 100);
 
         this.map.scrollZoom.setWheelZoomRate(1 / 200);
 
@@ -515,7 +518,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
             const visitBtn = document.createElement('button');
             visitBtn.className = 'visit-gym-btn map-visit-btn';
-            
+
             if (this.visitedTodayGyms.has(name)) {
                 visitBtn.innerText = '¡Visitado! ✓';
                 visitBtn.classList.add('visited-success');
@@ -533,7 +536,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
                     }
                 }
             }
-            
+
             popup.setDOMContent(popupContent);
         });
 
@@ -657,5 +660,24 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private showError(msg: string): void {
         const el = document.getElementById('map-error');
         if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
+    }
+
+    private setupCompassToggle(): void {
+        const compassBtn = document.querySelector('.maplibregl-ctrl-compass');
+        if (!compassBtn || !this.map) return;
+
+        compassBtn.addEventListener('click', (e) => {
+            const pitch = this.map.getPitch();
+            // If current pitch is 0 (2D), clicking the compass (which usually resets to 0)
+            // should instead toggle to 3D view.
+            if (Math.round(pitch) === 0) {
+                this.map.easeTo({
+                    pitch: 55,
+                    bearing: -15,
+                    duration: 1000,
+                    essential: true
+                });
+            }
+        });
     }
 }

@@ -20,43 +20,64 @@
 
   <!-- Global PRs View -->
   <div class="ranking-list" *ngIf="activeTab() === 'global'">
+    
+    <!-- Category Filter -->
+    <div class="exercise-filter-tabs" *ngIf="globalPrs().length > 0 || !loadingGlobal()" (touchstart)="$event.stopPropagation()" (touchmove)="$event.stopPropagation()" (touchend)="$event.stopPropagation()">
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Todos'" (click)="setGlobalExercise('Todos')">
+        🌍 Todos
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Press de banca'" (click)="setGlobalExercise('Press de banca')">
+        🏋️ Press de banca
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Sentadilla'" (click)="setGlobalExercise('Sentadilla')">
+        🦵 Sentadilla
+      </button>
+      <button class="exercise-tab" [class.active]="selectedGlobalExercise() === 'Peso muerto'" (click)="setGlobalExercise('Peso muerto')">
+        💀 Peso muerto
+      </button>
+    </div>
+
     <div *ngIf="loadingGlobal()" class="loading-state">
       <div class="spinner"></div>
       <p>Cargando campeones...</p>
     </div>
 
-    <div *ngIf="!loadingGlobal() && globalPrs().length === 0" class="empty-state">
-      <p>Aún no hay récords registrados.</p>
+    <div *ngIf="!loadingGlobal() && filteredGlobalPrs().length === 0" class="empty-state">
+      <p>Aún no hay récords registrados en esta categoría.</p>
     </div>
 
     <ng-container *ngIf="!loadingGlobal()">
-      <div *ngFor="let pr of globalPrs(); let i = index" class="ranking-card" [class.top-1]="i === 0"
-        [class.top-2]="i === 1" [class.top-3]="i === 2">
-        <div class="rank-number">#{{ i + 1 }}</div>
+      <div *ngFor="let pr of filteredGlobalPrs(); let i = index" class="global-pr-card"
+           [class.top-1]="i === 0" [class.top-2]="i === 1" [class.top-3]="i === 2"
+           (click)="openSingleVideoModal(pr)">
 
-        <img #avatarImg [src]="pr.users?.avatar_url || 'assets/default-avatar.png'" alt="Avatar" class="user-avatar"
-          (error)="avatarImg.src='assets/default-avatar.png'" />
+        <!-- Rank badge -->
+        <div class="gpr-rank">{{ i + 1 }}</div>
 
-        <div class="card-content">
-          <div class="user-info">
-            <span class="username">{{ pr.users?.username || 'Usuario' }}</span>
-            <span class="handle">{{ '@' + (pr.users?.handle || 'anon') }}</span>
+        <!-- Avatar -->
+        <img #avatarImg [src]="pr.users?.avatar_url || 'assets/default-avatar.png'" alt="Avatar"
+             class="gpr-avatar" (error)="avatarImg.src='assets/default-avatar.png'" />
+
+        <!-- Info: username (top) + meta (bottom) -->
+        <div class="gpr-info">
+          <div class="gpr-top-row">
+            <span class="gpr-username">{{ pr.users?.username || 'Usuario' }}</span>
+            <div class="gpr-weight-inline">
+              <span class="gpr-kg">{{ pr.weight_kg }}</span>
+              <span class="gpr-unit">kg</span>
+            </div>
           </div>
-          <div class="pr-details">
-            <span class="exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
-            <span class="gym-badge">📍 {{ pr.gym_name || 'Sin gimnasio' }}</span>
+          <div class="gpr-meta">
+            <ng-container *ngIf="selectedGlobalExercise() === 'Todos'">
+              <span class="gpr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+            </ng-container>
+            <span class="gpr-gym">📍 {{ pr.gym_name || 'Sin gimnasio' }}</span>
           </div>
         </div>
 
-        <div class="weight-display">
-          <span class="weight">{{ pr.weight_kg }}</span>
-          <span class="unit">kg</span>
-        </div>
       </div>
     </ng-container>
   </div>
-
-  <!-- Gyms Ranking View -->
   <div class="ranking-list" *ngIf="activeTab() === 'gyms'">
     <div *ngIf="loadingGyms()" class="loading-state">
       <div class="spinner"></div>
@@ -68,45 +89,69 @@
       <p>Aún no hay récords registrados en ningún gimnasio.</p>
     </div>
 
-    <ng-container *ngIf="!loadingGyms()">
-      <div *ngFor="let gym of gymRanking(); let gi = index" class="gym-group">
+    <!-- Gym search -->
+    <div *ngIf="!loadingGyms() && gymRanking().length > 0" class="gym-search-wrapper">
+      <span class="gym-search-icon">🔍</span>
+      <input class="gym-search-input"
+             type="text"
+             placeholder="Buscar gimnasio..."
+             [value]="gymSearchQuery()"
+             (input)="gymSearchQuery.set($any($event.target).value)" />
+      <button *ngIf="gymSearchQuery()" class="gym-search-clear" (click)="gymSearchQuery.set('')">✕</button>
+    </div>
 
-        <!-- Gym Header -->
-        <div class="gym-group-header">
+    <div *ngIf="!loadingGyms() && filteredGymRanking().length === 0 && gymSearchQuery()" class="empty-state">
+      <p>No hay gimnasios que coincidan con "{{ gymSearchQuery() }}".</p>
+    </div>
+
+    <ng-container *ngIf="!loadingGyms()">
+      <div *ngFor="let gym of filteredGymRanking(); let gi = index" class="gym-group">
+
+        <!-- Gym Header (clickable accordion toggle) -->
+        <div class="gym-group-header gym-accordion-header"
+             (click)="toggleGym(gym.gym_name)"
+             [class.is-open]="expandedGymName() === gym.gym_name">
           <div class="gym-icon">🏟️</div>
           <div class="gym-header-info">
             <span class="gym-name">{{ gym.gym_name }}</span>
             <span class="gym-stat-badge">{{ gym.total_prs }} {{ gym.total_prs === 1 ? 'récord' : 'récords' }}</span>
           </div>
-          <div class="gym-rank">#{{ gi + 1 }}</div>
+          <div class="gym-chevron" [class.open]="expandedGymName() === gym.gym_name">▾</div>
         </div>
 
-        <!-- Top PRs inside this gym -->
-        <div class="gym-prs-list">
-          <div *ngFor="let pr of gym.top_prs; let pi = index" class="gym-pr-row">
-            <div class="gym-pr-position">{{ pi + 1 }}</div>
+        <!-- Top PRs inside this gym — shown only when expanded -->
+        <div class="gym-prs-list" *ngIf="expandedGymName() === gym.gym_name">
+          <div *ngFor="let pr of gym.top_prs; let pi = index"
+               class="global-pr-card gym-inner-card"
+               (click)="openGymPrVideo(pr, gym)">
+
+            <!-- Position -->
+            <div class="gpr-rank">{{ pi + 1 }}</div>
 
             <img #gymAvatarImg
-              [src]="pr.users?.avatar_url || 'assets/default-avatar.png'"
-              alt="Avatar"
-              class="gym-pr-avatar"
-              (error)="gymAvatarImg.src='assets/default-avatar.png'" />
+                 [src]="pr.users?.avatar_url || 'assets/default-avatar.png'"
+                 alt="Avatar" class="gpr-avatar"
+                 (error)="gymAvatarImg.src='assets/default-avatar.png'" />
 
-            <div class="gym-pr-info">
-              <span class="gym-pr-username">{{ pr.users?.username || 'Usuario' }}</span>
-              <span class="gym-pr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+            <div class="gpr-info">
+              <div class="gpr-top-row">
+                <span class="gpr-username">{{ pr.users?.username || 'Usuario' }}</span>
+                <div class="gpr-weight-inline">
+                  <span class="gpr-kg">{{ pr.weight_kg }}</span>
+                  <span class="gpr-unit">kg</span>
+                </div>
+              </div>
+              <div class="gpr-meta">
+                <span class="gpr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+              </div>
             </div>
 
-            <div class="gym-pr-weight">
-              <span class="weight">{{ pr.weight_kg }}</span>
-              <span class="unit">kg</span>
-            </div>
           </div>
         </div>
 
       </div>
     </ng-container>
-  </div>
+  
 
   <!-- My PRs View -->
   <div class="ranking-list" *ngIf="activeTab() === 'me'">
@@ -139,4 +184,132 @@
     </ng-container>
   </div>
 
+</div>
+
+<!-- ── VIDEO MODAL ─────────────────────────────────────────────── -->
+<div class="video-overlay" *ngIf="showVideoModal()" (click)="closeVideoModal()">
+  <div class="video-modal" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="video-modal-header">
+      <div class="video-modal-title-row">
+        <span class="video-modal-icon">🎬</span>
+        <div>
+          <h2 class="video-modal-title">Mejores Levantamientos</h2>
+          <p class="video-modal-gym">{{ videoModalGymName() }}</p>
+        </div>
+      </div>
+      <button class="video-modal-close" (click)="closeVideoModal()">&times;</button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="loadingVideos()" class="video-loading">
+      <div class="spinner"></div>
+      <p>Cargando vídeos...</p>
+    </div>
+
+    <!-- Content -->
+    <ng-container *ngIf="!loadingVideos() && videoModalLifts().length > 0">
+      <!-- Exercise tabs -->
+      <div class="video-exercise-tabs">
+        <button *ngFor="let lift of videoModalLifts(); let i = index"
+                class="video-exercise-tab"
+                [class.active]="activeVideoIndex() === i"
+                (click)="selectVideo(i)">
+          {{ getExerciseEmoji(lift.exercise_name) }} {{ lift.exercise_name }}
+        </button>
+      </div>
+
+      <!-- Video Player -->
+      <div class="video-player-wrapper" *ngIf="videoModalLifts()[activeVideoIndex()] as lift">
+        <video class="video-player"
+               [src]="lift.video_url"
+               controls
+               playsinline
+               preload="metadata">
+          Tu navegador no soporta la reproducción de vídeos.
+        </video>
+
+        <div class="video-info-bar">
+          <div class="video-user-info">
+            <img #modalAvatar
+                 [src]="lift.users?.avatar_url || 'assets/default-avatar.png'"
+                 alt="Avatar"
+                 class="video-user-avatar"
+                 (error)="modalAvatar.src='assets/default-avatar.png'" />
+            <div>
+              <span class="video-username">{{ lift.users?.username || 'Usuario' }}</span>
+              <span class="video-handle">{{ '@' + (lift.users?.handle || 'anon') }}</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="video-lift-stats" style="text-align: right;">
+              <span class="video-weight">{{ lift.weight_kg }}<small>kg</small></span>
+              <span class="video-reps" *ngIf="lift.reps > 1">× {{ lift.reps }} reps</span>
+            </div>
+            <button class="report-btn report-btn--small"
+                    *ngIf="!isOwnPR(lift)"
+                    [class.reported]="reportedPRs().has(lift.id)"
+                    [disabled]="reportedPRs().has(lift.id)"
+                    (click)="openReportModal(lift); closeVideoModal()"
+                    title="Reportar peso sospechoso">
+              {{ reportedPRs().has(lift.id) ? '✓' : '🚩' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Empty -->
+    <div *ngIf="!loadingVideos() && videoModalLifts().length === 0" class="video-empty">
+      <span class="video-empty-icon">📹</span>
+      <p>No hay vídeos registrados en este gimnasio todavía.</p>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── REPORT MODAL ─────────────────────────────────────────────── -->
+<div class="report-overlay" *ngIf="showReportModal()" (click)="closeReportModal()">
+  <div class="report-modal" (click)="$event.stopPropagation()">
+    <div class="report-modal-header">
+      <span class="report-modal-icon">🚩</span>
+      <h2 class="report-modal-title">Reportar PR sospechoso</h2>
+      <button class="report-modal-close" (click)="closeReportModal()">&times;</button>
+    </div>
+
+    <div class="report-modal-body" *ngIf="reportTargetPR() as pr">
+      <p class="report-desc">
+        ¿Crees que el peso declarado en este PR no coincide con el vídeo o es sospechoso?
+      </p>
+
+      <div class="report-pr-summary">
+        <div class="report-pr-info">
+          <span class="report-pr-user">{{ pr.users?.username || 'Usuario' }}</span>
+          <span class="report-pr-exercise">{{ pr.exercise_emoji }} {{ pr.exercise_name }}</span>
+        </div>
+        <div class="report-pr-weight">
+          <span class="weight">{{ pr.weight_kg }}</span>
+          <span class="unit">kg</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div *ngIf="reportResult() as res" class="report-result"
+           [class.is-success]="res.success" [class.is-error]="!res.success">
+        <span>{{ res.success ? '✅' : '❌' }}</span>
+        <span>{{ res.message }}</span>
+      </div>
+
+      <!-- Buttons -->
+      <div class="report-actions" *ngIf="!reportResult()">
+        <button class="report-btn-cancel" (click)="closeReportModal()">Cancelar</button>
+        <button class="report-btn-confirm" (click)="confirmReport()" [disabled]="reportLoading()">
+          <span *ngIf="!reportLoading()">Enviar reporte</span>
+          <span *ngIf="reportLoading()">Enviando...</span>
+        </button>
+      </div>
+    </div>
+
+  </div>
 </div>

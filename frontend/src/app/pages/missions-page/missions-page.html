@@ -1,5 +1,11 @@
 <div class="ms-page">
 
+    <!-- ══ XP TOAST ══════════════════════════════════════════════ -->
+    <div class="ms-xp-toast" *ngIf="showXpToast()" [@fadeSlide]>
+        <span class="ms-xp-toast-icon">⚡</span>
+        <span>+{{ xpToastAmount() }} XP</span>
+    </div>
+
     <!-- ══ LEVEL-UP OVERLAY ════════════════════════════════════════ -->
     <div class="ms-levelup-backdrop" *ngIf="showLevelUp()" (click)="dismissLevelUp()">
         <div class="ms-levelup-card" (click)="$event.stopPropagation()">
@@ -41,33 +47,42 @@
 
         <!-- Progress summary chip -->
         <div class="ms-progress-chip">
-            <span>⚔️ {{ completedCount() }} / {{ totalCount() }} misiones completadas</span>
+            <span>⚔️ {{ completedCount() }} / {{ totalCount() }} completadas</span>
         </div>
     </div>
 
     <!-- ══ LEVEL ROADMAP ════════════════════════════════════════════ -->
     <div class="ms-roadmap-wrap">
-        <div class="ms-roadmap">
+        <div class="ms-roadmap" (touchstart)="$event.stopPropagation()" (touchmove)="$event.stopPropagation()"
+            (touchend)="$event.stopPropagation()">
             <ng-container *ngFor="let lv of roadmapLevels; let last = last">
-                <div class="ms-roadmap-node"
-                    [class.ms-roadmap-node--done]="lv < level"
-                    [class.ms-roadmap-node--current]="lv === level"
-                    [class.ms-roadmap-node--locked]="lv > level">
+                <div class="ms-roadmap-node" [class.ms-roadmap-node--done]="lv < level"
+                    [class.ms-roadmap-node--current]="lv === level" [class.ms-roadmap-node--locked]="lv > level">
                     <span *ngIf="lv < level">✓</span>
                     <span *ngIf="lv === level">{{ lv }}</span>
                     <span *ngIf="lv > level">{{ lv }}</span>
                 </div>
-                <div *ngIf="!last" class="ms-roadmap-line"
-                    [class.ms-roadmap-line--done]="lv < level"></div>
+                <div *ngIf="!last" class="ms-roadmap-line" [class.ms-roadmap-line--done]="lv < level"></div>
             </ng-container>
         </div>
         <p class="ms-roadmap-hint">{{ maxXP - currentXP | number }} XP para el nivel {{ level + 1 }}</p>
     </div>
 
+    <!-- ══ TABS ═════════════════════════════════════════════════════ -->
+    <div class="ms-tabs-wrap">
+        <div class="ms-tabs">
+            <button class="ms-tab" [class.ms-tab--active]="activeTab() === 'daily'" (click)="setTab('daily')">
+                ⚡ Diarios
+            </button>
+            <button class="ms-tab" [class.ms-tab--active]="activeTab() === 'monthly'" (click)="setTab('monthly')">
+                📅 Mensuales
+            </button>
+        </div>
+        <p class="ms-countdown">{{ countdownText() }}</p>
+    </div>
+
     <!-- ══ MISSIONS LIST ════════════════════════════════════════════ -->
     <div class="ms-inner">
-
-        <h2 class="ms-section-title">🗡️ Misiones</h2>
 
         <!-- Loading state -->
         <div *ngIf="loading()" class="ms-loading">
@@ -76,16 +91,18 @@
         </div>
 
         <!-- Empty state -->
-        <div *ngIf="!loading() && missions().length === 0" class="ms-empty">
-            No hay misiones disponibles aún.
+        <div *ngIf="!loading() && activeMissions().length === 0" class="ms-empty">
+            <div class="ms-empty-icon">🎯</div>
+            <p>No hay misiones {{ activeTab() === 'daily' ? 'diarias' : 'mensuales' }} disponibles.</p>
+            <p class="ms-empty-sub">¡Vuelve pronto para nuevos retos!</p>
         </div>
 
         <!-- Mission cards -->
         <div class="ms-missions-grid" *ngIf="!loading()">
-            <div
-                class="ms-mission-card"
-                *ngFor="let m of missions()"
-                [class.ms-mission-card--done]="m.completed">
+            <div class="ms-mission-card" *ngFor="let m of activeMissions()"
+                [class.ms-mission-card--done]="m.claimed"
+                [class.ms-mission-card--claimable]="canClaim(m)"
+                [attr.data-difficulty]="m.difficulty">
 
                 <div class="ms-mission-emoji">{{ m.emoji }}</div>
 
@@ -96,11 +113,19 @@
                     </div>
                     <p class="ms-mission-desc">{{ m.description }}</p>
 
+                    <!-- Difficulty badge -->
+                    <div class="ms-mission-meta">
+                        <span class="ms-difficulty-badge ms-difficulty-badge--{{ m.difficulty }}">
+                            {{ difficultyIcon(m.difficulty) }} {{ difficultyLabel(m.difficulty) }}
+                        </span>
+                    </div>
+
                     <!-- Progress bar -->
                     <div class="ms-mission-bar-wrap">
                         <div class="ms-mission-bar-track">
                             <div class="ms-mission-bar-fill"
-                                [class.ms-mission-bar-fill--done]="m.completed"
+                                [class.ms-mission-bar-fill--done]="m.claimed"
+                                [class.ms-mission-bar-fill--claimable]="canClaim(m)"
                                 [style.width.%]="progressPercent(m)">
                             </div>
                         </div>
@@ -110,16 +135,16 @@
                     </div>
                 </div>
 
-                <!-- Badge or Claim button -->
+                <!-- Badge / Claim button / Lock -->
                 <div class="ms-mission-action">
-                    <div *ngIf="m.completed" class="ms-mission-badge">✅</div>
-                    <button
-                        *ngIf="!m.completed && m.user_progress >= m.goal"
-                        class="ms-claim-btn"
+                    <div *ngIf="m.claimed" class="ms-mission-badge">✅</div>
+                    <button *ngIf="canClaim(m)" class="ms-claim-btn"
+                        [disabled]="claimingId() === m.id"
                         (click)="claimMission(m)">
-                        ¡Reclamar!
+                        <span *ngIf="claimingId() !== m.id">🎁 Reclamar</span>
+                        <span *ngIf="claimingId() === m.id" class="ms-claim-spinner"></span>
                     </button>
-                    <div *ngIf="!m.completed && m.user_progress < m.goal" class="ms-mission-lock">🔒</div>
+                    <div *ngIf="isLocked(m)" class="ms-mission-lock">🔒</div>
                 </div>
             </div>
         </div>

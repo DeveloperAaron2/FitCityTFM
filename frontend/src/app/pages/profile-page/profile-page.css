@@ -3,7 +3,8 @@
     --pr-bg: #111111;
     --pr-surface: rgba(255, 255, 255, 0.08);
     --pr-border: rgba(255, 255, 255, 0.15);
-    --pr-accent: #22d3ee; /* cyan-400 */
+    --pr-accent: #22d3ee;
+    /* cyan-400 */
     --pr-accent-dim: rgba(34, 211, 238, 0.15);
     --pr-accent-border: rgba(34, 211, 238, 0.30);
     --pr-text: #ffffff;
@@ -16,6 +17,7 @@
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
+    background: var(--pr-bg) !important;
     background: var(--pr-bg) !important;
     color: var(--pr-text);
     font-family: system-ui, sans-serif;
@@ -58,12 +60,99 @@
 }
 
 :host-context(body.theme-sun) .pr-logout-btn {
-    background: #e2e8f0;
+    background: rgba(185, 28, 28, 0.08);
+    border-color: rgba(185, 28, 28, 0.3);
     color: #b91c1c;
 }
 
 :host-context(body.theme-sun) .pr-logout-btn:hover {
-    background: #cbd5e1;
+    background: rgba(185, 28, 28, 0.16);
+    border-color: rgba(185, 28, 28, 0.55);
+}
+
+/* ── Logout confirmation panel ─────────────────────────── */
+.pr-logout-wrap {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+}
+
+.pr-logout-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    background: rgba(20, 20, 20, 0.92);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: 12px;
+    padding: 10px 12px;
+    backdrop-filter: blur(12px);
+    animation: pr-confirm-in 0.18s ease-out;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    white-space: nowrap;
+}
+
+@keyframes pr-confirm-in {
+    from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pr-logout-question {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #fca5a5;
+}
+
+.pr-logout-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.pr-logout-yes {
+    padding: 5px 12px;
+    background: #dc2626;
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.pr-logout-yes:hover {
+    background: #ef4444;
+    transform: translateY(-1px);
+}
+
+.pr-logout-no {
+    padding: 5px 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.pr-logout-no:hover {
+    background: rgba(255,255,255,0.16);
+}
+
+:host-context(body.theme-sun) .pr-logout-confirm {
+    background: rgba(255,255,255,0.96);
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+:host-context(body.theme-sun) .pr-logout-question { color: #b91c1c; }
+:host-context(body.theme-sun) .pr-logout-no {
+    background: #f1f5f9;
+    border-color: rgba(0,0,0,0.1);
+    color: #475569;
 }
 
 :host-context(body.theme-sun) .pr-theme-toggle {
@@ -93,6 +182,7 @@
     position: absolute;
     inset: 0;
     background: radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, .15) 0%, transparent 70%);
+    background: radial-gradient(ellipse at 50% 0%, rgba(34, 211, 238, .15) 0%, transparent 70%);
     pointer-events: none;
 }
 
@@ -108,6 +198,7 @@
     height: 88px;
     border-radius: 50%;
     background: linear-gradient(135deg, #0ea5e9, #22d3ee);
+    background: linear-gradient(135deg, #0ea5e9, #22d3ee);
     border: none;
     cursor: pointer;
     padding: 0;
@@ -115,6 +206,7 @@
     align-items: center;
     justify-content: center;
     color: #fff;
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, .25), 0 8px 32px rgba(0, 0, 0, .5);
     box-shadow: 0 0 0 4px rgba(34, 211, 238, .25), 0 8px 32px rgba(0, 0, 0, .5);
     overflow: hidden;
     transition: box-shadow 0.2s;
@@ -163,7 +255,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -213,7 +305,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 8px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
     animation: pr-menu-in 0.2s ease-out;
     display: flex;
     flex-direction: column;
@@ -221,8 +313,15 @@
 }
 
 @keyframes pr-menu-in {
-    from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 .pr-theme-option {
@@ -326,7 +425,9 @@
 }
 
 @keyframes pr-spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 /* Upload error */
@@ -342,6 +443,7 @@
     position: absolute;
     bottom: -4px;
     right: -4px;
+    background: linear-gradient(135deg, #0284c7, #22d3ee);
     background: linear-gradient(135deg, #0284c7, #22d3ee);
     color: #fff;
     font-size: 11px;
@@ -377,6 +479,9 @@
     background: var(--pr-accent-dim);
     border: 1px solid var(--pr-accent-border);
     color: var(--pr-accent);
+    background: var(--pr-accent-dim);
+    border: 1px solid var(--pr-accent-border);
+    color: var(--pr-accent);
     font-size: 0.75rem;
     font-weight: 600;
 }
@@ -406,12 +511,13 @@
 
 .pr-xp-nums {
     color: var(--pr-accent);
+    color: var(--pr-accent);
     font-weight: 700;
 }
 
 .pr-xp-track {
     height: 10px;
-    background: rgba(255, 255, 255, .06);
+    background: var(--pr-accent-dim);
     border-radius: 20px;
     overflow: hidden;
     position: relative;
@@ -420,6 +526,7 @@
 
 .pr-xp-fill {
     height: 100%;
+    background: linear-gradient(90deg, #0284c7, #22d3ee);
     background: linear-gradient(90deg, #0284c7, #22d3ee);
     border-radius: 20px;
     position: relative;
@@ -454,6 +561,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    justify-content: center;
     margin-bottom: 12px;
 }
 
@@ -465,11 +573,15 @@
     color: var(--pr-muted);
     margin: 0;
     text-align: center;
+    text-align: center;
 }
 
 .pr-total-badge {
     font-size: 0.75rem;
     font-weight: 700;
+    color: var(--pr-accent);
+    background: var(--pr-accent-dim);
+    border: 1px solid var(--pr-accent-border);
     color: var(--pr-accent);
     background: var(--pr-accent-dim);
     border: 1px solid var(--pr-accent-border);
@@ -491,6 +603,7 @@
     padding: 14px 16px;
     background: var(--pr-card);
     border: 1px solid var(--pr-border);
+    border-left: 3px solid var(--acc, var(--pr-accent));
     border-left: 3px solid var(--acc, var(--pr-accent));
     border-radius: 16px;
     transition: background .2s;
@@ -535,6 +648,7 @@
     font-size: 1.6rem;
     font-weight: 900;
     line-height: 1;
+    color: var(--acc, var(--pr-accent));
     color: var(--acc, var(--pr-accent));
 }
 
@@ -612,6 +726,7 @@
 .pr-gym-visits-num {
     font-size: 1.15rem;
     font-weight: 900;
+    color: var(--pr-accent);
     color: var(--pr-accent);
     line-height: 1;
 }

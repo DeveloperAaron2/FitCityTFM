@@ -106,8 +106,54 @@
                     <span>{{ res.message }}</span>
                 </div>
 
+                <!-- Weight Verification Warnings -->
+                <div *ngIf="showWeightWarnings()" class="vpr-weight-warnings">
+                    <div class="vpr-warning-header">
+                        <span class="vpr-warning-header-icon">⚠️</span>
+                        <span>Se han detectado avisos sobre el peso declarado</span>
+                    </div>
+
+                    <!-- Plausibility Warning -->
+                    <div *ngIf="weightPlausibilityWarning() as warn" class="vpr-warning-card">
+                        <div class="vpr-warning-title">
+                            <span>📊</span> Control de plausibilidad
+                        </div>
+                        <p class="vpr-warning-msg">{{ warn.message }}</p>
+                        <div class="vpr-warning-detail">
+                            Tu PR anterior: <strong>{{ warn.previous_weight }} kg</strong> →
+                            Nuevo: <strong>{{ warn.new_weight }} kg</strong>
+                            (incremento del {{ warn.increase_percent }}%)
+                        </div>
+                    </div>
+
+                    <!-- AI Weight Estimation Warning -->
+                    <div *ngIf="weightAiCheck() as aiCheck" class="vpr-warning-card">
+                        <div class="vpr-warning-title">
+                            <span>🤖</span> Estimación IA del peso
+                        </div>
+                        <p class="vpr-warning-msg" *ngIf="aiCheck.estimated_weight">
+                            La IA estima aproximadamente <strong>{{ aiCheck.estimated_weight }} kg</strong> en la barra,
+                            pero has declarado <strong>{{ weightKg() }} kg</strong>.
+                        </p>
+                        <p class="vpr-warning-detail" *ngIf="aiCheck.detail">{{ aiCheck.detail }}</p>
+                        <span class="vpr-warning-confidence">Confianza: {{ aiCheck.confidence }}</span>
+                    </div>
+
+                    <!-- Confirmation buttons -->
+                    <div class="vpr-warning-actions">
+                        <button type="button" class="vpr-btn-cancel" (click)="showWeightWarnings.set(false)">
+                            Cancelar y corregir
+                        </button>
+                        <button type="button" class="vpr-btn-confirm" (click)="confirmAndSavePR()"
+                            [disabled]="isSubmitting()">
+                            <span *ngIf="!isSubmitting()">Confirmar de todos modos</span>
+                            <span *ngIf="isSubmitting()" class="vpr-loading">Guardando...</span>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Action button -->
-                <button type="submit" class="vpr-btn-submit"
+                <button type="submit" class="vpr-btn-submit" *ngIf="!showWeightWarnings()"
                     [disabled]="isSubmitting() || !selectedFile() || !weightKg() || !exerciseName() ">
                     <span *ngIf="!isSubmitting()">Subir y Validar PR</span>
                     <span *ngIf="isSubmitting()" class="vpr-loading">Validando...</span>
@@ -476,4 +522,229 @@
         color: #22d3ee;
         border: 1px solid rgba(34, 211, 238, 0.2);
     }
+
+    /* ═══════════════════════════════════════════════════
+       Weight Warnings
+       ═══════════════════════════════════════════════════ */
+
+    .vpr-weight-warnings {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 8px;
+        animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .vpr-warning-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: rgba(234, 179, 8, 0.12);
+        border: 1px solid rgba(234, 179, 8, 0.3);
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #eab308;
+    }
+
+    .vpr-warning-header-icon {
+        font-size: 18px;
+    }
+
+    .vpr-warning-card {
+        padding: 14px 16px;
+        background: rgba(251, 146, 60, 0.08);
+        border: 1px solid rgba(251, 146, 60, 0.25);
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .vpr-warning-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fb923c;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .vpr-warning-msg {
+        font-size: 13px;
+        color: #e2e8f0;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .vpr-warning-detail {
+        font-size: 12px;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .vpr-warning-confidence {
+        font-size: 11px;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .vpr-warning-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 4px;
+    }
+
+    .vpr-btn-cancel {
+        flex: 1;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.05);
+        color: #e2e8f0;
+        padding: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .vpr-btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .vpr-btn-confirm {
+        flex: 1;
+        border: none;
+        background: linear-gradient(135deg, #f59e0b, #f97316);
+        color: white;
+        padding: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        transition: all 0.2s;
+    }
+
+    .vpr-btn-confirm:hover {
+        transform: translateY(-1px);
+    }
+
+    .vpr-btn-confirm:disabled {
+        background: #64748b;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    /* ═══════════════════════════════════════════════════
+       THEME-SUN (Light Mode) overrides
+       ═══════════════════════════════════════════════════ */
+
+    :host-context(body.theme-sun) .vpr-page {
+        background-color: #f0f4f8;
+    }
+
+    :host-context(body.theme-sun) .vpr-header {
+        background: #ffffff;
+        border-bottom-color: rgba(0,0,0,0.08);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    :host-context(body.theme-sun) .vpr-btn-back {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .vpr-btn-back:active {
+        background: rgba(2, 132, 199, 0.08);
+    }
+
+    :host-context(body.theme-sun) .vpr-title {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vpr-card {
+        background: #ffffff;
+        border-color: rgba(0,0,0,0.08);
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    :host-context(body.theme-sun) .vpr-desc {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .vpr-label {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .vpr-input {
+        background: #f8fafc;
+        border-color: rgba(0,0,0,0.12);
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vpr-input:focus {
+        border-color: #0284c7;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+    }
+
+    :host-context(body.theme-sun) .vpr-input--readonly {
+        background: #f1f5f9;
+        color: #64748b;
+        border-color: rgba(0,0,0,0.08);
+    }
+
+    :host-context(body.theme-sun) .vpr-file-drop {
+        background: #f8fafc;
+        border-color: rgba(2, 132, 199, 0.3);
+    }
+
+    :host-context(body.theme-sun) .vpr-file-drop:active {
+        background: #e0f2fe;
+        border-color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .vpr-file-text {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-banner {
+        background: #f1f5f9;
+        border-color: rgba(0,0,0,0.1);
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-text {
+        color: #475569;
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-banner.is-error {
+        background: rgba(239,68,68,0.06);
+        border-color: rgba(239,68,68,0.2);
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-banner.is-error .vpr-geo-text {
+        color: #dc2626;
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-banner.is-success {
+        background: rgba(2, 132, 199, 0.06);
+        border-color: rgba(2, 132, 199, 0.2);
+    }
+
+    :host-context(body.theme-sun) .vpr-geo-banner.is-success .vpr-geo-text {
+        color: #0284c7;
+    }
+
+    :host-context(body.theme-sun) .vpr-btn-submit:disabled {
+        background: #e2e8f0;
+        color: #94a3b8;
+    }
+
 </style>

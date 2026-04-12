@@ -31,6 +31,11 @@ export class ValidatePrPage implements OnInit {
     isSubmitting = signal(false);
     result = signal<{ success: boolean; message: string } | null>(null);
 
+    // Weight verification warnings (Layers 1 & 2)
+    weightPlausibilityWarning = signal<any>(null);
+    weightAiCheck = signal<any>(null);
+    showWeightWarnings = signal(false);
+
     // Emojis mapping for common exercises
     private readonly EMOJIS: Record<string, string> = {
         'Press de banca': '🏋️',
@@ -93,52 +98,107 @@ export class ValidatePrPage implements OnInit {
 
         this.isSubmitting.set(true);
         this.result.set(null);
+        this.weightPlausibilityWarning.set(null);
+        this.weightAiCheck.set(null);
+        this.showWeightWarnings.set(false);
 
         try {
-            // STEP 1: Validate Video
-            await new Promise((resolve, reject) => {
-                this.api.validatePRVideo(userId, file, ex).subscribe({
+            // STEP 1: Validate Video (also checks weight plausibility + AI estimation)
+            const validationRes = await new Promise<any>((resolve, reject) => {
+                this.api.validatePRVideo(userId, file, ex, gym, weight, 1).subscribe({
                     next: resolve,
                     error: reject
                 });
             });
 
-            // STEP 2: Find Emoji
-            const emoji = this.EMOJIS[ex] || this.EMOJIS['default'];
+            // Store validation result for use in confirmation step
+            (this as any)._lastValidationRes = validationRes;
 
-            // STEP 3: Create PR Record in DB
-            const prBody = {
-                gym_name: gym,
-                exercise_name: ex,
-                exercise_emoji: emoji,
-                weight_kg: weight,
-                reps: 1
-            };
+            // STEP 2: Check for weight warnings
+            const hasPlausibilityWarning = validationRes.weight_plausibility_warning != null;
+            const hasAiWarning = validationRes.weight_ai_check != null
+                && validationRes.weight_ai_check.matches_declared === false;
 
-            const prRes = await new Promise<any>((resolve, reject) => {
-                this.api.createLiftingPR(userId, prBody).subscribe({
-                    next: resolve,
-                    error: reject
-                });
-            });
+            if (hasPlausibilityWarning) {
+                this.weightPlausibilityWarning.set(validationRes.weight_plausibility_warning);
+            }
+            if (hasAiWarning) {
+                this.weightAiCheck.set(validationRes.weight_ai_check);
+            }
 
-            this.result.set({
-                success: true,
-                message: prRes.is_new_record
-                    ? `¡Nuevo record guardado! (+${prRes.xp_awarded} XP) 🚀`
-                    : `Record actualizado. (+${prRes.xp_awarded} XP) 🔥`
-            });
+            // If warnings exist, show them and wait for user confirmation
+            if (hasPlausibilityWarning || hasAiWarning) {
+                this.showWeightWarnings.set(true);
+                this.isSubmitting.set(false);
+                return; // User must click "Confirmar de todos modos"
+            }
 
-            // Navigate back to profile after 3 seconds on success
-            setTimeout(() => this.goBack(), 3000);
+            // No warnings → proceed directly
+            await this._savePR(validationRes);
 
         } catch (err: any) {
             console.error(err);
             const detail = err.error?.detail || 'Error en la validación / subida del PR.';
             this.result.set({ success: false, message: detail });
+            this.isSubmitting.set(false);
+        }
+    }
+
+    async confirmAndSavePR(): Promise<void> {
+        this.showWeightWarnings.set(false);
+        this.isSubmitting.set(true);
+        try {
+            const validationRes = (this as any)._lastValidationRes;
+            await this._savePR(validationRes);
+        } catch (err: any) {
+            console.error(err);
+            const detail = err.error?.detail || 'Error al guardar el PR.';
+            this.result.set({ success: false, message: detail });
         } finally {
             this.isSubmitting.set(false);
         }
+    }
+
+    private async _savePR(validationRes: any): Promise<void> {
+        const userId = this.user?.id;
+        const gym = this.gymName().trim();
+        const ex = this.exerciseName().trim();
+        const weight = this.weightKg() || 0;
+
+        // Find Emoji
+        const emoji = this.EMOJIS[ex] || this.EMOJIS['default'];
+
+        // Create PR Record in DB
+        const prBody = {
+            gym_name: gym,
+            exercise_name: ex,
+            exercise_emoji: emoji,
+            weight_kg: weight,
+            reps: 1
+        };
+
+        const prRes = await new Promise<any>((resolve, reject) => {
+            this.api.createLiftingPR(userId!, prBody).subscribe({
+                next: resolve,
+                error: reject
+            });
+        });
+
+        // Build success message
+        let message = prRes.is_new_record
+            ? `¡Nuevo record guardado! (+${prRes.xp_awarded} XP) 🚀`
+            : `Record actualizado. (+${prRes.xp_awarded} XP) 🔥`;
+
+        // If it's the gym best lift, add a celebration
+        if (validationRes.is_gym_best) {
+            message += `\n🏆 ¡MEJOR LEVANTAMIENTO DEL GIMNASIO! (+${validationRes.best_lift_xp_awarded} XP extra)`;
+        }
+
+        this.result.set({ success: true, message });
+        this.isSubmitting.set(false);
+
+        // Navigate back to profile after 3 seconds on success
+        setTimeout(() => this.goBack(), 3000);
     }
 
     goBack(): void {

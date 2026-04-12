@@ -4,6 +4,6 @@ supabase==2.13.0
 python-dotenv==1.0.1
 pydantic[email]==2.10.6
 pydantic-settings==2.8.1
-python-multipart==0.0.22
+python-multipart>=0.0.18,<0.0.21
 httpx
 opencv-python-headless

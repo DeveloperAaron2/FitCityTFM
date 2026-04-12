@@ -15,6 +15,11 @@ export const routes: Routes = [
         canActivate: [guestGuard],
         loadComponent: () => import('./pages/register-page/register-page').then(m => m.RegisterPage),
     },
+    {
+        // OAuth callback — no guard, Supabase redirects here after Google login
+        path: 'auth/callback',
+        loadComponent: () => import('./pages/auth-callback/auth-callback').then(m => m.AuthCallbackPage),
+    },
 
     // ── Protected app shell (navbar + router-outlet) ───────────────────────────
     {
