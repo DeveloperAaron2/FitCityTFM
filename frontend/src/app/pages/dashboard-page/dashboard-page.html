@@ -58,7 +58,7 @@
 
 
     <!-- ── RETO DIARIO ─────────────────────────────── -->
-    <div class="fc-quest">
+    <div class="fc-quest" routerLink="/missions" style="cursor:pointer">
         <span class="fc-quest-icon">⚔️</span>
         <div class="fc-quest-body">
             <p class="fc-quest-title">Reto del día</p>
@@ -583,6 +583,17 @@
         border: 1px solid rgba(234, 179, 8, .25);
         border-radius: 16px;
         padding: 12px;
+        transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    }
+
+    .fc-quest:hover {
+        transform: translateY(-2px);
+        border-color: rgba(234, 179, 8, .45);
+        background: linear-gradient(135deg, rgba(234, 179, 8, .16), rgba(239, 68, 68, .1));
+    }
+
+    .fc-quest:active {
+        transform: scale(0.98);
     }
 
     .fc-quest-icon {

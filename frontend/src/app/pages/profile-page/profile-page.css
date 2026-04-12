@@ -60,12 +60,99 @@
 }
 
 :host-context(body.theme-sun) .pr-logout-btn {
-    background: #e2e8f0;
+    background: rgba(185, 28, 28, 0.08);
+    border-color: rgba(185, 28, 28, 0.3);
     color: #b91c1c;
 }
 
 :host-context(body.theme-sun) .pr-logout-btn:hover {
-    background: #cbd5e1;
+    background: rgba(185, 28, 28, 0.16);
+    border-color: rgba(185, 28, 28, 0.55);
+}
+
+/* ── Logout confirmation panel ─────────────────────────── */
+.pr-logout-wrap {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 10;
+}
+
+.pr-logout-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    background: rgba(20, 20, 20, 0.92);
+    border: 1px solid rgba(248, 113, 113, 0.35);
+    border-radius: 12px;
+    padding: 10px 12px;
+    backdrop-filter: blur(12px);
+    animation: pr-confirm-in 0.18s ease-out;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    white-space: nowrap;
+}
+
+@keyframes pr-confirm-in {
+    from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.pr-logout-question {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #fca5a5;
+}
+
+.pr-logout-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.pr-logout-yes {
+    padding: 5px 12px;
+    background: #dc2626;
+    border: none;
+    border-radius: 7px;
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+}
+
+.pr-logout-yes:hover {
+    background: #ef4444;
+    transform: translateY(-1px);
+}
+
+.pr-logout-no {
+    padding: 5px 10px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 7px;
+    color: #cbd5e1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.pr-logout-no:hover {
+    background: rgba(255,255,255,0.16);
+}
+
+:host-context(body.theme-sun) .pr-logout-confirm {
+    background: rgba(255,255,255,0.96);
+    border-color: rgba(220, 38, 38, 0.3);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+:host-context(body.theme-sun) .pr-logout-question { color: #b91c1c; }
+:host-context(body.theme-sun) .pr-logout-no {
+    background: #f1f5f9;
+    border-color: rgba(0,0,0,0.1);
+    color: #475569;
 }
 
 :host-context(body.theme-sun) .pr-theme-toggle {

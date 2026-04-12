@@ -32,6 +32,15 @@ export class RankingPage implements OnInit {
   }
   myPrs = signal<any[]>([]);
   gymRanking = signal<any[]>([]);
+  gymSearchQuery = signal('');
+
+  filteredGymRanking = computed(() => {
+    const q = this.gymSearchQuery().toLowerCase().trim();
+    if (!q) return this.gymRanking();
+    return this.gymRanking().filter(g =>
+      (g.gym_name ?? '').toLowerCase().includes(q)
+    );
+  });
 
   loadingGlobal = signal(false);
   loadingMe = signal(false);
@@ -43,6 +52,13 @@ export class RankingPage implements OnInit {
   videoModalLifts = signal<any[]>([]);
   loadingVideos = signal(false);
   activeVideoIndex = signal(0);
+
+  // ── Gym accordion state ────────────────────────────────────────────────
+  expandedGymName = signal<string | null>(null);
+
+  toggleGym(gymName: string) {
+    this.expandedGymName.set(this.expandedGymName() === gymName ? null : gymName);
+  }
 
   // ── Global PR expansion state ──────────────────────────────────────────
   openSingleVideoModal(pr: any) {

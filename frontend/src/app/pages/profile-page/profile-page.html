@@ -36,8 +36,21 @@
                 </div>
             </div>
 
-            <!-- Botón cerrar sesión: esquina superior derecha -->
-            <button class="pr-logout-btn" (click)="logout()">Cerrar Sesión</button>
+            <!-- Botón cerrar sesión / confirmación -->
+            <div class="pr-logout-wrap">
+              <ng-container *ngIf="!confirmingLogout(); else logoutConfirm">
+                <button class="pr-logout-btn" (click)="requestLogout()">Cerrar Sesión</button>
+              </ng-container>
+              <ng-template #logoutConfirm>
+                <div class="pr-logout-confirm">
+                  <span class="pr-logout-question">¿Seguro que quieres cerrar sesión?</span>
+                  <div class="pr-logout-actions">
+                    <button class="pr-logout-yes" (click)="logout()">Sí, salir</button>
+                    <button class="pr-logout-no"  (click)="cancelLogout()">Cancelar</button>
+                  </div>
+                </div>
+              </ng-template>
+            </div>
 
             <div class="pr-avatar-wrap">
                 <!-- Hidden file input for avatar selection -->
@@ -171,37 +184,18 @@
         }
 
         .pr-logout-btn {
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            padding: 5px 12px;
-            background: #d1d5db;
-            border: none;
-            border-radius: 6px;
-            color: #991b1b;
-            font-size: 10px;
-            font-weight: 800;
+            padding: 4px 20px;
+            background: rgba(220, 38, 38, 0.12);
+            border: 1px solid rgba(220, 38, 38, 0.35);
+            border-radius: 999px;
+            color: #fca5a5;
+            font-size: 0.72rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.02em;
-            position: absolute;
-            top: 14px;
-            right: 14px;
-            padding: 5px 12px;
-            background: #d1d5db;
-            border: none;
-            border-radius: 6px;
-            color: #991b1b;
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.06em;
             cursor: pointer;
-            z-index: 10;
-            animation: pr-pulse-red 3s infinite ease-in-out;
-            transition: background .2s, transform .15s;
-            z-index: 10;
-            animation: pr-pulse-red 3s infinite ease-in-out;
-            transition: background .2s, transform .15s;
+            white-space: nowrap;
+            transition: background .2s, border-color .2s, transform .15s;
         }
 
         @keyframes pr-pulse-red {
@@ -217,14 +211,9 @@
         }
 
         .pr-logout-btn:hover {
-            background: #e5e7eb;
+            background: rgba(220, 38, 38, 0.22);
+            border-color: rgba(220, 38, 38, 0.6);
             transform: translateY(-1px);
-            animation-play-state: paused;
-            box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
-            background: #e5e7eb;
-            transform: translateY(-1px);
-            animation-play-state: paused;
-            box-shadow: 0 3px 6px rgba(153, 27, 27, 0.3);
         }
 
         /* Video Uploader Button */

@@ -89,20 +89,38 @@
       <p>Aún no hay récords registrados en ningún gimnasio.</p>
     </div>
 
-    <ng-container *ngIf="!loadingGyms()">
-      <div *ngFor="let gym of gymRanking(); let gi = index" class="gym-group">
+    <!-- Gym search -->
+    <div *ngIf="!loadingGyms() && gymRanking().length > 0" class="gym-search-wrapper">
+      <span class="gym-search-icon">🔍</span>
+      <input class="gym-search-input"
+             type="text"
+             placeholder="Buscar gimnasio..."
+             [value]="gymSearchQuery()"
+             (input)="gymSearchQuery.set($any($event.target).value)" />
+      <button *ngIf="gymSearchQuery()" class="gym-search-clear" (click)="gymSearchQuery.set('')">✕</button>
+    </div>
 
-        <!-- Gym Header -->
-        <div class="gym-group-header">
+    <div *ngIf="!loadingGyms() && filteredGymRanking().length === 0 && gymSearchQuery()" class="empty-state">
+      <p>No hay gimnasios que coincidan con "{{ gymSearchQuery() }}".</p>
+    </div>
+
+    <ng-container *ngIf="!loadingGyms()">
+      <div *ngFor="let gym of filteredGymRanking(); let gi = index" class="gym-group">
+
+        <!-- Gym Header (clickable accordion toggle) -->
+        <div class="gym-group-header gym-accordion-header"
+             (click)="toggleGym(gym.gym_name)"
+             [class.is-open]="expandedGymName() === gym.gym_name">
           <div class="gym-icon">🏟️</div>
           <div class="gym-header-info">
             <span class="gym-name">{{ gym.gym_name }}</span>
             <span class="gym-stat-badge">{{ gym.total_prs }} {{ gym.total_prs === 1 ? 'récord' : 'récords' }}</span>
           </div>
+          <div class="gym-chevron" [class.open]="expandedGymName() === gym.gym_name">▾</div>
         </div>
 
-        <!-- Top PRs inside this gym -->
-        <div class="gym-prs-list">
+        <!-- Top PRs inside this gym — shown only when expanded -->
+        <div class="gym-prs-list" *ngIf="expandedGymName() === gym.gym_name">
           <div *ngFor="let pr of gym.top_prs; let pi = index"
                class="global-pr-card gym-inner-card"
                (click)="openGymPrVideo(pr, gym)">
@@ -133,7 +151,7 @@
 
       </div>
     </ng-container>
-  </div>
+  
 
   <!-- My PRs View -->
   <div class="ranking-list" *ngIf="activeTab() === 'me'">

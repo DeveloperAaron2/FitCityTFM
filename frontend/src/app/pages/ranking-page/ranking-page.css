@@ -336,6 +336,74 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Gym Search ─────────────────────────────────────────────────────────── */
+
+.gym-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+.gym-search-wrapper:focus-within {
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+}
+
+.gym-search-icon {
+  font-size: 0.95rem;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.gym-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.gym-search-input::placeholder {
+  color: #64748b;
+}
+
+.gym-search-clear {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.gym-search-clear:hover {
+  color: #f87171;
+}
+
+:host-context(body.theme-sun) .gym-search-wrapper {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .gym-search-wrapper:focus-within {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+}
+
+:host-context(body.theme-sun) .gym-search-input {
+  color: #1e293b;
+}
+
 /* ── Gym Ranking ─────────────────────────────────────────────────────────── */
 
 .gym-group {
@@ -361,6 +429,38 @@
   padding: 1rem 1.25rem;
   background: rgba(34, 211, 238, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Accordion variant */
+.gym-accordion-header {
+  cursor: pointer;
+  border-bottom: none;
+  transition: background 0.2s;
+}
+
+.gym-accordion-header:hover {
+  background: rgba(34, 211, 238, 0.16);
+}
+
+.gym-accordion-header.is-open {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Chevron icon */
+.gym-chevron {
+  font-size: 1.1rem;
+  color: var(--fc-primary);
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.gym-chevron.open {
+  transform: rotate(180deg);
+}
+
+:host-context(body.theme-sun) .gym-accordion-header:hover {
+  background: rgba(2, 132, 199, 0.1);
 }
 
 .gym-icon {
