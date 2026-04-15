@@ -45,8 +45,10 @@
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="fc-btn-svg">
                         <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
                         <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-                        <g id="SVGRepo_iconCarrier"> 
-                            <path fill-rule="evenodd" clip-rule="evenodd" d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z" fill="currentColor"></path> 
+                        <g id="SVGRepo_iconCarrier">
+                            <path fill-rule="evenodd" clip-rule="evenodd"
+                                d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22ZM16.0303 8.96967C16.3232 9.26256 16.3232 9.73744 16.0303 10.0303L11.0303 15.0303C10.7374 15.3232 10.2626 15.3232 9.96967 15.0303L7.96967 13.0303C7.67678 12.7374 7.67678 12.2626 7.96967 11.9697C8.26256 11.6768 8.73744 11.6768 9.03033 11.9697L10.5 13.4393L14.9697 8.96967C15.2626 8.67678 15.7374 8.67678 16.0303 8.96967Z"
+                                fill="currentColor"></path>
                         </g>
                     </svg>
                     Validar PR
@@ -119,11 +121,13 @@
                         <p class="fc-gym-hours" *ngIf="gym.opening_hours">🕐 {{ gym.opening_hours }}</p>
                     </div>
                     <div class="fc-gym-actions">
-                        <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn" (click)="$event.stopPropagation()">📞</a>
-                        <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener"
-                            class="fc-gym-action-btn" (click)="$event.stopPropagation()">🌐</a>
+                        <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn"
+                            (click)="$event.stopPropagation()">📞</a>
+                        <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener" class="fc-gym-action-btn"
+                            (click)="$event.stopPropagation()">🌐</a>
                         <button class="fc-gym-action-btn" *ngIf="gym.distanceM <= 150 && !isVisited(gym.name)"
-                            (click)="visitGym(gym); $event.stopPropagation()" [disabled]="isVisiting(gym.id)" title="Marcar como visitado">
+                            (click)="visitGym(gym); $event.stopPropagation()" [disabled]="isVisiting(gym.id)"
+                            title="Marcar como visitado">
                             📍
                         </button>
                         <span class="fc-gym-dist-badge" *ngIf="isVisited(gym.name)"
@@ -161,7 +165,7 @@
                 <label class="vm-label">Ejercicio</label>
                 <select class="vm-input vm-select" [ngModel]="validateExercise()"
                     (ngModelChange)="validateExercise.set($event)">
-                    <option value="">Selecciona ejercicio...</option>
+                    <option value="" disabled selected>— Selecciona ejercicio —</option>
                     <option value="Press de banca">Press de banca</option>
                     <option value="Sentadilla">Sentadilla</option>
                     <option value="Peso muerto">Peso muerto</option>
@@ -352,7 +356,7 @@
         position: relative;
         overflow: hidden;
     }
-    
+
     .fc-camera-action::before {
         content: '';
         position: absolute;
@@ -369,7 +373,7 @@
         border-color: rgba(34, 211, 238, 0.4);
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2);
     }
-    
+
     .fc-camera-action:hover::before {
         opacity: 1;
     }
@@ -405,7 +409,7 @@
         filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         transition: transform 0.3s ease;
     }
-    
+
     .fc-camera-action:hover .fc-btn-svg {
         transform: scale(1.1) rotate(-3deg);
     }
@@ -952,7 +956,7 @@
         border-color: rgba(2, 132, 199, 0.3) !important;
         box-shadow: 0 8px 24px rgba(2, 132, 199, 0.1), inset 0 1px 0 rgba(255, 255, 255, 1) !important;
     }
-    
+
     :host-context(body.theme-sun) .fc-camera-action::before {
         display: none !important;
     }
@@ -1185,6 +1189,32 @@
 
     .vm-select {
         cursor: pointer;
+        appearance: none;
+        background-color: rgba(0, 0, 0, 0.25);
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 10px auto;
+        padding-top: 14px;
+        padding-bottom: 14px;
+        padding-left: 16px;
+        padding-right: 36px;
+        font-size: 15px;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .vm-select option {
+        background-color: #1c1c1c;
+        color: #ffffff;
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+
+    .vm-select option[value=""] {
+        color: #22d3ee;
+        font-weight: 600;
+        font-style: italic;
     }
 
     .vm-file-input {
@@ -1385,6 +1415,21 @@
         border-color: #0284c7;
         background: #ffffff;
         box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+    }
+
+    :host-context(body.theme-sun) .vm-select {
+        background-color: #f1f5f9;
+        border-color: rgba(0, 0, 0, 0.15);
+        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    }
+
+    :host-context(body.theme-sun) .vm-select option {
+        background-color: #ffffff;
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vm-select option[value=""] {
+        color: #0284c7;
     }
 
     :host-context(body.theme-sun) .vm-file-drop {
