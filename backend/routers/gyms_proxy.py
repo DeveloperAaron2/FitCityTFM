@@ -58,6 +58,19 @@ def build_overpass_query(south: float, west: float, north: float, east: float) -
 out center;
 """.strip()
 
+@router.get("/check-exists")
+async def check_gym_exists(q: str = Query(..., description="Query to search")):
+    """Verifies if a gym exists in the static database."""
+    query = q.lower().strip()
+    if not query:
+        return {"exists": False}
+    for gym in FALLBACK_GYMS:
+        tags = gym.get("tags", {})
+        gym_name = tags.get("name", "Centro de fitness").lower()
+        if query in gym_name:
+            return {"exists": True}
+    return {"exists": False}
+
 @router.get("/nearby")
 async def get_nearby_gyms(
     south: float = Query(..., description="South bounding box"),

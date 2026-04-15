@@ -108,7 +108,7 @@
             <!-- Real gym cards -->
             <ng-container *ngIf="!gymsService.loading()">
                 <div class="fc-gym-card" *ngFor="let gym of gymsService.nearbyGyms(); let i = index; trackBy: trackById"
-                    [style.--accent]="accentColor(i)">
+                    [style.--accent]="accentColor(i)" (click)="goToGymRanking(gym)" style="cursor: pointer;">
                     <span class="fc-gym-emoji">{{ gymEmoji(i) }}</span>
                     <div class="fc-gym-info">
                         <p class="fc-gym-name">{{ gym.name }}</p>
@@ -119,11 +119,11 @@
                         <p class="fc-gym-hours" *ngIf="gym.opening_hours">🕐 {{ gym.opening_hours }}</p>
                     </div>
                     <div class="fc-gym-actions">
-                        <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn">📞</a>
+                        <a *ngIf="gym.phone" [href]="'tel:' + gym.phone" class="fc-gym-action-btn" (click)="$event.stopPropagation()">📞</a>
                         <a *ngIf="gym.web" [href]="gym.web" target="_blank" rel="noopener"
-                            class="fc-gym-action-btn">🌐</a>
+                            class="fc-gym-action-btn" (click)="$event.stopPropagation()">🌐</a>
                         <button class="fc-gym-action-btn" *ngIf="gym.distanceM <= 150 && !isVisited(gym.name)"
-                            (click)="visitGym(gym)" [disabled]="isVisiting(gym.id)" title="Marcar como visitado">
+                            (click)="visitGym(gym); $event.stopPropagation()" [disabled]="isVisiting(gym.id)" title="Marcar como visitado">
                             📍
                         </button>
                         <span class="fc-gym-dist-badge" *ngIf="isVisited(gym.name)"
@@ -958,7 +958,7 @@
     }
 
     :host-context(body.theme-sun) .fc-cam-label {
-        color: #475569 !important;
+        color: #1e293b !important;
         text-shadow: none !important;
     }
 
@@ -967,7 +967,7 @@
     }
 
     :host-context(body.theme-sun) .fc-btn-svg {
-        color: #000000;
+        color: #0284c7;
     }
 
     :host-context(body.theme-sun) .fc-quest {

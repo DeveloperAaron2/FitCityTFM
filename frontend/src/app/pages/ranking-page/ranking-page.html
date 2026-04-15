@@ -96,12 +96,20 @@
              type="text"
              placeholder="Buscar gimnasio..."
              [value]="gymSearchQuery()"
-             (input)="gymSearchQuery.set($any($event.target).value)" />
-      <button *ngIf="gymSearchQuery()" class="gym-search-clear" (click)="gymSearchQuery.set('')">✕</button>
+             (input)="onGymSearchInput($event)" />
+      <button *ngIf="gymSearchQuery()" class="gym-search-clear" (click)="gymSearchQuery.set(''); isSearchGymExisting.set(false)">✕</button>
     </div>
 
-    <div *ngIf="!loadingGyms() && filteredGymRanking().length === 0 && gymSearchQuery()" class="empty-state">
-      <p>No hay gimnasios que coincidan con "{{ gymSearchQuery() }}".</p>
+    <div *ngIf="!loadingGyms() && filteredGymRanking().length === 0 && gymSearchQuery()" class="empty-state" style="display:flex; flex-direction:column; align-items:center; text-align:center;">
+      <div *ngIf="checkingGymExistence()" class="spinner" style="margin: 0 auto 10px;"></div>
+      <ng-container *ngIf="!checkingGymExistence()">
+        <p *ngIf="!isSearchGymExisting()">No hay gimnasios cargados con el nombre "{{ gymSearchQuery() }}".</p>
+        <div *ngIf="isSearchGymExisting()">
+          <span style="font-size: 24px; margin-bottom: 8px; display:block;">📍</span>
+          <p>Aún no hay vídeos subidos en este gimnasio.</p>
+          <p style="margin-top: 8px; font-weight: 800; color: var(--cyan);">¡Sé el primero o primera en subir un vídeo!</p>
+        </div>
+      </ng-container>
     </div>
 
     <ng-container *ngIf="!loadingGyms()">

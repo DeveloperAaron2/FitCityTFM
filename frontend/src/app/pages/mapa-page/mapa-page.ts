@@ -1,4 +1,5 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { API_URL, ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -77,6 +78,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
     private api = inject(ApiService);
     private auth = inject(AuthService);
+    private router = inject(Router);
 
     // Instance-level references to shared cache sets
     private get loadedTiles() { return mapCache.loadedTiles; }
@@ -497,7 +499,12 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
         const markerEl = document.createElement('div');
         markerEl.className = 'gym-marker-wrap';
-        markerEl.innerHTML = '<div class="gym-marker"><span class="gym-marker-emoji">🏋️</span></div>';
+        const isVisited = this.visitedTodayGyms.has(name);
+        if (isVisited) {
+            markerEl.innerHTML = '<div class="gym-marker gym-marker-visited"><span class="gym-marker-emoji">🏋️</span></div>';
+        } else {
+            markerEl.innerHTML = '<div class="gym-marker"><span class="gym-marker-emoji">🏋️</span></div>';
+        }
 
         const popup = new ml.Popup({
             offset: [0, -42],
@@ -531,11 +538,20 @@ export class MapaPage implements AfterViewInit, OnDestroy {
                     const distance = haversineM(uLat, uLon, lat, lon);
                     if (distance <= 150) {
                         visitBtn.innerText = 'Marcar como visitado';
-                        visitBtn.onclick = () => this.visitGym(name, address, lat, lon, visitBtn);
+                        visitBtn.onclick = () => this.visitGym(name, address, lat, lon, visitBtn, markerEl);
                         popupContent.appendChild(visitBtn);
                     }
                 }
             }
+
+            // Navigate to ranking when clicking on the popup body
+            popupContent.onclick = (e) => {
+                const target = e.target as HTMLElement;
+                if (target.tagName === 'A' || target.closest('a') || target.tagName === 'BUTTON' || target.closest('button')) {
+                    return; 
+                }
+                this.router.navigate(['/ranking'], { queryParams: { tab: 'gyms', gym: name } });
+            };
 
             popup.setDOMContent(popupContent);
         });
@@ -548,7 +564,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
         this.markers.push(marker);
     }
 
-    private visitGym(name: string, address: string, lat: number, lon: number, btn: HTMLButtonElement): void {
+    private visitGym(name: string, address: string, lat: number, lon: number, btn: HTMLButtonElement, markerEl: HTMLElement): void {
         const user = this.auth.user();
         if (!user || !user.id) {
             this.showError('Debes iniciar sesión para visitar un centro.');
@@ -579,6 +595,13 @@ export class MapaPage implements AfterViewInit, OnDestroy {
                 btn.innerText = '¡Visitado! ✓';
                 btn.classList.add('visited-success');
                 this.visitedTodayGyms.add(name);
+                
+                // Update marker visual dynamically
+                const innerMarker = markerEl.querySelector('.gym-marker');
+                if (innerMarker) {
+                    innerMarker.classList.add('gym-marker-visited');
+                }
+                
                 // Add positive visual feedback and optionally update the local XP manually if it's synced
                 if (res.xp_awarded) {
                     const currentXp = user.current_xp || 0;

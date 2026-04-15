@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { CommonModule } from '@angular/common';
 import { NearbyGymsService, NearbyGym } from '../../services/nearby-gyms.service';
 import { AuthService } from '../../services/auth.service';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
 
@@ -18,6 +18,7 @@ export class DashboardPage implements OnInit {
   readonly gymsService = inject(NearbyGymsService);
   readonly auth = inject(AuthService);
   readonly api = inject(ApiService);
+  private router = inject(Router);
 
   private visitedTodayGyms = new Set<string>();
   visitingGyms = new Set<number>();
@@ -128,6 +129,10 @@ export class DashboardPage implements OnInit {
         }
       }
     });
+  }
+
+  goToGymRanking(gym: NearbyGym) {
+    this.router.navigate(['/ranking'], { queryParams: { tab: 'gyms', gym: gym.name } });
   }
 
   // ── Validate-only modal methods ────────────────────────────────────────────

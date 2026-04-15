@@ -54,6 +54,10 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/gym-visits`, body);
     }
 
+    checkGymExists(query: string): Observable<{exists: boolean}> {
+        return this.http.get<{exists: boolean}>(`${API_URL}/gyms/check-exists?q=${encodeURIComponent(query)}`);
+    }
+
     getGymStats(userId: string): Observable<any> {
         return this.http.get(`${API_URL}/users/${userId}/gym-visits/stats`);
     }

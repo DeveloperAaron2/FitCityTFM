@@ -1,5 +1,6 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { finalize } from 'rxjs';
@@ -14,6 +15,7 @@ import { finalize } from 'rxjs';
 export class RankingPage implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
+  private route = inject(ActivatedRoute);
 
   activeTab = signal<'global' | 'me' | 'gyms'>('global');
   selectedGlobalExercise = signal<string>('Todos');
@@ -33,6 +35,9 @@ export class RankingPage implements OnInit {
   myPrs = signal<any[]>([]);
   gymRanking = signal<any[]>([]);
   gymSearchQuery = signal('');
+  isSearchGymExisting = signal(false);
+  checkingGymExistence = signal(false);
+  private searchTimeout: any;
 
   filteredGymRanking = computed(() => {
     const q = this.gymSearchQuery().toLowerCase().trim();
@@ -88,6 +93,45 @@ export class RankingPage implements OnInit {
     this.loadGlobalPrs();
     this.loadMyPrs();
     this.loadGymRanking();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['tab'] === 'gyms') {
+        this.activeTab.set('gyms');
+        if (params['gym']) {
+          this.gymSearchQuery.set(params['gym']);
+          this.expandedGymName.set(params['gym']);
+          this.checkIfGymExistsInDB(params['gym']);
+        }
+      }
+    });
+  }
+
+  onGymSearchInput(event: Event) {
+    const q = (event.target as HTMLInputElement).value;
+    this.gymSearchQuery.set(q);
+    this.checkIfGymExistsInDB(q);
+  }
+
+  private checkIfGymExistsInDB(q: string) {
+    const queryStr = q.trim().toLowerCase();
+    const localMatches = this.gymRanking().filter(g => (g.gym_name ?? '').toLowerCase().includes(queryStr));
+    
+    if (localMatches.length === 0 && queryStr.length > 0) {
+      this.checkingGymExistence.set(true);
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => {
+        this.api.checkGymExists(queryStr).subscribe({
+          next: (res) => {
+            this.isSearchGymExisting.set(res.exists);
+            this.checkingGymExistence.set(false);
+          },
+          error: () => this.checkingGymExistence.set(false)
+        });
+      }, 300);
+    } else {
+      this.isSearchGymExisting.set(localMatches.length > 0);
+      this.checkingGymExistence.set(false);
+    }
   }
 
   setTab(tab: 'global' | 'me' | 'gyms') {
