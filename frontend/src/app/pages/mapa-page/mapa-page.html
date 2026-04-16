@@ -2,18 +2,33 @@
     <div class="map-header">
         <div class="map-header-left">
             <h1 class="map-title">🏋️ Centros de Fitness</h1>
-            <p class="map-subtitle">Comunidad de Madrid — OpenStreetMap</p>
+            <p class="map-subtitle">Encuentra tu gimnasio</p>
         </div>
+        
+        <!-- Inline search is now in map-header-right -->
+
         <div class="map-header-right">
             <!-- Small spinner shown while a chunk is loading -->
             <span class="chunk-loader" id="chunk-loader" title="Cargando zona...">
                 <span class="chunk-spinner"></span>
             </span>
-            <span class="fitness-badge" id="fitness-count">0 centros</span>
-            <button class="locate-btn" id="locate-btn" (click)="centerOnUser()" title="Centrar en mi ubicación">
+            <span class="fitness-badge" id="fitness-count" [class.hidden]="isSearchExpanded">0 centros</span>
+            <button class="locate-btn" id="locate-btn" (click)="centerOnUser()" title="Centrar en mi ubicación" [class.hidden]="isSearchExpanded">
                 <span class="locate-icon">📍</span>
                 <span class="locate-label">Mi ubicación</span>
             </button>
+
+            <!-- Inline search -->
+            <div class="inline-search-container" [class.expanded-container]="isSearchExpanded">
+                <div class="map-search-container" [class.expanded]="isSearchExpanded">
+                    <input #searchInput id="searchInputField" class="map-search-input" type="text" placeholder="Escribe tu ciudad..." (keyup.enter)="searchLocation(searchInput.value)" />
+                    <button class="search-close-inline-btn" (click)="toggleSearch()" title="Cerrar">✖</button>
+                </div>
+                <button class="search-trigger-btn" [class.searching]="isSearchingLocation" (click)="isSearchExpanded ? searchLocation(searchInput.value) : toggleSearch()" title="Buscar ubicación">
+                    <span class="search-icon">🔍</span>
+                    <span class="search-spinner-btn"></span>
+                </button>
+            </div>
         </div>
     </div>
 
