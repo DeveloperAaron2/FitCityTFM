@@ -105,18 +105,17 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private fetching = false;
     private moveTimer: any = null;
 
-    // Store gym names visited today to persist UI state
-    private visitedTodayGyms = new Set<string>();
+    // Store all visited gym names to persist UI state globally
+    private visitedGyms = new Set<string>();
 
     ngAfterViewInit(): void {
         const user = this.auth.user();
         if (user && user.id) {
             this.api.getGymVisits(user.id).subscribe({
                 next: (visits: any[]) => {
-                    const today = new Date().toISOString().split('T')[0];
                     for (const v of visits) {
-                        if (v.visited_at === today && v.gym_name) {
-                            this.visitedTodayGyms.add(v.gym_name);
+                        if (v.gym_name) {
+                            this.visitedGyms.add(v.gym_name);
                         }
                     }
                     this.loadMapLibreAndInitMap();
@@ -516,7 +515,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
         const markerEl = document.createElement('div');
         markerEl.className = 'gym-marker-wrap';
-        const isVisited = this.visitedTodayGyms.has(name);
+        const isVisited = this.visitedGyms.has(name);
         if (isVisited) {
             markerEl.innerHTML = '<div class="gym-marker gym-marker-visited"><span class="gym-marker-emoji">🏋️</span></div>';
         } else {
@@ -543,7 +542,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             const visitBtn = document.createElement('button');
             visitBtn.className = 'visit-gym-btn map-visit-btn';
 
-            if (this.visitedTodayGyms.has(name)) {
+            if (this.visitedGyms.has(name)) {
                 visitBtn.innerText = '¡Visitado! ✓';
                 visitBtn.classList.add('visited-success');
                 visitBtn.disabled = true;
@@ -611,7 +610,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             next: (res) => {
                 btn.innerText = '¡Visitado! ✓';
                 btn.classList.add('visited-success');
-                this.visitedTodayGyms.add(name);
+                this.visitedGyms.add(name);
                 
                 // Update marker visual dynamically
                 const innerMarker = markerEl.querySelector('.gym-marker');
