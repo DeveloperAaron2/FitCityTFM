@@ -1,5 +1,6 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
 import { finalize } from 'rxjs';
@@ -14,12 +15,37 @@ import { finalize } from 'rxjs';
 export class RankingPage implements OnInit {
   private api = inject(ApiService);
   private auth = inject(AuthService);
+  private route = inject(ActivatedRoute);
 
   activeTab = signal<'global' | 'me' | 'gyms'>('global');
+  selectedGlobalExercise = signal<string>('Todos');
 
   globalPrs = signal<any[]>([]);
+
+  filteredGlobalPrs = computed(() => {
+    const all = this.globalPrs();
+    const curr = this.selectedGlobalExercise();
+    if (curr === 'Todos') return all;
+    return all.filter(pr => pr.exercise_name === curr);
+  });
+
+  setGlobalExercise(ex: string) {
+    this.selectedGlobalExercise.set(ex);
+  }
   myPrs = signal<any[]>([]);
   gymRanking = signal<any[]>([]);
+  gymSearchQuery = signal('');
+  isSearchGymExisting = signal(false);
+  checkingGymExistence = signal(false);
+  private searchTimeout: any;
+
+  filteredGymRanking = computed(() => {
+    const q = this.gymSearchQuery().toLowerCase().trim();
+    if (!q) return this.gymRanking();
+    return this.gymRanking().filter(g =>
+      (g.gym_name ?? '').toLowerCase().includes(q)
+    );
+  });
 
   loadingGlobal = signal(false);
   loadingMe = signal(false);
@@ -32,10 +58,80 @@ export class RankingPage implements OnInit {
   loadingVideos = signal(false);
   activeVideoIndex = signal(0);
 
+  // ── Gym accordion state ────────────────────────────────────────────────
+  expandedGymName = signal<string | null>(null);
+
+  toggleGym(gymName: string) {
+    this.expandedGymName.set(this.expandedGymName() === gymName ? null : gymName);
+  }
+
+  // ── Global PR expansion state ──────────────────────────────────────────
+  openSingleVideoModal(pr: any) {
+    this.videoModalGymName.set(pr.gym_name ? `Récord en ${pr.gym_name}` : 'Récord Global');
+    this.activeVideoIndex.set(0);
+    this.videoModalLifts.set([pr]);
+    this.showVideoModal.set(true);
+  }
+
+  /** Open video modal for a gym ranking PR card.
+   *  If the gym has a best_lift for that exercise, show that video.
+   *  Otherwise open an empty modal (no video). */
+  openGymPrVideo(pr: any, gym: any) {
+    const bestLifts: any[] = gym.best_lifts || [];
+    const match = bestLifts.find((bl: any) =>
+      bl.exercise_name === pr.exercise_name && bl.user_id === pr.user_id
+    ) || bestLifts.find((bl: any) => bl.exercise_name === pr.exercise_name);
+
+    const liftToShow = match ?? { ...pr, video_url: null };
+    this.videoModalGymName.set(gym.gym_name);
+    this.activeVideoIndex.set(0);
+    this.videoModalLifts.set([liftToShow]);
+    this.showVideoModal.set(true);
+  }
+
   ngOnInit() {
     this.loadGlobalPrs();
     this.loadMyPrs();
     this.loadGymRanking();
+
+    this.route.queryParams.subscribe(params => {
+      if (params['tab'] === 'gyms') {
+        this.activeTab.set('gyms');
+        if (params['gym']) {
+          this.gymSearchQuery.set(params['gym']);
+          this.expandedGymName.set(params['gym']);
+          this.checkIfGymExistsInDB(params['gym']);
+        }
+      }
+    });
+  }
+
+  onGymSearchInput(event: Event) {
+    const q = (event.target as HTMLInputElement).value;
+    this.gymSearchQuery.set(q);
+    this.checkIfGymExistsInDB(q);
+  }
+
+  private checkIfGymExistsInDB(q: string) {
+    const queryStr = q.trim().toLowerCase();
+    const localMatches = this.gymRanking().filter(g => (g.gym_name ?? '').toLowerCase().includes(queryStr));
+    
+    if (localMatches.length === 0 && queryStr.length > 0) {
+      this.checkingGymExistence.set(true);
+      clearTimeout(this.searchTimeout);
+      this.searchTimeout = setTimeout(() => {
+        this.api.checkGymExists(queryStr).subscribe({
+          next: (res) => {
+            this.isSearchGymExisting.set(res.exists);
+            this.checkingGymExistence.set(false);
+          },
+          error: () => this.checkingGymExistence.set(false)
+        });
+      }, 300);
+    } else {
+      this.isSearchGymExisting.set(localMatches.length > 0);
+      this.checkingGymExistence.set(false);
+    }
   }
 
   setTab(tab: 'global' | 'me' | 'gyms') {

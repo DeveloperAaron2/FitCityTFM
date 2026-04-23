@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, EmailStr
 import traceback
-from utils import level_info, XP_PER_LEVEL
+from utils import level_info, _xp_for_level
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -83,7 +83,7 @@ def register(body: RegisterRequest):
         db.table("user_levels").insert({
             "user_id": user_id,
             "level": 1,
-            "max_xp": XP_PER_LEVEL,   # umbral para subir a nivel 2
+            "max_xp": _xp_for_level(1),   # umbral para subir a nivel 2
         }).execute()
     except Exception:
         pass  # Non-fatal: level row will be created on first XP update
@@ -222,7 +222,7 @@ def google_callback(body: GoogleCallbackRequest):
             db.table("user_levels").insert({
                 "user_id": user_id,
                 "level": 1,
-                "max_xp": XP_PER_LEVEL,
+                "max_xp": _xp_for_level(1),
             }).execute()
         except Exception:
             pass

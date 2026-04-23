@@ -54,7 +54,7 @@ def _is_better_lift(new_weight: float, new_reps: int, old_weight: float, old_rep
 _PLAUSIBILITY_THRESHOLD = 0.20  # Max 20% increase over previous PR
 
 
-def _check_weight_plausibility(user_id: str, exercise_name: str, new_weight: float) -> dict | None:
+def _check_weight_plausibility(user_id: str, exercise_name: str, new_weight: float) -> Optional[dict]:
     """Check if the declared weight is plausible based on the user's history.
     Returns a warning dict if the jump is suspicious, or None if OK.
     """
@@ -220,7 +220,7 @@ async def _process_gym_best_lift(
     reps: int,
     video_bytes: bytes,
     content_type: str,
-) -> tuple[bool, str | None, int]:
+) -> tuple[bool, Optional[str], int]:
     """Check if this lift beats the current gym best. If so, upload video and update DB.
     Returns (is_best, video_url, xp_awarded).
     """

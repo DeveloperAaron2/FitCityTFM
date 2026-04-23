@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, UploadFile, File
 from pydantic import BaseModel
 from typing import Optional
 from database import get_supabase_client
-from utils import compute_level, get_title, level_info, XP_PER_LEVEL
+from utils import compute_level, get_title, level_info, award_xp_and_check_level, _xp_for_level
 from config import get_settings
 
 
@@ -38,26 +38,12 @@ def get_user(user_id: str):
 
 @router.get("/{user_id}/level")
 def get_user_level(user_id: str):
-    """Get the stored level info for a user from the user_levels table."""
+    """Get the computed level info for a user."""
     db = get_supabase_client()
-
-    # Try user_levels first (source of truth after any XP update)
-    ul = (
-        db.table("user_levels")
-        .select("level, max_xp")
-        .eq("user_id", user_id)
-        .single()
-        .execute()
-    )
-    if ul.data:
-        return ul.data
-
-    # Fallback: compute from total_xp if user_levels row doesn't exist yet
     res = db.table("users").select("total_xp").eq("id", user_id).single().execute()
     if not res.data:
         raise HTTPException(status_code=404, detail="User not found")
-    lv = compute_level(res.data["total_xp"])
-    return {"level": lv, "max_xp": XP_PER_LEVEL * lv}
+    return level_info(res.data["total_xp"])
 
 
 @router.post("")
@@ -77,36 +63,11 @@ def create_user(body: UserCreate):
 
 @router.put("/{user_id}/xp")
 def add_xp(user_id: str, body: UserXPUpdate):
-    """Add XP to a user. Updates user_levels table and returns new level info."""
-    db = get_supabase_client()
-
-    # Fetch current XP
-    res = db.table("users").select("total_xp").eq("id", user_id).single().execute()
-    if not res.data:
+    """Add XP to a user. Uses centralized XP+level logic."""
+    result = award_xp_and_check_level(user_id, body.xp_to_add)
+    if result.get("xp_awarded", 0) == 0 and not result.get("total_xp"):
         raise HTTPException(status_code=404, detail="User not found")
-
-    new_total_xp = res.data["total_xp"] + body.xp_to_add
-
-    # Update total_xp in users table
-    upd = db.table("users").update({"total_xp": new_total_xp}).eq("id", user_id).execute()
-    if not upd.data:
-        raise HTTPException(status_code=400, detail="Could not update XP")
-
-    # Compute level and upsert into user_levels table
-    lv = compute_level(new_total_xp)
-    max_xp = XP_PER_LEVEL * lv
-    db.table("user_levels").upsert(
-        {"user_id": user_id, "level": lv, "max_xp": max_xp},
-        on_conflict="user_id",
-    ).execute()
-
-    return {
-        "user_id": user_id,
-        "total_xp": new_total_xp,
-        "level": lv,
-        "max_xp": max_xp,
-        "title": get_title(lv),
-    }
+    return {"user_id": user_id, **result}
 
 
 @router.put("/{user_id}/avatar")

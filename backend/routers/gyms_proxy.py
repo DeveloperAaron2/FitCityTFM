@@ -19,14 +19,19 @@ import json
 # Load static fallback data for 0ms loads
 FALLBACK_GYMS = []
 fallback_path = os.path.join(os.path.dirname(__file__), "..", "madrid_gyms.json")
-try:
-    if os.path.exists(fallback_path):
-        with open(fallback_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            FALLBACK_GYMS = data.get("elements", [])
-        logger.info(f"Loaded {len(FALLBACK_GYMS)} gyms from local fallback.")
-except Exception as e:
-    logger.error(f"Failed to load fallback gyms: {e}")
+
+def load_fallback_gyms():
+    global FALLBACK_GYMS
+    try:
+        if os.path.exists(fallback_path):
+            with open(fallback_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                FALLBACK_GYMS = data.get("elements", [])
+            logger.info(f"Loaded {len(FALLBACK_GYMS)} gyms from local fallback.")
+    except Exception as e:
+        logger.error(f"Failed to load fallback gyms: {e}")
+
+load_fallback_gyms()
 
 def get_fallback_gyms_in_bbox(south: float, west: float, north: float, east: float):
     results = []
@@ -52,6 +57,19 @@ def build_overpass_query(south: float, west: float, north: float, east: float) -
 );
 out center;
 """.strip()
+
+@router.get("/check-exists")
+async def check_gym_exists(q: str = Query(..., description="Query to search")):
+    """Verifies if a gym exists in the static database."""
+    query = q.lower().strip()
+    if not query:
+        return {"exists": False}
+    for gym in FALLBACK_GYMS:
+        tags = gym.get("tags", {})
+        gym_name = tags.get("name", "Centro de fitness").lower()
+        if query in gym_name:
+            return {"exists": True}
+    return {"exists": False}
 
 @router.get("/nearby")
 async def get_nearby_gyms(

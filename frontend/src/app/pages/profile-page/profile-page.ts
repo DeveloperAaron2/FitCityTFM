@@ -67,6 +67,7 @@ export class ProfilePage implements OnInit {
     uploading = signal(false);
     uploadError = signal<string | null>(null);
     showThemeMenu = signal(false);
+    confirmingLogout = signal(false);
 
     toggleTheme() {
         this.showThemeMenu.set(!this.showThemeMenu());
@@ -145,6 +146,9 @@ export class ProfilePage implements OnInit {
             },
         });
     }
+
+    requestLogout(): void { this.confirmingLogout.set(true); }
+    cancelLogout(): void  { this.confirmingLogout.set(false); }
 
     logout(): void {
         this.api.logout().subscribe({

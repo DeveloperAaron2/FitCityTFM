@@ -90,6 +90,44 @@
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
+/* Exercise Filter Tabs */
+.exercise-filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  overflow-x: auto;
+  padding: 6px 4px 14px 4px; /* Sufficient padding to avoid clipping shadow and scale */
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.exercise-filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+.exercise-tab {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 0.6rem 1.2rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+.exercise-tab.active {
+  background: rgba(34, 211, 238, 0.15);
+  border-color: rgba(34, 211, 238, 0.4);
+  color: var(--fc-primary);
+  box-shadow: 0 4px 12px rgba(34, 211, 238, 0.15);
+  transform: scale(1.05);
+}
+.exercise-tab:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* Lists */
 .ranking-list {
   display: flex;
@@ -298,6 +336,74 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Gym Search ─────────────────────────────────────────────────────────── */
+
+.gym-search-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.2s;
+}
+
+.gym-search-wrapper:focus-within {
+  border-color: rgba(34, 211, 238, 0.5);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+}
+
+.gym-search-icon {
+  font-size: 0.95rem;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.gym-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.gym-search-input::placeholder {
+  color: #64748b;
+}
+
+.gym-search-clear {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.gym-search-clear:hover {
+  color: #f87171;
+}
+
+:host-context(body.theme-sun) .gym-search-wrapper {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .gym-search-wrapper:focus-within {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+}
+
+:host-context(body.theme-sun) .gym-search-input {
+  color: #1e293b;
+}
+
 /* ── Gym Ranking ─────────────────────────────────────────────────────────── */
 
 .gym-group {
@@ -323,6 +429,38 @@
   padding: 1rem 1.25rem;
   background: rgba(34, 211, 238, 0.1);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Accordion variant */
+.gym-accordion-header {
+  cursor: pointer;
+  border-bottom: none;
+  transition: background 0.2s;
+}
+
+.gym-accordion-header:hover {
+  background: rgba(34, 211, 238, 0.16);
+}
+
+.gym-accordion-header.is-open {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Chevron icon */
+.gym-chevron {
+  font-size: 1.1rem;
+  color: var(--fc-primary);
+  opacity: 0.7;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.gym-chevron.open {
+  transform: rotate(180deg);
+}
+
+:host-context(body.theme-sun) .gym-accordion-header:hover {
+  background: rgba(2, 132, 199, 0.1);
 }
 
 .gym-icon {
@@ -475,6 +613,24 @@
   background: #0284c7;
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(2,132,199,0.3);
+}
+
+:host-context(body.theme-sun) .exercise-tab {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #64748b;
+}
+
+:host-context(body.theme-sun) .exercise-tab.active {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+}
+
+:host-context(body.theme-sun) .exercise-tab:hover:not(.active) {
+  background: rgba(0, 0, 0, 0.08);
+  color: #1e293b;
 }
 
 :host-context(body.theme-sun) .ranking-card {
@@ -1234,3 +1390,181 @@
   border-color: rgba(0, 0, 0, 0.1);
   color: #475569;
 }
+
+/* Gym inner cards sit inside a gym-group — neutral styling, no podium borders */
+.gym-inner-card {
+  border-radius: 10px;
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.03);
+  animation: none !important;
+}
+
+.gym-inner-card:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* Subtle podium color only on the rank number */
+.gym-inner-card:nth-child(1) .gpr-rank { color: rgba(255, 215, 0, 0.85); }
+.gym-inner-card:nth-child(2) .gpr-rank { color: rgba(192, 192, 192, 0.85); }
+.gym-inner-card:nth-child(3) .gpr-rank { color: rgba(205, 127, 50, 0.85); }
+
+:host-context(body.theme-sun) .gym-inner-card {
+  border-color: transparent;
+  background: rgba(0, 0, 0, 0.02);
+  box-shadow: none;
+}
+
+:host-context(body.theme-sun) .gym-inner-card:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ═══════════════════════════════════════════════════
+   GLOBAL PR CARD — New clean design
+   ═══════════════════════════════════════════════════ */
+
+.global-pr-card {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 0.55rem 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, border-color 0.2s;
+  animation: fadeInUp 0.5s ease backwards;
+}
+
+.global-pr-card:hover {
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateY(-2px);
+}
+
+.global-pr-card:nth-child(1) { animation-delay: 0.05s; }
+.global-pr-card:nth-child(2) { animation-delay: 0.10s; }
+.global-pr-card:nth-child(3) { animation-delay: 0.15s; }
+.global-pr-card:nth-child(4) { animation-delay: 0.20s; }
+.global-pr-card:nth-child(5) { animation-delay: 0.25s; }
+
+/* Podium borders */
+.global-pr-card.top-1 { border-color: rgba(255, 215, 0, 0.35); background: rgba(255, 215, 0, 0.05); }
+.global-pr-card.top-2 { border-color: rgba(192, 192, 192, 0.35); background: rgba(192, 192, 192, 0.05); }
+.global-pr-card.top-3 { border-color: rgba(205, 127, 50, 0.35); background: rgba(205, 127, 50, 0.05); }
+
+/* Rank number */
+.gpr-rank {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #555;
+  width: 26px;
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: -0.5px;
+}
+
+.global-pr-card.top-1 .gpr-rank { color: #FFD700; font-size: 1.2rem; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
+.global-pr-card.top-2 .gpr-rank { color: #C0C0C0; font-size: 1.15rem; text-shadow: 0 0 8px rgba(192,192,192,0.5); }
+.global-pr-card.top-3 .gpr-rank { color: #CD7F32; font-size: 1.1rem; text-shadow: 0 0 8px rgba(205,127,50,0.5); }
+
+/* Avatar */
+.gpr-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.global-pr-card.top-1 .gpr-avatar { border-color: rgba(255, 215, 0, 0.6); }
+.global-pr-card.top-2 .gpr-avatar { border-color: rgba(192, 192, 192, 0.6); }
+.global-pr-card.top-3 .gpr-avatar { border-color: rgba(205, 127, 50, 0.6); }
+
+/* Info block — fills the remaining space */
+.gpr-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.gpr-username {
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Meta: exercise on first line, gym on second line */
+.gpr-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.gpr-exercise {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gpr-gym {
+  font-size: 0.73rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Username row with weight on the right */
+.gpr-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.gpr-weight-inline {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.gpr-kg {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--fc-primary);
+  line-height: 1;
+}
+
+.gpr-unit {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--fc-primary);
+  opacity: 0.8;
+}
+
+/* ── Light mode overrides ── */
+:host-context(body.theme-sun) .global-pr-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+:host-context(body.theme-sun) .global-pr-card:hover { background: #f8fafc; }
+:host-context(body.theme-sun) .global-pr-card.top-1 { background: rgba(255, 215, 0, 0.06); }
+:host-context(body.theme-sun) .global-pr-card.top-2 { background: rgba(192, 192, 192, 0.06); }
+:host-context(body.theme-sun) .global-pr-card.top-3 { background: rgba(205, 127, 50, 0.06); }
+
+:host-context(body.theme-sun) .gpr-username { color: #1e293b; }
+:host-context(body.theme-sun) .gpr-exercise { color: #475569; }
+:host-context(body.theme-sun) .gpr-gym      { color: #94a3b8; }
+:host-context(body.theme-sun) .gpr-kg       { color: #0284c7; }
+:host-context(body.theme-sun) .gpr-unit     { color: #0284c7; }
+:host-context(body.theme-sun) .gpr-avatar   { border-color: rgba(0, 0, 0, 0.1); }

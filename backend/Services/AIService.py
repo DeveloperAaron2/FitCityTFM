@@ -132,6 +132,7 @@ class AIService:
                             "stream": False,
                             "format": "json",
                         },
+<<<<<<< HEAD
                         timeout=600.0,
                     )
                     response.raise_for_status()
@@ -143,6 +144,12 @@ class AIService:
                         "confidence": "none",
                         "detail": "El servicio de IA ha tardado demasiado en estimar el peso (Timeout intentando procesar por CPU).",
                     }
+=======
+                        timeout=120.0,
+                    )
+                    response.raise_for_status()
+                    result = response.json()
+>>>>>>> origin/main
                 except (httpx.HTTPStatusError, httpx.RequestError):
                     return {
                         "estimated_weight": None,

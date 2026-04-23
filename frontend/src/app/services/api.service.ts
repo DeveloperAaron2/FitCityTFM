@@ -54,6 +54,10 @@ export class ApiService {
         return this.http.post(`${API_URL}/users/${userId}/gym-visits`, body);
     }
 
+    checkGymExists(query: string): Observable<{exists: boolean}> {
+        return this.http.get<{exists: boolean}>(`${API_URL}/gyms/check-exists?q=${encodeURIComponent(query)}`);
+    }
+
     getGymStats(userId: string): Observable<any> {
         return this.http.get(`${API_URL}/users/${userId}/gym-visits/stats`);
     }
@@ -94,6 +98,18 @@ export class ApiService {
 
     getUserChallengesAll(userId: string): Observable<any[]> {
         return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/all`);
+    }
+
+    getActiveChallenges(userId: string): Observable<any[]> {
+        return this.http.get<any[]>(`${API_URL}/users/${userId}/challenges/active`);
+    }
+
+    syncChallengeProgress(userId: string): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/sync`, {});
+    }
+
+    claimChallenge(userId: string, challengeId: string): Observable<any> {
+        return this.http.post(`${API_URL}/users/${userId}/challenges/${challengeId}/claim`, {});
     }
 
     updateChallengeProgress(userId: string, challengeId: string, progress: number): Observable<any> {

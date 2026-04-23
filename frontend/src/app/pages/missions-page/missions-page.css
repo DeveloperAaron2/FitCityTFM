@@ -8,9 +8,13 @@
     --border: rgba(255, 255, 255, 0.1);
     --text: #ffffff;
     --muted: #94a3b8;
-    --green: #22d3ee;
+    --green: #22c55e;
     --blue: #22d3ee;
     --purple: #a855f7;
+    --yellow: #eab308;
+    --red: #ef4444;
+    --legendary-1: #a855f7;
+    --legendary-2: #f59e0b;
 }
 
 /* ── Page wrapper ────────────────────────────────────────────────────────── */
@@ -20,6 +24,41 @@
     color: var(--text);
     padding-bottom: 120px;
     font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* ══ XP TOAST ════════════════════════════════════════════════════════════════ */
+.ms-xp-toast {
+    position: fixed;
+    top: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10000;
+    background: linear-gradient(135deg, #0ea5e9, var(--gold));
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 99px;
+    font-size: 16px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 32px rgba(34, 211, 238, 0.4);
+    animation: toastIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), toastOut 0.3s ease 2.2s forwards;
+}
+
+.ms-xp-toast-icon {
+    font-size: 20px;
+    animation: pulse 0.6s ease infinite;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.8); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes toastOut {
+    from { opacity: 1; transform: translateX(-50%) translateY(0); }
+    to   { opacity: 0; transform: translateX(-50%) translateY(-20px); }
 }
 
 /* ══ LEVEL-UP OVERLAY ════════════════════════════════════════════════════════ */
@@ -100,7 +139,7 @@
 
 .ms-levelup-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 32px rgba(245, 158, 11, 0.5);
+    box-shadow: 0 12px 32px rgba(34, 211, 238, 0.5);
 }
 
 /* ══ HERO ════════════════════════════════════════════════════════════════════ */
@@ -319,18 +358,59 @@
     margin-top: 12px;
 }
 
+/* ══ TABS ════════════════════════════════════════════════════════════════════ */
+.ms-tabs-wrap {
+    padding: 20px 16px 0;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.ms-tabs {
+    display: flex;
+    gap: 8px;
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 4px;
+    border: 1px solid var(--border);
+}
+
+.ms-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ms-tab--active {
+    background: linear-gradient(135deg, rgba(34, 211, 238, 0.15), rgba(14, 165, 233, 0.1));
+    color: var(--gold);
+    box-shadow: 0 2px 12px rgba(34, 211, 238, 0.15);
+}
+
+.ms-tab:hover:not(.ms-tab--active) {
+    color: var(--text);
+    background: rgba(255,255,255,0.03);
+}
+
+.ms-countdown {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+    font-weight: 500;
+}
+
 /* ══ MISSION CARDS ═══════════════════════════════════════════════════════════ */
 .ms-inner {
     padding: 16px;
     max-width: 520px;
     margin: 0 auto;
-}
-
-.ms-section-title {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 16px;
 }
 
 .ms-missions-grid {
@@ -348,6 +428,19 @@
     border-radius: 18px;
     padding: 16px;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    animation: cardIn 0.3s ease backwards;
+}
+
+.ms-mission-card:nth-child(1) { animation-delay: 0.05s; }
+.ms-mission-card:nth-child(2) { animation-delay: 0.1s; }
+.ms-mission-card:nth-child(3) { animation-delay: 0.15s; }
+.ms-mission-card:nth-child(4) { animation-delay: 0.2s; }
+.ms-mission-card:nth-child(5) { animation-delay: 0.25s; }
+.ms-mission-card:nth-child(6) { animation-delay: 0.3s; }
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .ms-mission-card:hover {
@@ -359,6 +452,32 @@
 .ms-mission-card--done {
     border-color: rgba(34, 211, 238, 0.3);
     background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), var(--surface));
+}
+
+.ms-mission-card--claimable {
+    border-color: rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.1);
+    animation: claimPulse 2s ease infinite;
+}
+
+@keyframes claimPulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(34, 211, 238, 0.1); }
+    50%      { box-shadow: 0 0 24px rgba(34, 211, 238, 0.25); }
+}
+
+/* Difficulty left-border accent */
+.ms-mission-card[data-difficulty="easy"] {
+    border-left: 3px solid var(--green);
+}
+.ms-mission-card[data-difficulty="medium"] {
+    border-left: 3px solid var(--yellow);
+}
+.ms-mission-card[data-difficulty="hard"] {
+    border-left: 3px solid var(--red);
+}
+.ms-mission-card[data-difficulty="legendary"] {
+    border-left: 3px solid;
+    border-image: linear-gradient(180deg, var(--legendary-1), var(--legendary-2)) 1;
 }
 
 .ms-mission-emoji {
@@ -410,7 +529,47 @@
 .ms-mission-desc {
     font-size: 12px;
     color: var(--muted);
-    margin-bottom: 10px;
+    margin-bottom: 6px;
+}
+
+/* ── Mission meta (difficulty badge) ─────────────────────────────────────── */
+.ms-mission-meta {
+    margin-bottom: 8px;
+}
+
+.ms-difficulty-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 99px;
+    letter-spacing: 0.3px;
+}
+
+.ms-difficulty-badge--easy {
+    background: rgba(34, 197, 94, 0.12);
+    color: var(--green);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.ms-difficulty-badge--medium {
+    background: rgba(234, 179, 8, 0.12);
+    color: var(--yellow);
+    border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.ms-difficulty-badge--hard {
+    background: rgba(239, 68, 68, 0.12);
+    color: var(--red);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.ms-difficulty-badge--legendary {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(245, 158, 11, 0.12));
+    color: var(--legendary-1);
+    border: 1px solid rgba(168, 85, 247, 0.25);
 }
 
 /* mission progress bar */
@@ -439,6 +598,16 @@
     background: linear-gradient(90deg, #0ea5e9, #22d3ee);
 }
 
+.ms-mission-bar-fill--claimable {
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    animation: barGlow 1.5s ease infinite;
+}
+
+@keyframes barGlow {
+    0%, 100% { filter: brightness(1); }
+    50%      { filter: brightness(1.3); }
+}
+
 .ms-mission-bar-label {
     font-size: 11px;
     color: var(--muted);
@@ -452,7 +621,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
+    min-width: 48px;
 }
 
 .ms-mission-badge {
@@ -468,17 +637,55 @@
     background: linear-gradient(135deg, var(--gold), #0ea5e9);
     color: #fff;
     border: none;
-    border-radius: 10px;
-    padding: 7px 10px;
-    font-size: 11px;
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 12px;
     font-weight: 800;
     cursor: pointer;
-    transition: transform 0.15s;
+    transition: transform 0.15s, box-shadow 0.15s;
     white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(34, 211, 238, 0.25);
 }
 
 .ms-claim-btn:hover {
     transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(34, 211, 238, 0.35);
+}
+
+.ms-claim-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.ms-claim-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.ms-empty {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--muted);
+    font-size: 14px;
+}
+
+.ms-empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.ms-empty-sub {
+    font-size: 12px;
+    color: var(--muted);
+    opacity: 0.7;
+    margin-top: 4px;
 }
 
 /* ── Loading ─────────────────────────────────────────────────────────────── */
@@ -496,13 +703,6 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto 16px;
-}
-
-.ms-empty {
-    text-align: center;
-    padding: 48px 16px;
-    color: var(--muted);
-    font-size: 14px;
 }
 
 /* ── Animations ──────────────────────────────────────────────────────────── */
@@ -543,8 +743,12 @@
     --muted: #64748b;
     --gold: #0284c7;
     --gold-light: #38bdf8;
-    --green: #0284c7;
+    --green: #16a34a;
     --blue: #0284c7;
+    --yellow: #ca8a04;
+    --red: #dc2626;
+    --legendary-1: #7c3aed;
+    --legendary-2: #d97706;
 }
 
 :host-context(body.theme-sun) .ms-hero-bg {
@@ -577,6 +781,16 @@
 
 :host-context(body.theme-sun) .ms-roadmap-line {
     background: rgba(0, 0, 0, 0.1);
+}
+
+:host-context(body.theme-sun) .ms-tabs {
+    background: #ffffff;
+    border-color: rgba(0,0,0,0.1);
+}
+
+:host-context(body.theme-sun) .ms-tab--active {
+    background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(34, 211, 238, 0.08));
+    color: #0284c7;
 }
 
 :host-context(body.theme-sun) .ms-mission-card {
@@ -622,3 +836,27 @@
     text-shadow: 0 0 30px rgba(2, 132, 199, 0.3);
 }
 
+:host-context(body.theme-sun) .ms-xp-toast {
+    background: linear-gradient(135deg, #0284c7, #0ea5e9);
+    box-shadow: 0 8px 32px rgba(2, 132, 199, 0.3);
+}
+
+:host-context(body.theme-sun) .ms-difficulty-badge--easy {
+    background: rgba(22, 163, 74, 0.1);
+    border-color: rgba(22, 163, 74, 0.2);
+}
+
+:host-context(body.theme-sun) .ms-difficulty-badge--medium {
+    background: rgba(202, 138, 4, 0.1);
+    border-color: rgba(202, 138, 4, 0.2);
+}
+
+:host-context(body.theme-sun) .ms-difficulty-badge--hard {
+    background: rgba(220, 38, 38, 0.1);
+    border-color: rgba(220, 38, 38, 0.2);
+}
+
+:host-context(body.theme-sun) .ms-difficulty-badge--legendary {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(217, 119, 6, 0.08));
+    border-color: rgba(124, 58, 237, 0.2);
+}
