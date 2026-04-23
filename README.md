@@ -13,31 +13,33 @@ El proyecto consta de dos partes principales:
 - **Rankings y Retos**: Visualización de los usuarios más fuertes, gimnasios donde se consiguieron las marcas y retos vigentes de la comunidad.
 
 ## Requisitos Previos
+- Docker y Docker Compose (Recomendado para desplegar el Backend y la IA integrada).
 - Node.js (v18+) y npm.
 - Angular CLI (`npm install -g @angular/cli`).
-- Python 3.10+.
+- Python 3.10+ (Sólo si decides ejecutar el backend en local sin Docker).
 - Una cuenta y proyecto en [Supabase](https://supabase.com/).
 
 ## Configuración y Ejecución
 
-### 1. Configuración del Backend (FastAPI)
-1. Navega a la carpeta del backend: `cd backend`
-2. Crea un entorno virtual e instálalo: 
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-3. Configura las variables de entorno. Crea un archivo `.env` en la carpeta `backend` con las siguientes variables:
+### 1. Configuración del Backend e IA (Recomendado con Docker)
+El backend y su ecosistema de Inteligencia Artificial (Ollama + LLaVA) han sido contenerizados para evitar problemas de compatibilidad y configuraciones manuales complejas.
+
+1. Configura tus tokens secretos. Crea un archivo `.env` dentro de la carpeta `backend` con lo siguiente:
    ```env
    SUPABASE_URL=tu_supabase_url
    SUPABASE_KEY=tu_supabase_key
    ```
-4. Ejecuta el servidor de desarrollo:
+2. Navega a la raíz de tu proyecto (donde está el archivo `docker-compose.yml`) y levanta los servicios en segundo plano:
    ```bash
-   uvicorn main:app --reload
+   docker-compose up -d --build
    ```
-   El backend estará disponible en `http://localhost:8000`. Puedes consultar la documentación interactiva en `http://localhost:8000/docs`.
+3. **Paso importante (Primera ejecución)**: El inicializador automático detectará que es la primera vez y comenzará a descargar el modelo inteligente que valida los vídeos (`llava:13b`). Al pesar unos 8 Gigabytes, esto llevará unos minutos. Puedes chequear el progreso en vivo con este comando:
+   ```bash
+   docker logs -f fitcity_ollama_init
+   ```
+4. Cuando el log indique que ha terminado de bajar, tu backend estará escuchando activamente en `http://localhost:8000`. Puedes revisar los *endpoints* interactivos en `http://localhost:8000/docs`.
+
+*(Alternativa Local: Si prefieres no usar Docker, debes entrar en `/backend`, configurar un entorno virtual de `Python 3.10+`, lanzar `pip install -r requirements.txt`, asegurarte de tener la herramienta `ollama` nativa con `llava:13b` corriendo en tu máquina, y finalmente levantar el propio back ejecutando `uvicorn main:app --reload`)*
 
 ### 2. Configuración del Frontend (Angular)
 1. Navega a la carpeta del frontend: `cd frontend`

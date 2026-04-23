@@ -1,0 +1,24 @@
+# Repositorios y control de versiones
+.git/
+.github/
+
+# Entornos Virtuales
+venv/
+env/
+.venv/
+
+# Archivos compilados o caché de Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Configuración del IDE que no necesitas en producción
+.vscode/
+
+# Archivos de entorno (Deberán ser proveídos en tiempo de ejecución de Docker)
+.env
+
+# OS-specific
+.DS_Store
+Thumbs.db

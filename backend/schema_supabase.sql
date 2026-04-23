@@ -129,3 +129,44 @@ ALTER TABLE user_levels ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "allow_all_user_levels" ON user_levels
     FOR ALL USING (true) WITH CHECK (true);
+
+-- ── 7. GYM BEST LIFTS ──────────────────────────────────────────────────────
+-- Stores the best validated lift video per exercise per gym.
+-- Max 3 rows per gym (bench press, squat, deadlift).
+CREATE TABLE IF NOT EXISTS gym_best_lifts (
+    id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    gym_name        TEXT NOT NULL,
+    exercise_name   TEXT NOT NULL,
+    user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    weight_kg       NUMERIC(6,2) NOT NULL,
+    reps            INTEGER NOT NULL DEFAULT 1,
+    video_url       TEXT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(gym_name, exercise_name)   -- Solo un mejor vídeo por ejercicio+gimnasio
+);
+
+CREATE INDEX IF NOT EXISTS idx_gym_best_lifts_gym_name ON gym_best_lifts(gym_name);
+
+ALTER TABLE gym_best_lifts ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_all_gym_best_lifts" ON gym_best_lifts
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- ── 8. PR REPORTS ──────────────────────────────────────────────────────────
+-- Stores user reports on suspicious PR weights.
+-- A user can only report each PR once.
+CREATE TABLE IF NOT EXISTS pr_reports (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pr_id         UUID NOT NULL REFERENCES lifting_prs(id) ON DELETE CASCADE,
+    reporter_id   UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    reason        TEXT NOT NULL DEFAULT 'weight_mismatch',
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    UNIQUE(pr_id, reporter_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pr_reports_pr_id ON pr_reports(pr_id);
+
+ALTER TABLE pr_reports ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "allow_all_pr_reports" ON pr_reports
+    FOR ALL USING (true) WITH CHECK (true);
