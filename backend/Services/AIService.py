@@ -9,7 +9,7 @@ from typing import Dict, Any
 # Environment variables for Ollama (so it can be pointing to Ollama Cloud later)
 # Assuming a multimodal model like llava or llama3.2-vision
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llava:13b")
+OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llava")
 OLLAMA_API_KEY = os.getenv("OLLAMA_API_KEY", "")
 
 class AIService:
@@ -52,7 +52,7 @@ class AIService:
                             "stream": False,
                             "format": "json" # Force JSON output from the model
                         },
-                        timeout=180.0
+                        timeout=900.0 # Ampliado a 15 min para evitar cortes al usar CPU puro
                     )
                     response.raise_for_status()
                     result = response.json()
@@ -60,9 +60,15 @@ class AIService:
                     err_msg = exc.response.text
                     return {
                         "is_valid": False,
-                        "reason": f"Ollama rechazó la petición ({exc.response.status_code}): El modelo '{self.model}' podría no estar descargado.",
+                        "reason": f"Ollama rechazó la petición ({exc.response.status_code}): El modelo '{self.model}' podría no estar descargado o colapsó.",
                         "confidence": "low",
                         "debug_info": err_msg
+                    }
+                except httpx.TimeoutException:
+                    return {
+                        "is_valid": False,
+                        "reason": "El análisis ha tardado demasiado (Timeout). La IA está procesando por CPU las 5 imágenes y requiere más tiempo.",
+                        "confidence": "low"
                     }
                 except httpx.RequestError as exc:
                     return {
@@ -126,10 +132,17 @@ class AIService:
                             "stream": False,
                             "format": "json",
                         },
-                        timeout=120.0,
+                        timeout=600.0,
                     )
                     response.raise_for_status()
                     result = response.json()
+                except httpx.TimeoutException:
+                    return {
+                        "estimated_weight": None,
+                        "matches_declared": True,
+                        "confidence": "none",
+                        "detail": "El servicio de IA ha tardado demasiado en estimar el peso (Timeout intentando procesar por CPU).",
+                    }
                 except (httpx.HTTPStatusError, httpx.RequestError):
                     return {
                         "estimated_weight": None,

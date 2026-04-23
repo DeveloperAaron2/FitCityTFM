@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: fitcity_backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      # Redirigimos la conexión a Ollama hacia el contenedor de IA
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=llava
+    # Usamos el archivo .env ubicado en la carpeta backend para pasar las claves (supabase_url, etc)
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+    depends_on:
+      - ollama
+
+  # Contenedor principal de Ollama
+  ollama:
+    image: ollama/ollama:latest
+    container_name: fitcity_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # Volumen para no perder los modelos al reiniciar
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  # Contenedor temporal (sidecar) para descargar automáticamente el modelo llava
+  # Esto asegura que el modelo esté preparado sin que tengas que hacerlo manualmente.
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: fitcity_ollama_init
+    entrypoint: /bin/sh
+    command: >
+      -c "echo 'Esperando a que el servidor Ollama inicie...' &&
+               until OLLAMA_HOST=ollama:11434 ollama list > /dev/null 2>&1; do
+                 sleep 3;
+               done &&
+               echo 'Conectado a Ollama. Iniciando descarga del modelo llava (7B)...' &&
+               echo '(Este proceso descarga ~4.5GB. Por favor, revisa estos logs para ver el progreso)' &&
+               OLLAMA_HOST=ollama:11434 ollama pull llava &&
+               echo 'Modelo llava descargado exitosamente y listo para usarse.'"
+    depends_on:
+      - ollama
+    restart: "no"
+
+volumes:
+  ollama_data:
