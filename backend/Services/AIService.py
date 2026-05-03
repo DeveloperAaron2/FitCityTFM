@@ -27,7 +27,7 @@ class AIService:
         """
         try:
             # 1. Extract frames from video as Base64 strings
-            base64_frames = self._extract_frames(video_bytes, num_frames=5)
+            base64_frames = self._extract_frames(video_bytes, num_frames=8)
             
             if not base64_frames:
                 return {
@@ -67,7 +67,7 @@ class AIService:
                 except httpx.TimeoutException:
                     return {
                         "is_valid": False,
-                        "reason": "El análisis ha tardado demasiado (Timeout). La IA está procesando por CPU las 5 imágenes y requiere más tiempo.",
+                        "reason": "El análisis ha tardado demasiado (Timeout). La IA está procesando por CPU las 8 imágenes y requiere más tiempo.",
                         "confidence": "low"
                     }
                 except httpx.RequestError as exc:
@@ -132,7 +132,6 @@ class AIService:
                             "stream": False,
                             "format": "json",
                         },
-<<<<<<< HEAD
                         timeout=600.0,
                     )
                     response.raise_for_status()
@@ -144,12 +143,6 @@ class AIService:
                         "confidence": "none",
                         "detail": "El servicio de IA ha tardado demasiado en estimar el peso (Timeout intentando procesar por CPU).",
                     }
-=======
-                        timeout=120.0,
-                    )
-                    response.raise_for_status()
-                    result = response.json()
->>>>>>> origin/main
                 except (httpx.HTTPStatusError, httpx.RequestError):
                     return {
                         "estimated_weight": None,
@@ -227,92 +220,119 @@ class AIService:
 
     def _build_prompt(self, exercise_name: str) -> str:
         base_prompt = (
-            "Eres un asistente de IA muy amistoso y comprensivo que valida levantamientos en un gimnasio aficionado. "
-            f"A continuación, verás un montaje de 5 imágenes extraídas de un vídeo del usuario haciendo '{exercise_name}'.\n\n"
-            "REGLA DE ORO DE ESTE GIMNASIO: Asume SIEMPRE que el levantamiento es VÁLIDO por defecto. Da por válido el levantamiento "
-            "a menos que haya un fallo técnico gigantesco y catastrófico (ej: la barra se cae, no hace absolutamente ningún recorrido, "
-            "el vídeo muestra otra persona u otro deporte distinto).\n\n"
+            "Eres un árbitro de powerlifting que valida levantamientos aplicando las reglas de la AEP/IPF. "
+            f"Vas a ver 8 fotogramas extraídos de un vídeo del usuario realizando '{exercise_name}'.\n\n"
+            "PASO 1 — VERIFICACIÓN DEL EJERCICIO:\n"
+            f"Comprueba que el movimiento que aparece en las imágenes ES realmente '{exercise_name}'. "
+            "Si el vídeo muestra claramente un ejercicio completamente distinto (ej: se pide sentadilla pero se ve press de banca), "
+            "devuelve is_valid: false indicando que el ejercicio no corresponde. "
+            "Si hay duda razonable o el ángulo es ambiguo, continúa con la evaluación.\n\n"
+            "PASO 2 — EVALUACIÓN TÉCNICA:\n"
+            "Evalúa la técnica con los criterios específicos del ejercicio (ver abajo). "
+            "No asumas válido por defecto: emite is_valid: true solo si los criterios principales se cumplen "
+            "o si la imagen no permite determinar el fallo con certeza.\n\n"
         )
-        
+
         name_lower = exercise_name.lower()
         if "sentadilla" in name_lower or "squat" in name_lower:
             rules = (
-                "## Criterios SUPER permisivos para Sentadilla:\n"
-                "1. Profundidad: Con que se note claramente que el usuario baja y vuelve a subir, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
-                "2. Si las imágenes no muestran bien el ángulo de la rodilla, asume que ha roto el paralelo y bájalo a válido.\n"
+                "## Criterios para Sentadilla (AEP/IPF simplificado):\n"
+                "VÁLIDO si se cumplen los 3 puntos:\n"
+                "1. PROFUNDIDAD: Se aprecia que la cadera desciende hasta quedar al nivel o por debajo de la línea superior de las rodillas "
+                "(plano del muslo paralelo o más bajo). Si el ángulo no permite ver la profundidad, beneficio de la duda → válido.\n"
+                "2. RECORRIDO COMPLETO: El atleta arranca de pie, desciende y regresa a posición erguida con rodillas extendidas.\n"
+                "3. BARRA EN POSICIÓN: La barra está sobre los hombros/trapecios (no en el cuello ni en las manos sueltas).\n"
+                "INVÁLIDO solo si se aprecia claramente que la cadera queda muy por encima de las rodillas (sin profundidad evidente) "
+                "o el atleta no llega a ponerse de pie al finalizar.\n"
             )
         elif "banca" in name_lower or "bench" in name_lower:
             rules = (
-                "## Criterios SUPER permisivos para Press de Banca:\n"
-                "1. Con que la barra baje un poco hacia el pecho y vuelva a subir hacia arriba, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
-                "2. NO exijas pausas, ni que la barra toque obligatoriamente el pecho. NO exijas bloqueo de codos exacto.\n"
+                "## Criterios para Press de Banca (AEP/IPF simplificado):\n"
+                "VÁLIDO si se cumplen los 3 puntos:\n"
+                "1. TOQUE AL PECHO: La barra desciende hasta contactar o casi contactar el pecho/esternón del atleta. "
+                "Si la barra se acerca claramente al pecho pero el fotograma no muestra el contacto exacto, beneficio de la duda → válido.\n"
+                "2. EXTENSIÓN FINAL: La barra sube hasta que los codos quedan visiblemente extendidos al final del movimiento.\n"
+                "3. POSICIÓN EN EL BANCO: El atleta está tumbado boca arriba sobre el banco durante todo el levantamiento.\n"
+                "INVÁLIDO solo si se ve claramente que la barra no baja más allá de la mitad del recorrido "
+                "o el atleta se levanta del banco de forma evidente.\n"
             )
         elif "muerto" in name_lower or "deadlift" in name_lower:
             rules = (
-                "## Criterios SUPER permisivos para Peso Muerto:\n"
-                "1. Si el usuario levanta la barra del suelo y más o menos termina de pie de nuevo con ella en las manos, DA EL LEVANTAMIENTO POR VÁLIDO.\n"
-                "2. Ignora tirones irregulares, la curvatura de la espalda o rebotes.\n"
+                "## Criterios para Peso Muerto (AEP/IPF simplificado):\n"
+                "VÁLIDO si se cumplen los 3 puntos:\n"
+                "1. DESPEGUE DEL SUELO: La barra parte claramente desde el suelo (o muy cerca) al inicio del levantamiento.\n"
+                "2. LOCKOUT FINAL: El atleta termina erguido con caderas y rodillas extendidas y hombros por detrás de la vertical de la barra. "
+                "Si el fotograma final muestra al atleta de pie sosteniendo la barra, es suficiente.\n"
+                "3. CONTROL DE LA BARRA: La barra no se suelta ni cae de forma incontrolada durante el levantamiento.\n"
+                "INVÁLIDO solo si la barra claramente no despega del suelo "
+                "o el atleta no llega a ninguna posición erguida al finalizar.\n"
             )
         else:
             rules = (
-                "## Criterios generales muy permisivos:\n"
-                "Valida el movimiento siempre que se aprecie intención de esfuerzo y exista algo de recorrido aparente.\n"
+                "## Criterios generales de levantamiento:\n"
+                "VÁLIDO si: el atleta realiza un recorrido de movimiento completo y controlado con la carga, "
+                "comenzando y terminando en una posición estable.\n"
+                "INVÁLIDO solo si: no hay recorrido apreciable, la carga cae de forma incontrolada "
+                "o el movimiento no guarda ninguna relación con el ejercicio declarado.\n"
             )
-            
+
         json_instruct = (
-            "\nIMPORTANTE: Como solo puedes ver 5 fotos estáticas sueltas del vídeo, lógicamente te estás perdiendo gran parte de la información fluida del movimiento y de los ángulos exactos. "
-            "Por este motivo limitante de la tecnología, ante CUALQUIER mínima duda, debes priorizar siempre que la ejecución fue buena en los momentos que no viste y debes emitir un 'is_valid': true.\n\n"
-            "Devuelve tu respuesta ÚNICAMENTE usando este modelo JSON exacto:\n"
-            '{\n  "is_valid": true|false,\n  "reason": "<Breve mensaje de ánimo destacando que el levantamiento es válido (o un motivo muy claro y grave si fueras a darlo nulo)>",\n  "confidence": "high|medium|low"\n}'
+            "\nNOTA TÉCNICA: Dispones de 8 fotogramas distribuidos entre el 10% y el 90% del vídeo para cubrir la fase activa del levantamiento. "
+            "Si un criterio no puede evaluarse con certeza por el ángulo o la calidad de imagen, aplica beneficio de la duda para ese criterio concreto.\n\n"
+            "Devuelve tu respuesta ÚNICAMENTE con este JSON exacto (sin texto adicional):\n"
+            '{\n'
+            '  "is_valid": true|false,\n'
+            '  "reason": "<Explica brevemente qué criterios se cumplen o cuál falla de forma clara>",\n'
+            '  "confidence": "high|medium|low"\n'
+            '}'
         )
-        
+
         return base_prompt + rules + json_instruct
         
-    def _extract_frames(self, video_bytes: bytes, num_frames: int = 5) -> list[str]:
+    def _extract_frames(self, video_bytes: bytes, num_frames: int = 8) -> list[str]:
         """
-        Extrae `num_frames` imágenes equidistantes de un buffer de vídeo en memoria para su análisis multi-modal.
+        Extrae `num_frames` imágenes del buffer de vídeo cubriendo del 10% al 90% del metraje
+        para capturar la fase activa del levantamiento y evitar frames en negro del inicio/fin.
         """
-        # Save bytes to a temp file because cv2 needs a file path
         fd, tmp_path = tempfile.mkstemp(suffix=".mp4")
         with os.fdopen(fd, 'wb') as f:
             f.write(video_bytes)
-            
+
         frames_b64 = []
         try:
             cap = cv2.VideoCapture(tmp_path)
             total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-            
+
             if total_frames <= 0:
                 print("Warning (AIService): No se pudo leer el número de frames.")
                 return frames_b64
-                
-            # Get 5 evenly spaced frames avoiding the exact first and last if possible to skip blanking
-            step = max(total_frames // (num_frames + 1), 1)
-            
-            for i in range(1, num_frames + 1):
-                frame_idx = min(i * step, total_frames - 1)
+
+            # Distribute frames between 10% and 90% of the video to cover the active lift phase
+            step = max((total_frames * 0.8) // num_frames, 1)
+            start_frame = int(total_frames * 0.1)
+
+            for i in range(num_frames):
+                frame_idx = int(start_frame + min(i * step, int(total_frames * 0.9) - start_frame))
+                frame_idx = min(frame_idx, total_frames - 1)
                 cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
                 ret, frame = cap.read()
-                
+
                 if ret:
-                    # Resize to reduce payload for Ollama Cloud/Local
-                    # Keep aspect ratio, scale height to ~512
                     h, w = frame.shape[:2]
                     new_h = 512
                     new_w = int(w * (new_h / h))
                     resized = cv2.resize(frame, (new_w, new_h))
-                    
-                    # Encode as JPEG buffer
-                    success, buffer = cv2.imencode('.jpg', resized)
+
+                    success, buffer = cv2.imencode('.jpg', resized, [cv2.IMWRITE_JPEG_QUALITY, 85])
                     if success:
                         b64_str = base64.b64encode(buffer).decode('utf-8')
                         frames_b64.append(b64_str)
-                        
+
             cap.release()
         finally:
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
-                
+
         return frames_b64
 
 # Instantiate to use in FastAPI endpoints
