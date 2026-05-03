@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewEncapsulation, inject, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { API_URL, ApiService } from '../../services/api.service';
 import { AuthService } from '../../services/auth.service';
@@ -79,6 +79,23 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private api = inject(ApiService);
     private auth = inject(AuthService);
     private router = inject(Router);
+    private cdr = inject(ChangeDetectorRef);
+
+    isSearchingLocation = false;
+    isSearchExpanded = false;
+
+    toggleSearch(): void {
+        this.isSearchExpanded = !this.isSearchExpanded;
+        this.cdr.markForCheck();
+        if (this.isSearchExpanded) {
+            setTimeout(() => {
+                const input = document.getElementById('searchInputField');
+                if (input) {
+                    input.focus();
+                }
+            }, 100);
+        }
+    }
 
     // Instance-level references to shared cache sets
     private get loadedTiles() { return mapCache.loadedTiles; }
@@ -88,18 +105,17 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private fetching = false;
     private moveTimer: any = null;
 
-    // Store gym names visited today to persist UI state
-    private visitedTodayGyms = new Set<string>();
+    // Store all visited gym names to persist UI state globally
+    private visitedGyms = new Set<string>();
 
     ngAfterViewInit(): void {
         const user = this.auth.user();
         if (user && user.id) {
             this.api.getGymVisits(user.id).subscribe({
                 next: (visits: any[]) => {
-                    const today = new Date().toISOString().split('T')[0];
                     for (const v of visits) {
-                        if (v.visited_at === today && v.gym_name) {
-                            this.visitedTodayGyms.add(v.gym_name);
+                        if (v.gym_name) {
+                            this.visitedGyms.add(v.gym_name);
                         }
                     }
                     this.loadMapLibreAndInitMap();
@@ -499,7 +515,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
 
         const markerEl = document.createElement('div');
         markerEl.className = 'gym-marker-wrap';
-        const isVisited = this.visitedTodayGyms.has(name);
+        const isVisited = this.visitedGyms.has(name);
         if (isVisited) {
             markerEl.innerHTML = '<div class="gym-marker gym-marker-visited"><span class="gym-marker-emoji">🏋️</span></div>';
         } else {
@@ -526,7 +542,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             const visitBtn = document.createElement('button');
             visitBtn.className = 'visit-gym-btn map-visit-btn';
 
-            if (this.visitedTodayGyms.has(name)) {
+            if (this.visitedGyms.has(name)) {
                 visitBtn.innerText = '¡Visitado! ✓';
                 visitBtn.classList.add('visited-success');
                 visitBtn.disabled = true;
@@ -594,7 +610,7 @@ export class MapaPage implements AfterViewInit, OnDestroy {
             next: (res) => {
                 btn.innerText = '¡Visitado! ✓';
                 btn.classList.add('visited-success');
-                this.visitedTodayGyms.add(name);
+                this.visitedGyms.add(name);
                 
                 // Update marker visual dynamically
                 const innerMarker = markerEl.querySelector('.gym-marker');
@@ -683,6 +699,54 @@ export class MapaPage implements AfterViewInit, OnDestroy {
     private showError(msg: string): void {
         const el = document.getElementById('map-error');
         if (el) { el.textContent = msg; el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 4000); }
+    }
+
+    async searchLocation(query: string) {
+        if (!query || query.trim() === '') return;
+        this.isSearchingLocation = true;
+        this.cdr.markForCheck();
+        
+        try {
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=10&countrycodes=es`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            const validTypes = ['city', 'town', 'village', 'municipality', 'province', 'state', 'county', 'region', 'administrative'];
+            const validResult = data.find((item: any) => {
+                const type = item.type || item.addresstype || '';
+                if (item.class === 'boundary' && type === 'administrative') return true;
+                if (item.class === 'place' && validTypes.includes(type)) return true;
+                return false;
+            });
+            
+            if (validResult) {
+                const lat = parseFloat(validResult.lat);
+                const lon = parseFloat(validResult.lon);
+                if (this.map) {
+                    this.map.flyTo({
+                        center: [lon, lat],
+                        zoom: 13,
+                        essential: true
+                    });
+                    // Close the search overlay upon success
+                    this.isSearchExpanded = false;
+                    
+                    // Clear the input field
+                    const input = document.getElementById('searchInputField') as HTMLInputElement | null;
+                    if (input) {
+                        input.value = '';
+                    }
+                }
+            } else {
+                this.showError('Lugar no encontrado o a las afueras de España');
+            }
+        } catch (err) {
+            console.error('[FitCity Map] Error searching location:', err);
+            this.showError('Error al buscar la ubicación.');
+        } finally {
+            this.isSearchingLocation = false;
+            this.cdr.detectChanges();
+        }
     }
 
     private setupCompassToggle(): void {

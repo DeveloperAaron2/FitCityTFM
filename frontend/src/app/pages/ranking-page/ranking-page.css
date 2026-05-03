@@ -893,11 +893,25 @@
 }
 
 /* Exercise Tabs */
+.video-exercise-tabs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  gap: 1rem;
+}
+
 .video-exercise-tabs {
   display: flex;
   gap: 0.5rem;
-  padding: 1rem 1.25rem;
+  padding: 1rem 0;
   overflow-x: auto;
+  flex: 1;
+  scrollbar-width: none; /* Hide scrollbar for cleaner look */
+}
+
+.video-exercise-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .video-exercise-tab {
@@ -924,6 +938,14 @@
 .video-exercise-tab:hover:not(.active) {
   background: rgba(255, 255, 255, 0.1);
   color: #ccc;
+}
+
+.video-modal-upload-date {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  white-space: nowrap;
+  letter-spacing: -0.2px;
 }
 
 /* Video Player */
@@ -1118,6 +1140,10 @@
 :host-context(body.theme-sun) .video-loading,
 :host-context(body.theme-sun) .video-empty {
   color: #64748b;
+}
+
+:host-context(body.theme-sun) .video-modal-upload-date {
+  color: #1e293b;
 }
 
 /* ═══════════════════════════════════════════════════
