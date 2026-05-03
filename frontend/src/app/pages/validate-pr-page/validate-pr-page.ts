@@ -26,6 +26,7 @@ export class ValidatePrPage implements OnInit {
     exerciseName = signal('');
     weightKg = signal<number | null>(null);
     selectedFile = signal<File | null>(null);
+    exerciseDropdownOpen = signal(false);
 
     // Submission state
     isSubmitting = signal(false);
@@ -203,5 +204,14 @@ export class ValidatePrPage implements OnInit {
 
     goBack(): void {
         this.router.navigate(['/dashboard']);
+    }
+
+    toggleExerciseDropdown(): void {
+        this.exerciseDropdownOpen.update(v => !v);
+    }
+
+    selectExercise(exercise: string): void {
+        this.exerciseName.set(exercise);
+        this.exerciseDropdownOpen.set(false);
     }
 }

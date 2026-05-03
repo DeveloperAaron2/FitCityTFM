@@ -160,16 +160,20 @@
         </p>
 
         <div class="vm-form">
-            <!-- Exercise select -->
+            <!-- Exercise select (custom dropdown for iOS) -->
             <div class="vm-field">
                 <label class="vm-label">Ejercicio</label>
-                <select class="vm-input vm-select" [ngModel]="validateExercise()"
-                    (ngModelChange)="validateExercise.set($event)">
-                    <option value="" disabled selected>— Selecciona ejercicio —</option>
-                    <option value="Press de banca">Press de banca</option>
-                    <option value="Sentadilla">Sentadilla</option>
-                    <option value="Peso muerto">Peso muerto</option>
-                </select>
+                <div class="vm-custom-select" (click)="toggleExerciseDropdown()" [class.is-open]="exerciseDropdownOpen()">
+                    <span class="vm-select-value" [class.is-placeholder]="!validateExercise()">
+                        {{ validateExercise() || '— Selecciona ejercicio —' }}
+                    </span>
+                    <span class="vm-select-arrow">▼</span>
+                </div>
+                <div class="vm-dropdown" *ngIf="exerciseDropdownOpen()">
+                    <div class="vm-dropdown-item" (click)="selectExercise('Press de banca')">Press de banca</div>
+                    <div class="vm-dropdown-item" (click)="selectExercise('Sentadilla')">Sentadilla</div>
+                    <div class="vm-dropdown-item" (click)="selectExercise('Peso muerto')">Peso muerto</div>
+                </div>
             </div>
 
             <!-- Video upload -->
@@ -1062,11 +1066,20 @@
         z-index: 9999;
         background: rgba(0, 0, 0, 0.7);
         backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 16px;
         animation: vmFadeIn 0.25s ease;
+    }
+
+    /* Prevent iOS native select rendering bug */
+    @supports (-webkit-touch-callout: none) {
+        .vm-overlay {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+        }
     }
 
     @keyframes vmFadeIn {
@@ -1099,7 +1112,7 @@
         }
 
         to {
-            transform: translateY(0);
+            transform: none;
             opacity: 1;
         }
     }
@@ -1187,34 +1200,66 @@
         box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.15);
     }
 
-    .vm-select {
+    .vm-custom-select {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
         cursor: pointer;
-        appearance: none;
         background-color: rgba(0, 0, 0, 0.25);
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2394a3b8%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-        background-repeat: no-repeat;
-        background-position: right 14px center;
-        background-size: 10px auto;
-        padding-top: 14px;
-        padding-bottom: 14px;
-        padding-left: 16px;
-        padding-right: 36px;
-        font-size: 15px;
-        border-radius: 12px;
         border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-
-    .vm-select option {
-        background-color: #1c1c1c;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 15px;
         color: #ffffff;
-        padding: 4px 8px;
-        font-size: 13px;
+        transition: all 0.2s;
+        user-select: none;
     }
 
-    .vm-select option[value=""] {
-        color: #22d3ee;
-        font-weight: 600;
-        font-style: italic;
+    .vm-custom-select.is-open {
+        border-color: #22d3ee;
+        background: rgba(34, 211, 238, 0.05);
+    }
+
+    .vm-select-value.is-placeholder {
+        color: #94a3b8;
+    }
+
+    .vm-select-arrow {
+        font-size: 10px;
+        color: #94a3b8;
+        transition: transform 0.2s;
+    }
+
+    .vm-custom-select.is-open .vm-select-arrow {
+        transform: rotate(180deg);
+    }
+
+    .vm-dropdown {
+        position: absolute;
+        z-index: 1000;
+        width: 100%;
+        max-width: 408px;
+        background: #2a2a2a;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 12px;
+        margin-top: 4px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .vm-dropdown-item {
+        padding: 12px 16px;
+        color: #ffffff;
+        cursor: pointer;
+        transition: background 0.15s;
+    }
+
+    .vm-dropdown-item:hover {
+        background: rgba(34, 211, 238, 0.15);
+    }
+
+    .vm-field {
+        position: relative;
     }
 
     .vm-file-input {
@@ -1417,19 +1462,36 @@
         box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
     }
 
-    :host-context(body.theme-sun) .vm-select {
+    :host-context(body.theme-sun) .vm-custom-select {
         background-color: #f1f5f9;
         border-color: rgba(0, 0, 0, 0.15);
-        background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2364748b%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
-    }
-
-    :host-context(body.theme-sun) .vm-select option {
-        background-color: #ffffff;
         color: #1e293b;
     }
 
-    :host-context(body.theme-sun) .vm-select option[value=""] {
-        color: #0284c7;
+    :host-context(body.theme-sun) .vm-select-value.is-placeholder {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .vm-select-arrow {
+        color: #64748b;
+    }
+
+    :host-context(body.theme-sun) .vm-custom-select.is-open {
+        border-color: #0284c7;
+        background: rgba(2, 132, 199, 0.05);
+    }
+
+    :host-context(body.theme-sun) .vm-dropdown {
+        background: #ffffff;
+        border-color: rgba(0, 0, 0, 0.15);
+    }
+
+    :host-context(body.theme-sun) .vm-dropdown-item {
+        color: #1e293b;
+    }
+
+    :host-context(body.theme-sun) .vm-dropdown-item:hover {
+        background: rgba(2, 132, 199, 0.1);
     }
 
     :host-context(body.theme-sun) .vm-file-drop {

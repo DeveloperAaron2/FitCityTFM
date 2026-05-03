@@ -9428,8 +9428,8 @@
     {
       "type": "node",
       "id": 9000000005,
-      "lat": 40.1895,
-      "lon": -3.6775,
+      "lat": 40.199861,
+      "lon": -3.685930,
       "tags": {
         "name": "Calle Casa Aaron",
         "amenity": "gym"

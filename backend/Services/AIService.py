@@ -22,23 +22,23 @@ class AIService:
 
     async def analyze_lifting_video(self, video_bytes: bytes, exercise_name: str) -> Dict[str, Any]:
         """
-        Extracts frames from the video and sends them to Ollama for analysis
-        based on the Spanish Powerlifting (AEP/IPF) rules.
+        Extracts frames from the video and sends them to Ollama for analysis.
+        Validates safety and minimum range of motion for standard gym users.
         """
         try:
             # 1. Extract frames from video as Base64 strings
             base64_frames = self._extract_frames(video_bytes, num_frames=8)
-            
+
             if not base64_frames:
                 return {
-                    "is_valid": False, 
-                    "reason": "No se pudo procesar el vídeo o no contiene suficientes frames.", 
+                    "is_valid": False,
+                    "reason": "No se pudo procesar el vídeo o no contiene suficientes frames.",
                     "confidence": "high"
                 }
 
-            # 2. Build the prompt according to the AEP/IPF rules
+            # 2. Build the prompt for the exercise
             prompt = self._build_prompt(exercise_name)
-            
+
             # 3. Call Ollama API
             async with httpx.AsyncClient() as client:
                 try:
@@ -50,9 +50,9 @@ class AIService:
                             "prompt": prompt,
                             "images": base64_frames,
                             "stream": False,
-                            "format": "json" # Force JSON output from the model
+                            "format": "json"  # Force JSON output from the model
                         },
-                        timeout=900.0 # Ampliado a 15 min para evitar cortes al usar CPU puro
+                        timeout=900.0  # Ampliado a 15 min para evitar cortes al usar CPU puro
                     )
                     response.raise_for_status()
                     result = response.json()
@@ -76,7 +76,7 @@ class AIService:
                         "reason": f"No se pudo conectar con Ollama en {self.base_url}. Asegúrate de que está ejecutándose.",
                         "confidence": "low"
                     }
-                
+
                 # Parse model answer
                 llm_text = result.get("response", "{}")
                 try:
@@ -161,19 +161,23 @@ class AIService:
                         except (ValueError, TypeError):
                             estimated = None
 
-                    # Compare: allow a tolerance of ±20% between estimated and declared
-                    if estimated is not None and estimated > 0:
-                        tolerance = 0.20
+                    confidence = data.get("confidence", "low")
+
+                    # Only flag a mismatch when the model is confident enough to count plates.
+                    # With low confidence the estimate is too unreliable to penalise the user.
+                    if estimated is not None and estimated > 0 and confidence in ("high", "medium"):
+                        # ±15% tolerance to absorb small plate-counting errors
+                        tolerance = 0.15
                         lower = estimated * (1 - tolerance)
                         upper = estimated * (1 + tolerance)
                         matches = lower <= declared_weight <= upper
                     else:
-                        matches = True  # Can't estimate → assume OK
+                        matches = True  # Can't estimate reliably → assume OK
 
                     return {
                         "estimated_weight": estimated,
                         "matches_declared": matches,
-                        "confidence": data.get("confidence", "low"),
+                        "confidence": confidence,
                         "detail": data.get("detail", ""),
                     }
                 except json.JSONDecodeError:
@@ -194,101 +198,100 @@ class AIService:
     def _build_weight_estimation_prompt(
         self, exercise_name: str, declared_weight: float
     ) -> str:
+        # NOTE: declared_weight is intentionally NOT included in the prompt to avoid
+        # anchoring the model towards confirming whatever the user declared.
         return (
-            "Eres un asistente de IA experto en identificar discos de pesas en imágenes de gimnasio. "
-            f"El usuario dice que está levantando {declared_weight} kg en '{exercise_name}'.\n\n"
-            "Analiza las imágenes e intenta estimar el peso total en la barra contando los discos visibles.\n\n"
-            "REFERENCIA DE DISCOS CALIBRADOS (colores IPF estándar):\n"
-            "- Rojo = 25 kg\n"
-            "- Azul = 20 kg\n"
-            "- Amarillo = 15 kg\n"
-            "- Verde = 10 kg\n"
-            "- Blanco = 5 kg\n"
-            "- Discos pequeños: 2.5 kg, 1.25 kg\n"
-            "- La barra olímpica pesa 20 kg normalmente\n\n"
-            "NOTA: Los discos se cargan a ambos lados de la barra (simétricos). "
-            "Si ves discos solo en un lado, multiplica por 2.\n\n"
-            "Si NO puedes ver los discos con claridad (ángulo malo, discos negros sin marcar, "
-            "mala iluminación), indica confidence 'low' y estimated_weight_kg como null.\n\n"
-            "Devuelve ÚNICAMENTE este JSON:\n"
+            f"Eres un asistente experto en identificar equipamiento de gimnasio. "
+            f"El usuario está realizando '{exercise_name}'. "
+            "Analiza las imágenes y estima el peso total cargado en la barra "
+            "contando los discos que puedas ver.\n\n"
+            "CÓMO CALCULAR EL PESO TOTAL:\n"
+            "1. Identifica el tipo de barra: olímpica estándar = 20 kg, barra corta/EZ = ~10 kg.\n"
+            "2. Cuenta los discos visibles en UN lado de la barra y multiplica por 2 "
+            "(los discos siempre se cargan simétricamente en ambos lados).\n"
+            "3. Suma: peso barra + (discos un lado × 2) = peso total.\n\n"
+            "REFERENCIA DE DISCOS (colores más habituales en gimnasios):\n"
+            "- Rojo = 25 kg | Azul = 20 kg | Amarillo = 15 kg | Verde = 10 kg | Blanco = 5 kg\n"
+            "- Discos negros de goma: busca el número grabado o impreso en el disco para identificar el peso.\n"
+            "- Discos pequeños: 2.5 kg, 1.25 kg (normalmente metálicos o con marcas visibles).\n\n"
+            "NIVELES DE CONFIANZA — elige el que corresponda:\n"
+            "- 'high': ves los discos con claridad, puedes leer o identificar el peso de cada uno.\n"
+            "- 'medium': ves la mayoría de los discos pero alguno es dudoso o está parcialmente tapado.\n"
+            "- 'low': los discos no son visibles, están fuera de plano, son negros sin marcas legibles "
+            "o la iluminación impide identificarlos.\n\n"
+            "IMPORTANTE: Si la confianza es 'low', devuelve estimated_weight_kg como null. "
+            "No inventes un número si no puedes contarlos con cierta seguridad.\n\n"
+            "Devuelve ÚNICAMENTE este JSON (sin texto adicional):\n"
             '{\n'
-            '  "estimated_weight_kg": <número o null si no es posible estimar>,\n'
+            '  "estimated_weight_kg": <número con hasta 1 decimal, o null>,\n'
             '  "confidence": "high|medium|low",\n'
-            '  "detail": "<breve explicación de qué discos has identificado o por qué no puedes estimar>"\n'
+            '  "detail": "<describe brevemente los discos identificados o el motivo por el que no puedes estimar>"\n'
             '}'
         )
 
     def _build_prompt(self, exercise_name: str) -> str:
         base_prompt = (
-            "Eres un árbitro de powerlifting que valida levantamientos aplicando las reglas de la AEP/IPF. "
-            f"Vas a ver 8 fotogramas extraídos de un vídeo del usuario realizando '{exercise_name}'.\n\n"
-            "PASO 1 — VERIFICACIÓN DEL EJERCICIO:\n"
-            f"Comprueba que el movimiento que aparece en las imágenes ES realmente '{exercise_name}'. "
-            "Si el vídeo muestra claramente un ejercicio completamente distinto (ej: se pide sentadilla pero se ve press de banca), "
-            "devuelve is_valid: false indicando que el ejercicio no corresponde. "
-            "Si hay duda razonable o el ángulo es ambiguo, continúa con la evaluación.\n\n"
-            "PASO 2 — EVALUACIÓN TÉCNICA:\n"
-            "Evalúa la técnica con los criterios específicos del ejercicio (ver abajo). "
-            "No asumas válido por defecto: emite is_valid: true solo si los criterios principales se cumplen "
-            "o si la imagen no permite determinar el fallo con certeza.\n\n"
+            "Eres un asistente de registro deportivo en una app de gimnasio. "
+            f"Vas a ver 8 fotogramas de un vídeo del usuario realizando '{exercise_name}'.\n\n"
+            "TU ÚNICO OBJETIVO es detectar si el movimiento se ha ejecutado o no. "
+            "No eres un árbitro ni un entrenador: no penalices la técnica imperfecta. "
+            "La inmensa mayoría de los levantamientos deben resultar VÁLIDOS.\n\n"
+            "REGLA DE ORO: ante cualquier duda, ángulo no ideal, técnica imperfecta "
+            "o imposibilidad de determinar algo con certeza → is_valid: true. "
+            "Solo marca is_valid: false ante evidencia clara e inequívoca de los casos INVÁLIDO de abajo.\n\n"
         )
 
         name_lower = exercise_name.lower()
         if "sentadilla" in name_lower or "squat" in name_lower:
             rules = (
-                "## Criterios para Sentadilla (AEP/IPF simplificado):\n"
-                "VÁLIDO si se cumplen los 3 puntos:\n"
-                "1. PROFUNDIDAD: Se aprecia que la cadera desciende hasta quedar al nivel o por debajo de la línea superior de las rodillas "
-                "(plano del muslo paralelo o más bajo). Si el ángulo no permite ver la profundidad, beneficio de la duda → válido.\n"
-                "2. RECORRIDO COMPLETO: El atleta arranca de pie, desciende y regresa a posición erguida con rodillas extendidas.\n"
-                "3. BARRA EN POSICIÓN: La barra está sobre los hombros/trapecios (no en el cuello ni en las manos sueltas).\n"
-                "INVÁLIDO solo si se aprecia claramente que la cadera queda muy por encima de las rodillas (sin profundidad evidente) "
-                "o el atleta no llega a ponerse de pie al finalizar.\n"
+                "## Sentadilla — INVÁLIDO únicamente si ocurre alguno de estos casos evidentes:\n"
+                "- El usuario no dobla las rodillas en absoluto (permanece totalmente erguido sin ningún descenso).\n"
+                "- El usuario cae o pierde la barra de forma completamente incontrolada.\n"
+                "- El vídeo muestra inequívocamente un ejercicio distinto a una sentadilla.\n"
+                "VÁLIDO todo lo demás: poca profundidad, rodillas ligeramente hacia dentro, "
+                "espalda inclinada, subida lenta, cualquier variante (frontal, sumo, goblet…).\n"
             )
         elif "banca" in name_lower or "bench" in name_lower:
             rules = (
-                "## Criterios para Press de Banca (AEP/IPF simplificado):\n"
-                "VÁLIDO si se cumplen los 3 puntos:\n"
-                "1. TOQUE AL PECHO: La barra desciende hasta contactar o casi contactar el pecho/esternón del atleta. "
-                "Si la barra se acerca claramente al pecho pero el fotograma no muestra el contacto exacto, beneficio de la duda → válido.\n"
-                "2. EXTENSIÓN FINAL: La barra sube hasta que los codos quedan visiblemente extendidos al final del movimiento.\n"
-                "3. POSICIÓN EN EL BANCO: El atleta está tumbado boca arriba sobre el banco durante todo el levantamiento.\n"
-                "INVÁLIDO solo si se ve claramente que la barra no baja más allá de la mitad del recorrido "
-                "o el atleta se levanta del banco de forma evidente.\n"
+                "## Press de Banca — INVÁLIDO únicamente si ocurre alguno de estos casos evidentes:\n"
+                "- Los brazos no bajan en absoluto desde la posición inicial (recorrido completamente nulo).\n"
+                "- La barra cae sobre el pecho de forma completamente incontrolada.\n"
+                "- El vídeo muestra inequívocamente un ejercicio distinto a un press de banca.\n"
+                "VÁLIDO todo lo demás: que no toque el pecho, codos no del todo extendidos, "
+                "agarre ancho o estrecho, ligero rebote, arqueo de espalda.\n"
             )
         elif "muerto" in name_lower or "deadlift" in name_lower:
             rules = (
-                "## Criterios para Peso Muerto (AEP/IPF simplificado):\n"
-                "VÁLIDO si se cumplen los 3 puntos:\n"
-                "1. DESPEGUE DEL SUELO: La barra parte claramente desde el suelo (o muy cerca) al inicio del levantamiento.\n"
-                "2. LOCKOUT FINAL: El atleta termina erguido con caderas y rodillas extendidas y hombros por detrás de la vertical de la barra. "
-                "Si el fotograma final muestra al atleta de pie sosteniendo la barra, es suficiente.\n"
-                "3. CONTROL DE LA BARRA: La barra no se suelta ni cae de forma incontrolada durante el levantamiento.\n"
-                "INVÁLIDO solo si la barra claramente no despega del suelo "
-                "o el atleta no llega a ninguna posición erguida al finalizar.\n"
+                "## Peso Muerto — INVÁLIDO únicamente si ocurre alguno de estos casos evidentes:\n"
+                "- La barra no se despega del suelo en absoluto (el usuario tira pero no sube nada).\n"
+                "- La barra se suelta y cae de forma completamente incontrolada a mitad del movimiento.\n"
+                "- El vídeo muestra inequívocamente un ejercicio distinto a un peso muerto.\n"
+                "VÁLIDO todo lo demás: espalda redondeada, lockout incompleto, rebote, "
+                "piernas muy dobladas, cualquier variante (sumo, rumano, trap bar…).\n"
             )
         else:
             rules = (
-                "## Criterios generales de levantamiento:\n"
-                "VÁLIDO si: el atleta realiza un recorrido de movimiento completo y controlado con la carga, "
-                "comenzando y terminando en una posición estable.\n"
-                "INVÁLIDO solo si: no hay recorrido apreciable, la carga cae de forma incontrolada "
-                "o el movimiento no guarda ninguna relación con el ejercicio declarado.\n"
+                "## Ejercicio general — INVÁLIDO únicamente si ocurre alguno de estos casos evidentes:\n"
+                "- No hay ningún movimiento apreciable con la carga (recorrido absolutamente nulo).\n"
+                "- La carga cae de forma completamente incontrolada causando un incidente claro.\n"
+                "- El vídeo muestra inequívocamente un ejercicio totalmente diferente al declarado.\n"
+                "VÁLIDO todo lo demás.\n"
             )
 
         json_instruct = (
-            "\nNOTA TÉCNICA: Dispones de 8 fotogramas distribuidos entre el 10% y el 90% del vídeo para cubrir la fase activa del levantamiento. "
-            "Si un criterio no puede evaluarse con certeza por el ángulo o la calidad de imagen, aplica beneficio de la duda para ese criterio concreto.\n\n"
-            "Devuelve tu respuesta ÚNICAMENTE con este JSON exacto (sin texto adicional):\n"
+            "\nNOTA: Tienes 8 fotogramas estáticos del 10% al 90% del vídeo; "
+            "no muestran el movimiento completo. Ante cualquier duda → is_valid: true.\n\n"
+            "Devuelve ÚNICAMENTE este JSON exacto (sin texto adicional):\n"
             '{\n'
             '  "is_valid": true|false,\n'
-            '  "reason": "<Explica brevemente qué criterios se cumplen o cuál falla de forma clara>",\n'
+            '  "reason": "<Una frase: confirma que el movimiento se ha realizado, '
+            'o indica el fallo concreto e inequívoco detectado>",\n'
             '  "confidence": "high|medium|low"\n'
             '}'
         )
 
         return base_prompt + rules + json_instruct
-        
+
     def _extract_frames(self, video_bytes: bytes, num_frames: int = 8) -> list[str]:
         """
         Extrae `num_frames` imágenes del buffer de vídeo cubriendo del 10% al 90% del metraje

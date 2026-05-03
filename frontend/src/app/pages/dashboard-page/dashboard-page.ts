@@ -29,6 +29,7 @@ export class DashboardPage implements OnInit {
   validateFile = signal<File | null>(null);
   isValidating = signal(false);
   validateResult = signal<{ success: boolean; message: string; reason?: string; confidence?: string } | null>(null);
+  exerciseDropdownOpen = signal(false);
 
   // Shortcuts for template
   get user() { return this.auth.user(); }
@@ -147,6 +148,16 @@ export class DashboardPage implements OnInit {
 
   closeValidateModal(): void {
     this.showValidateModal.set(false);
+    this.exerciseDropdownOpen.set(false);
+  }
+
+  toggleExerciseDropdown(): void {
+    this.exerciseDropdownOpen.update(v => !v);
+  }
+
+  selectExercise(exercise: string): void {
+    this.validateExercise.set(exercise);
+    this.exerciseDropdownOpen.set(false);
   }
 
   onValidateFileSelected(event: Event): void {
